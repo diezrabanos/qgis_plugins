@@ -376,10 +376,12 @@ class Silvilidar:
                        
                         #filtro gausian para dar valor en funcion de los vecinos
                         input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'1nf.tif')
-                        result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'g2.tif')#no sale un tif sino un sdat ojo#######################################
+                        result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'g2.sdat')
+                        #result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'g2.tif')#no sale un tif sino un sdat ojo#######################################
                         params={'INPUT':input,'MODE': 1, 'RADIUS': 5,'SIGMA' :1,'RESULT':result}
                         processing.run('saga:gaussianfilter', params)
-                        StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'g2.tif'),rasterdeentrada+str("g2"))
+                        #StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'g2.tif'),rasterdeentrada+str("g2"))
+                        StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'g2.sdat'),rasterdeentrada+str("g2"))
                     
                         #filtro y me quedo con lo mayor de un valor 
                         calc = QgsRasterCalculator("'"+rasterdeentrada+'g2@1 > '+str(filtro)+"'",
@@ -395,14 +397,14 @@ class Silvilidar:
                     
                         #filtro  filter clums eliminar los huecos menores de 1300 m2
                         input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'g2s.tif')  
-                        result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.tif')
+                        result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.sdat')
                         params={'GRID' : input,'OUTPUT' :result ,'THRESHOLD' :13}
                         processing.run('saga:removesmallpixelclumpstonodata', params)
-                        StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.tif'),rasterdeentrada+str("3"))
+                        StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.sdat'),rasterdeentrada+str("3"))
 
                         #filtro para rellenar huecos pequenos
                         print ("paso5 de agregado")
-                        input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.tif')
+                        input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.sdat')
                         output=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'31.tif')
                         params={'INPUT':input,'DISTANCE': 3, 'BAND': 1,'ITERATIONS': 0,'NO_MASK': False,'OUTPUT':output}
                         processing.run('gdal:fillnodata', params)
@@ -410,28 +412,30 @@ class Silvilidar:
 
                         #filtro mayorityffilter para dar valor en funcion de los vecinos
                         input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'31.tif')
-                        result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'4.tif')
+                        result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'4.sdat')
                         params={ 'INPUT' : input, 'MODE' : 0, 'RADIUS' : 1, 'RESULT' : result, 'THRESHOLD' : 4 }
                         processing.run('saga:majorityfilter', params)
-                        StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'4.tif'),rasterdeentrada+str("4"))
+                        StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'4.sdat'),rasterdeentrada+str("4"))
                         
                         #filtro  filter clums eliminar los huecos
-                        input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'4.tif')
+                        input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'4.sdat')
                         min=5
                         result=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'6.tif')
-                        processing.runalg('gdalogr:sieve', input, min, tipo, result)
-
+                        params={ 'EIGHT_CONNECTEDNESS' : False, 'INPUT' : input, 'MASK_LAYER' : None, 'NO_MASK' : False, 'OUTPUT' : result, 'THRESHOLD' : 5 }
+                        processing.run('gdal:sieve', params)
                         StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'6.tif'),rasterdeentrada+str("6"))
 
                         #filtro para rellenar huecos pequenos
                         input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'6.tif')
                         output=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'7.tif')
                         params={'INPUT':input,'DISTANCE': 3, 'BAND': 1,'ITERATIONS': 0,'NO_MASK': False,'OUTPUT':output}
-                        processing.run('gdalogr:fillnodata', params)
+                        processing.run('gdal:fillnodata', params)
                         StringToRaster(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'7.tif'),rasterdeentrada+str("7"))
                         
                         #lo vectorizo
-                        processing.runalg("gdalogr:polygonize",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'7.tif'),"DN",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'.shp'))
+                        parameters = {'INPUT': os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'7.tif'),'BAND': 1,  'FIELD': "DN",  'EIGHT_CONNECTEDNESS':False, 'OUTPUT': os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'.shp')}
+                        processing.runAndLoadResults("gdal:polygonize",parameters)
+                        #processing.runalg("gdalogr:polygonize",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'7.tif'),"DN",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'.shp'))
                         #seleciono lo que me interesa
                         lyr=QgsVectorLayer(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'.shp'),rasterdeentrada,"ogr")
                         QgsMapLayerRegistry.instance().addMapLayers([lyr])
@@ -585,7 +589,7 @@ class Silvilidar:
                 StringToRaster(os.path.join(carpeta,troncoresumido+'_suma.tif'),"suma")
 
 #lo vectorizo
-                parameters = {'INPUT': os.path.join(carpeta,troncoresumido+'_suma.tif'),                              'BAND': 1,                'FIELD': "DN",                'EIGHT_CONNECTEDNESS':False,                'OUTPUT': os.path.join(carpeta,troncoresumido+'_suma.shp')}
+                parameters = {'INPUT': os.path.join(carpeta,troncoresumido+'_suma.tif'),'BAND': 1,  'FIELD': "DN",  'EIGHT_CONNECTEDNESS':False, 'OUTPUT': os.path.join(carpeta,troncoresumido+'_suma.shp')}
                 processing.runAndLoadResults("gdal:polygonize",parameters)
                 #processing.run("gdalogr:polygonize",os.path.join(carpeta,troncoresumido+'_suma.tif'),"DN",os.path.join(carpeta,troncoresumido+'_suma.shp'))
                 #sumashp=QgsVectorLayer(os.path.join(carpeta,troncoresumido+'_suma.shp'),"sumashp","ogr")

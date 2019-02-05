@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/plugins/zoomtopaste" >
+        <file>icon.png</file>
+		<file>icon_now.png</file>
+		<file>icon_frm.png</file>
+    </qresource>
+</RCC>

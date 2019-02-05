@@ -1,0 +1,42 @@
+# This file contains metadata for your plugin. Since 
+# version 3.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 3.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=zoomtopaste 
+qgisMinimumVersion=3.0
+description=Zoom to a specified point on the map from the Clipboard comma delimited
+version=3.0.1
+author=gerd 3er geoplaning GmbH
+email=kontakt@geoplaning.de
+
+about=Zoom to a specified point on the map from the Clipboard comma delimited
+
+
+repository=https://github.com/Amphibitus/zoomtopaste
+tracker=https://github.com/Amphibitus/zoomtopaste/issues
+homepage=https://github.com/Amphibitus/zoomtopaste/wiki
+
+
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=zoom, paste, clipboard
+
+
+category=Plugin
+icon=./icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False

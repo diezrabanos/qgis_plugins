@@ -25,7 +25,7 @@
 #from PyQt5.QtGui import QIcon
 #from PyQt5.QtWidgets import QAction
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.PyQt.QtWidgets import QAction
 
 # Initialize Qt resources from file resources.py
@@ -35,7 +35,7 @@ from .silvilidar_dialog import SilvilidarDialog
 import os.path
 
 #import para procesar
-from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer,QgsFeatureRequest,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter
+from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer,QgsFeatureRequest,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsFillSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtCore import QFileInfo
@@ -755,6 +755,49 @@ class Silvilidar:
             print ("acaba exprime lidar")
    
 
+
+        #defino una funcion que une en una capa el resultado de todas las hojas
+        def juntoshapes(busca,salida):
+            print("empieza juntoshapes")
+            files=glob.glob(busca)
+            out=os.path.join(carpeta,salida+".shp")
+            entradas=";".join(files)
+            #entrada=[]
+            entrada=files
+            print("entrada")
+            print(entrada)
+            print("entradas")
+            print (entradas)
+            params={ 'LAYERS' : entrada, 'OUTPUT' : out , 'CRS' : None }
+            if len(files)>100:
+                lista1=files[:len(files)/2]
+                lista2=files[len(files)/2:]
+                out=os.path.join(carpeta,salida+"1.shp")
+                entrada=";".join(lista1)                
+                processing.run('native:mergevectorlayers',params)
+                out=os.path.join(carpeta,salida+"2.shp")
+                entrada=";".join(lista2)
+                processing.run('native:mergevectorlayers',params)
+            elif len(files) >1 and len(files) <=100:
+                processing.run('native:mergevectorlayers',params)
+            elif len(files) ==1:#### metodo bueno de selecionar y guardar mirar tiempos para ver si esta es mejor a la que tengo en agregate
+                layer2=QgsVectorLayer(files[0],"entrada","ogr")
+                QgsProject.instance().addMapLayers([layer2])
+                selection = layer2.getFeatures(QgsFeatureRequest().setFilterExpression(u'"DN" > 0'))
+                selecionado = layer2.selectByIds([s.id() for s in selection])
+                params={'INPUT': files[0]  , 'OUTPUT': out}
+                processing.run("native:saveselectedfeatures",params)
+            else:
+                pass
+            del(out)
+            del(entrada)
+            del(files)
+
+
+
+
+
+
         
         """Run method that performs all the real work"""
 
@@ -807,6 +850,101 @@ class Silvilidar:
             #ejecuto la busqueda de archivos las
             buscalidaryejecuta(carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe, hmontebravo, hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo, longitudcopaminima, crecimientofcc)
 
+
+
+            #uno en una capa todas las hojas de claras, regeneracion, resalveo y teselas
+            juntoshapes(os.path.join(carpeta,"p","*clara3.shp"),"Clara_merged")
+            juntoshapes(os.path.join(carpeta,"p","*regeneracion3.shp"),"Regeneracion_merged")
+            juntoshapes(os.path.join(carpeta,"p","*resalveo3.shp"),"Resalveo_merged")
+            juntoshapes(os.path.join(carpeta,"p","*suma.shp"),"Teselas_merged")
+
+            #elimino las capas que he cargado durante el proceso
+            capas =QgsProject.instance().mapLayers()
+            for capa in capas:
+                if capa not in capasoriginales:
+                    QgsProject.instance().removeMapLayers( [capa] )
+            del(capas)
+                
+            #cargo las capas finales
+            teselas=QgsVectorLayer(os.path.join(carpeta,'Teselas_merged.shp'),"Teselas","ogr")
+            teselas1=QgsVectorLayer(os.path.join(carpeta,'Teselas_merged_proyectado1.shp'),"Teselas Proyectado1","ogr")
+            teselas2=QgsVectorLayer(os.path.join(carpeta,'Teselas_merged_proyectado2.shp'),"Teselas Proyectado2","ogr")
+            clara=QgsVectorLayer(os.path.join(carpeta,'Clara_merged.shp'),"Clara","ogr")
+            regeneracion=QgsVectorLayer(os.path.join(carpeta,'Regeneracion_merged.shp'),"Regeneracion","ogr")
+            resalveo=QgsVectorLayer(os.path.join(carpeta,'Resalveo_merged.shp'),"Resalveo","ogr")
+
+            
+            #aplico simbologia a estas capas, si existen
+            try:
+                symbolsclara=clara.renderer().symbol()
+                sym=symbolsclara
+                sym.setColor(QColor.fromRgb(255,0,0))
+                QgsProject.instance().addMapLayer(clara)
+            except: 
+              pass
+
+            try:
+                symbolsregeneracion=regeneracion.renderer().symbol()
+                sym=symbolsregeneracion
+                sym.setColor(QColor.fromRgb(0,255,0))
+                QgsProject.instance().addMapLayer(regeneracion)
+            except: 
+              pass
+
+            try:
+                symbolsresalveo=resalveo.renderer().symbol()
+                sym=symbolsresalveo
+                sym.setColor(QColor.fromRgb(0,0,255))
+                QgsProject.instance().addMapLayer(resalveo)
+            except: 
+              pass
+
+            #coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
+
+            #ordeno los elementos de teselas ojo ojo
+            #ordenados=coloresteselas.items()
+            #ordenados.sort(key=lambda clave: str(clave[1][3]))
+            #me salto el orden del diccionario
+            ordenados=[('1', ('solid', '255,255,204,255', 'Raso o Regenerado', '001')), ('2', ('solid', '255,255,0,255', 'Menor (Monte Bravo)', '002')), ('17', ('solid', 'orange', 'Bajo Latizal No Concurrente o Latizal Encinar no Denso', '003')), ('3', ('vertical', '255,192,0,255', 'Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)', '004')), ('4', ('solid', '255,204,153,255', 'Bajo Latizal Desarrollado', '005')), ('51', ('b_diagonal', '255,0,255,255', 'Resalveo en Latizal poco desarrollado', '006')), ('52', ('f_diagonal', '255,0,0,255', 'Resalveo en Latizal', '007')), ('61', ('solid', '255,153,255,255', 'Latizal poco desarrollado Tratado', '008')), ('62', ('solid', '255,124,128,255', 'Latizal Tratado', '009')), ('7', ('solid', '204,255,153,255', 'Alto Latizal Claro', '010')), ('81', ('b_diagonal', '146,208,80,255', 'Poda Alta y Clara Suave en Latizal', '011')), ('9', ('f_diagonal', '0,176,80,255', 'Primera Clara y Poda Alta', '012')), ('10', ('solid', '102,255,153,255', 'Alto Latizal Aclarado', '013')), ('111', ('solid', '102,255,255,255', 'Fustal Claro', '014')), ('82', ('b_diagonal', '51,204,204,255', 'Poda Alta y Clara Suave en Monte Desarrollado', '015')), ('121', ('f_diagonal', '0,176,255,240', 'Clara en Fustal', '016')), ('141', ('solid', '204,236,255,255', 'Fustal Aclarado', '017')), ('112', ('solid', '139,139,232,255', 'Fustal Maduro Claro', '018')), ('122', ('b_diagonal', '65,51,162,255', 'Clara en Fustal Maduro', '019')), ('13', ('cross', '0,112,192,255', 'Clara Urgente en Fustal Maduro', '020')), ('142', ('solid', '166,166,207,255', 'Fustal Maduro Aclarado', '021')), ('15', ('horizontal', '112,48,160,255', 'Posibilidad de Regeneracion', '022'))]
+
+            categorias=[]
+
+            for clase,(relleno,color, etiqueta,orden) in ordenados:    
+                props={'style':relleno, 'color':color, 'style_border':'no'}
+                sym=QgsFillSymbol.createSimple(props)
+                categoria=QgsRendererCategory(clase,sym,etiqueta)
+                categorias.append(categoria)
+
+            field="DN"
+            renderer=QgsCategorizedSymbolRenderer(field,categorias)
+            teselas.setRenderer(renderer)
+            QgsProject.instance().addMapLayer(teselas)
+
+            categorias1=[]
+            for clase,(relleno,color, etiqueta,orden) in ordenados:    
+                props={'style':relleno, 'color':color, 'style_border':'no'}
+                sym=QgsFillSymbol.createSimple(props)
+                categoria1=QgsRendererCategory(clase,sym,etiqueta)
+                categorias1.append(categoria1)
+
+            field="DN"
+            renderer=QgsCategorizedSymbolRenderer(field,categorias1)
+            teselas1.setRenderer(renderer)
+            QgsProject.instance().addMapLayer(teselas1)
+
+            categorias2=[]
+            for clase,(relleno,color, etiqueta,orden) in ordenados:    
+                props={'style':relleno, 'color':color, 'style_border':'no'}
+                sym=QgsFillSymbol.createSimple(props)
+                categoria2=QgsRendererCategory(clase,sym,etiqueta)
+                categorias2.append(categoria2)
+
+            field="DN"
+            renderer=QgsCategorizedSymbolRenderer(field,categorias2)
+            teselas2.setRenderer(renderer)
+            QgsProject.instance().addMapLayer(teselas2)
+
+            
             #repinto todo refrescando la vista
             canvas.freeze(False)
             canvas.refresh()

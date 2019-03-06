@@ -24,9 +24,10 @@
 #from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 #from PyQt5.QtGui import QIcon
 #from PyQt5.QtWidgets import QAction
+
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from qgis.PyQt.QtGui import QIcon, QColor
-from qgis.PyQt.QtWidgets import QAction
+from qgis.PyQt.QtWidgets import QAction, QFileDialog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -47,17 +48,14 @@ import glob
 import re
 import sys
 #from qgis import *
+import time
+
+
 
 class Silvilidar:
-
-   
-
-    
     """QGIS Plugin Implementation."""
-
     def __init__(self, iface):
         """Constructor.
-
         :param iface: An interface instance that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
             application at run time.
@@ -81,13 +79,18 @@ class Silvilidar:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
+        self.dlg = SilvilidarDialog()
+
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Silvilidar')
-
+        
+        self.toolbar = self.iface.addToolBar(u'Silvilidar')             #creo que no hace nada
+        self.toolbar.setObjectName(u'Silvilidar')            #creo que no hace nada
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
+        self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -154,6 +157,10 @@ class Silvilidar:
             added to self.actions list.
         :rtype: QAction
         """
+        #copiado del catastro
+        #self.dlg = SilvilidarDialog()
+
+        
         #cambio el icon path para mi equipo.
         icon_path=r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\icon.png"
         icon = QIcon(icon_path)
@@ -170,6 +177,7 @@ class Silvilidar:
         if add_to_toolbar:
             # Adds plugin icon to Plugins toolbar
             self.iface.addToolBarIcon(action)
+            #self.toolbar.addAction(action)
 
         if add_to_menu:
             self.iface.addPluginToMenu(
@@ -192,6 +200,30 @@ class Silvilidar:
 
         # will be set False in run()
         self.first_start = True
+        
+
+    def select_laz_folder(self):
+        """seleciono la carpeta con los datos de entrada"""
+
+        #self.dlg.carpetalaz.clear()
+        carpeta = QFileDialog.getExistingDirectory(self.dlg , "Selecciona carpeta")
+        self.dlg.carpetalaz.setText(carpeta)
+        print(carpeta)
+    
+
+    """def toolButtonImport(self):
+        self.directory = QFileDialog.getExistingDirectory(None, 'Select a folder:',
+                                                                os.path.join(os.path.join(os.path.expanduser('~')),
+                                                                             'Desktop'), QFileDialog.ShowDirsOnly)
+        self.selected_folder = self.directory; p = '/'
+        if '/' in self.directory:
+            self.selected_folder = self.directory.split('/')[-1]; p = '/'
+        if '\\' in self.directory:
+            self.selected_folder = self.directory.split('\\')[-1]; p = '\\'
+        if '//' in self.directory:
+            self.selected_folder = self.directory.split('//')[-1]; p = '//'
+        self.selected_folder = './' + self.selected_folder + p
+        self.dlg.imp.setText(self.directory)"""
 
 
     def unload(self):
@@ -201,6 +233,10 @@ class Silvilidar:
                 self.tr(u'&Silvilidar'),
                 action)
             self.iface.removeToolBarIcon(action)
+        # remove the toolbar
+        del self.toolbar        #PUEDO PROBAR A BORRAR COSAS
+        del self.menu
+        del self.dlg
 
 
 
@@ -236,6 +272,8 @@ class Silvilidar:
         def exprimelidar(las, carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe, hmontebravo, hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo, longitudcopaminima, crecimientofcc):
             fcstring = ""
             print("empieza exprime lidar")
+            horaepiezaexprimelidar= time.time()
+            print(horaepiezaexprimelidar)
             #defino un par de variables con el nombre del archivo y su abreviatura. Pensado para la denominacion estandar de los archivos LiDAR del PNOA
             tronco=las[:-4]
             patron = re.compile(('\d{3}\_\d{4}|\d{3}\-\d{4}|\d{4}\_\d{1}\-\d{1}'))
@@ -363,7 +401,10 @@ class Silvilidar:
             #defino funcion para crear una capa shape que generalice los datos de un raster    filtro es el nivel de generalizacion entre 0 y 1
             def agregado(rasterdeentrada,filtro):
                 #try:
-                    #filtro para rellenar huecos 
+                    #filtro para rellenar huecos
+                    print("empieza agregado")
+                    horaepiezaagregado= time.time()
+                    
                     input=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'1.tif')
                     output=os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'1n.tif')
                     params={'INPUT':input,'DISTANCE': 100, 'BAND': 1,'ITERATIONS': 0,'NO_MASK': False,'OUTPUT':output}
@@ -480,6 +521,9 @@ class Silvilidar:
                             ids.append(feat.id())
                             #areas.append(feat.geometry().area() )
                     ################
+                    horaacabaagregado0= time.time()
+                    print("tiempo agregado0")
+                    print(horaepiezaagregado-horaacabaagregado0)
                     if len(ids)>0:
                         #print ("len feats")
                         #print( len( feats))
@@ -583,6 +627,9 @@ class Silvilidar:
                             lyr3=QgsVectorLayer(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.shp'),rasterdeentrada+str("3"),"ogr")
                             QgsProject.instance().addMapLayer(lyr3)
                             print ("en teoria ha hecho la seleccion2")
+                            horaacabaagregado1= time.time()
+                            print("tiempoacabaagregado1")
+                            print(horaacabaagregado1-horaacabaagregado0)
 
 
                         
@@ -613,6 +660,9 @@ class Silvilidar:
                 #except:
                  #   pass
             #calculo las variables basicas sin proyectar
+            print("empieza calculo las variables basicas sin proyectar")
+            horaepiezacalculovariabesbasicas= time.time()
+            print(horaepiezacalculovariabesbasicas)
             StringToRaster(salida5,"fcc")
             calculo('fcc@1',"fcc")
             StringToRaster(salida4,"hm")
@@ -624,7 +674,7 @@ class Silvilidar:
             calculo(' hm@1 - hbc@1 ',"lc")
             StringToRaster(os.path.join(carpeta,troncoresumido+'_lc.tif'),"lc")
 
-            #genero una carpeta para los datos intermedios            
+            #genero una carpeta para los datos intermedios
             carpetap=os.path.join(carpeta,"p")
             carpeta=carpetap
             if not os.path.exists(carpetap):
@@ -646,6 +696,7 @@ class Silvilidar:
             StringToRaster(os.path.join(carpeta,troncoresumido+'_lcp.tif'),"lcp")
 
             #introduzco los condicionantes para cada tipo de masa
+
             calculo('(fccp@1 <= '+str(fccbaja)+') * 1 ','C1')
             calculo('(fccp@1 > '+str(fccbaja)+')*(hmp@1 < '+str(hmontebravoe)+')*2','C2')
             calculo('(fccp@1 >= '+str(fccmedia)+')*(hmp@1 >= '+str(hmontebravoe)+')*(hmp@1 < '+str(hmontebravo)+')*(rcp@1 <= '+str(rcclaras)+')*51','C3')
@@ -682,8 +733,14 @@ class Silvilidar:
             #primera aproximacion al volumen                         
             calculo('((((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) > 10 ) * 10 + ((((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) < 10 ) * (((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) ', 'V')    
             StringToRaster(os.path.join(carpeta,troncoresumido+'_V.tif'),"vol")
-           
+            
+            horaepiezacalculotiposdemasa= time.time()
+            print("tiempo en raster")
+            print(horaepiezacalculotiposdemasa-horaepiezacalculovariabesbasicas)
             #empiezo carga de capas c
+            print("empieza cargadecapastipos")
+            horaepiezacargadecapastipos= time.time()
+            print(horaepiezacargadecapastipos)
             StringToRaster(os.path.join(carpeta,troncoresumido+'_C1.tif'),"c1")
             StringToRaster(os.path.join(carpeta,troncoresumido+'_C2.tif'),"c2")
             StringToRaster(os.path.join(carpeta,troncoresumido+'_C3.tif'),"c3")
@@ -759,6 +816,7 @@ class Silvilidar:
         #defino una funcion que une en una capa el resultado de todas las hojas
         def juntoshapes(busca,salida):
             print("empieza juntoshapes")
+            horaepiezajuntoshapes= time.time()
             files=glob.glob(busca)
             out=os.path.join(carpeta,salida+".shp")
             entradas=";".join(files)
@@ -792,6 +850,9 @@ class Silvilidar:
             del(out)
             del(entrada)
             del(files)
+            horaacabajuntoshapes= time.time()
+            print ("tiempo junto shapes")
+            print(horaepiezajuntoshapes-horaacabajuntoshapes)
 
 
 
@@ -805,21 +866,47 @@ class Silvilidar:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            self.dlg = SilvilidarDialog()
+            #self.dlg = SilvilidarDialog()
+            #la siguiente linea inicia el boton de cargar carpetas, peta al cerrar el qgis, deberia poner algun close o algo
+            #self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
+            print("inicio el boton en el gui")
+            #self.dlg.pushButton_select_path.setEnabled(True)
+            print ("pone le boton como habiltado")
+            
 
         # show the dialog
         self.dlg.show()
+        
+        #self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
+
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
-            print ("lo imprime si le doy a aceptar en el dialogo")
-            carpeta=self.dlg.carpetalaz.displayText()
+            #print ("lo imprime si le doy a aceptar en el dialogo")
+            carpeta=self.dlg.carpetalaz.text()#displayText()
+            #la carpeta la he cogido al pulsar el boton de la carpeta
 
              #meto aqui variables que luego deberan estar en la cajita   OJO
-            crecimiento= 1.5
+            crecimiento= self.dlg.crecimiento.text()##displayText()
+            fccbaja=self.dlg.fccbaja.text()##displayText()
+            fccterrazas=self.dlg.fccterrazas.text()##displayText()
+            fccmedia=self.dlg.fccmedia.text()##displayText()
+            fccalta=self.dlg.fccalta.text()##displayText()
+            hmontebravoe=self.dlg.hmontebravoe.text()##displayText()
+            hmontebravo=self.dlg.hmontebravo.text()##displayText()
+            hselvicolas=self.dlg.hselvicolas.text()##displayText()
+            hclaras=self.dlg.hclaras.text()#displayText()
+            hclaras2=self.dlg.hclaras2.text()#displayText()
+            hbcminima=self.dlg.hbcminima.text()#displayText()
+            hbcdesarrollado= self.dlg.hbcdesarrollado.text()#displayText()
+            rcclaras=self.dlg.rcclaras.text()#displayText()
+            rcextremo=self.dlg.rcextremo.text()#displayText()
+            longitudcopaminima=self.dlg.longitudcopaminima.text()##displayText()
+            crecimientofcc=self.dlg.crecimientofcc.text()##displayText()
+            """crecimiento= 1.5
             fccbaja=20.0
             fccterrazas=57.5
             fccmedia=46.0
@@ -834,7 +921,7 @@ class Silvilidar:
             rcclaras=35.0
             rcextremo=17.0
             longitudcopaminima=3.25
-            crecimientofcc=12.5
+            crecimientofcc=12.5"""
 
             #AQUI ACABA
             
@@ -919,7 +1006,7 @@ class Silvilidar:
             renderer=QgsCategorizedSymbolRenderer(field,categorias)
             teselas.setRenderer(renderer)
             QgsProject.instance().addMapLayer(teselas)
-
+            """
             categorias1=[]
             for clase,(relleno,color, etiqueta,orden) in ordenados:    
                 props={'style':relleno, 'color':color, 'style_border':'no'}
@@ -943,15 +1030,16 @@ class Silvilidar:
             renderer=QgsCategorizedSymbolRenderer(field,categorias2)
             teselas2.setRenderer(renderer)
             QgsProject.instance().addMapLayer(teselas2)
-
+            """
             
             #repinto todo refrescando la vista
             canvas.freeze(False)
             canvas.refresh()
-            
+            #self.dlg.pushButton_select_path.setEnabled(False)
+            #self.dlg.close()
             #print (capasoriginales)
 
             
-            print (fccbaja)
+            print (carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe, hmontebravo, hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo, longitudcopaminima, crecimientofcc)
             
             pass

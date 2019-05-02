@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SilvilidarDialogBase</class>
- <widget class="QDialog" name="SilvilidarDialogBase">
+ <class>AlidadasDialogBase</class>
+ <widget class="QDialog" name="AlidadasDialogBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Silvilidar</string>
+   <string>Alidadas</string>
   </property>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
@@ -45,28 +45,28 @@
     <item>
      <widget class="QLabel" name="label_18">
       <property name="text">
-       <string>º</string>
+       <string>ยบ</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="label_19">
       <property name="text">
-       <string>º</string>
+       <string>ยบ</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="label_20">
       <property name="text">
-       <string>º</string>
+       <string>ยบ</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="label_22">
       <property name="text">
-       <string>º</string>
+       <string>ยบ</string>
       </property>
      </widget>
     </item>
@@ -168,14 +168,14 @@
     <item>
      <widget class="QLineEdit" name="ang1">
       <property name="text">
-       <string>30</string>
+       <string/>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLineEdit" name="ang2">
       <property name="text">
-       <string>45</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -201,7 +201,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>SilvilidarDialogBase</receiver>
+   <receiver>AlidadasDialogBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -217,7 +217,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>SilvilidarDialogBase</receiver>
+   <receiver>AlidadasDialogBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

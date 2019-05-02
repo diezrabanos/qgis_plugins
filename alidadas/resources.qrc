@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/silvilidar" >
+    <qresource prefix="/plugins/alidadas" >
         <file>icon.png</file>
     </qresource>
 </RCC>

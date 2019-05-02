@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SigpacDialogBase</class>
- <widget class="QDialog" name="SigpacDialogBase">
+ <class>SilvilidarDialogBase</class>
+ <widget class="QDialog" name="SilvilidarDialogBase">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>657</width>
-    <height>584</height>
+    <width>1110</width>
+    <height>644</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SIGPAC</string>
+   <string>Silvilidar</string>
   </property>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>530</y>
+     <y>600</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -29,125 +29,415 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="POL">
+  <widget class="QLineEdit" name="carpetalaz">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>170</y>
-     <width>59</width>
+     <x>200</x>
+     <y>50</y>
+     <width>140</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="MUN">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>120</y>
-     <width>59</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="PAR">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>220</y>
-     <width>59</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="PRO">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>80</y>
-     <width>59</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>42</string>
+    <string>Carpeta con los datos lidar sin espacios</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>80</y>
-     <width>56</width>
+     <y>50</y>
+     <width>101</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>PROVINCIA</string>
+    <string>Carpeta datos Lidar</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_6">
+  <widget class="QWidget" name="layoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>90</y>
+     <width>241</width>
+     <height>501</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="label_18">
+      <property name="text">
+       <string>m.</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_19">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_20">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_21">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_22">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_23">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_24">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_25">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_26">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_27">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_28">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_29">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_30">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_31">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_32">
+      <property name="text">
+       <string>%</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_33">
+      <property name="text">
+       <string>m</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>120</y>
-     <width>55</width>
-     <height>16</height>
+     <y>90</y>
+     <width>241</width>
+     <height>501</height>
     </rect>
    </property>
-   <property name="text">
-    <string>MUNICIPIO</string>
-   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Crecimiento en altura................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Crecimiento en f.c.c.................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Fcc baja...............................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Fcc Terrazas.........................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>Fcc Media..............................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>Fcc Alta...............................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_8">
+      <property name="text">
+       <string>Altura monte bravo e................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_11">
+      <property name="text">
+       <string>Altura monte bravo .................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>Altura selvicolas.....................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_12">
+      <property name="text">
+       <string>Altura claras..........................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_13">
+      <property name="text">
+       <string>Altura claras 2........................................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_9">
+      <property name="text">
+       <string>Altura base de copa minima........................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_14">
+      <property name="text">
+       <string>Altura base de copa desarrollado..................</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_15">
+      <property name="text">
+       <string>Razón de copa para claras en porcentaje.......</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_16">
+      <property name="text">
+       <string>Razón de copa extrema en porcentaje..........</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_17">
+      <property name="text">
+       <string>Longitud copa mínima................................</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QComboBox" name="cbMUN">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>220</x>
-     <y>120</y>
-     <width>181</width>
-     <height>20</height>
+     <x>260</x>
+     <y>90</y>
+     <width>61</width>
+     <height>501</height>
     </rect>
    </property>
-  </widget>
-  <widget class="QLabel" name="label_7">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>170</y>
-     <width>53</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>POLIGONO</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>220</y>
-     <width>45</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>PARCELA</string>
-   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QLineEdit" name="crecimiento">
+      <property name="text">
+       <string>1.5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="crecimientofcc">
+      <property name="text">
+       <string>12.5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="fccbaja">
+      <property name="text">
+       <string>20</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="fccterrazas">
+      <property name="text">
+       <string>57.5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="fccmedia">
+      <property name="text">
+       <string>46</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="fccalta">
+      <property name="text">
+       <string>95</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="hmontebravoe">
+      <property name="text">
+       <string>3.5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="hmontebravo">
+      <property name="text">
+       <string>5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="hselvicolas">
+      <property name="text">
+       <string>7.5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="hclaras">
+      <property name="text">
+       <string>7</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="hclaras2">
+      <property name="text">
+       <string>16.5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="hbcminima">
+      <property name="text">
+       <string>3</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="hbcdesarrollado">
+      <property name="text">
+       <string>5.5</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="rcclaras">
+      <property name="text">
+       <string>35</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="rcextremo">
+      <property name="text">
+       <string>17</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="longitudcopaminima">
+      <property name="text">
+       <string>3.25</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QPushButton" name="pushButton_select_path">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>500</y>
+     <x>380</x>
+     <y>50</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -162,381 +452,13 @@
     <string>...</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>500</y>
-     <width>111</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Guardar en: (opcional)</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="ruta_archivo">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>500</y>
-     <width>140</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="mycheckBox">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>440</y>
-     <width>211</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>DISOLVER RECINTOS</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_9">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>290</y>
-     <width>211</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>BUSQUEDA POR COORDENADAS</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_10">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>330</y>
-     <width>45</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>X:</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_11">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>370</y>
-     <width>45</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Y:</string>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="XX">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>330</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLineEdit" name="YY">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>370</y>
-     <width>71</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>60</y>
-     <width>401</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>BUSQUEDA POR PROVINCIA MUNICIPIO POLIGONO Y PARCELA</string>
-   </property>
-  </widget>
-  <widget class="Line" name="line">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>270</y>
-     <width>401</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="Line" name="line_2">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>400</y>
-     <width>401</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="Line" name="line_3">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>480</y>
-     <width>401</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_4">
-   <property name="geometry">
-    <rect>
-     <x>160</x>
-     <y>20</y>
-     <width>411</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-     <weight>50</weight>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>COMPLEMENTO DE SIGMENA PARA ACCEDER A SIGPAC</string>
-   </property>
-  </widget>
-  <widget class="Line" name="line_4">
-   <property name="geometry">
-    <rect>
-     <x>420</x>
-     <y>60</y>
-     <width>20</width>
-     <height>511</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Vertical</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_5">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>70</y>
-     <width>171</width>
-     <height>221</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string> Carga las parcelas o  los recintos
- del SIGPAC
- introduciendo el código de 
- Municipio, Polígono y Parcela.
-
- Si se desconoce el código del 
- municipio puede selecionarse con
- el desplegable.
-
- </string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_12">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>410</y>
-     <width>171</width>
-     <height>81</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string> Si esta checheado,
- el resultado son las parcelas.
- En caso contrario muestra recintos.</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_13">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>270</y>
-     <width>171</width>
-     <height>111</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string> Si hay datos de  
- polígono o parcela esta
- opción no funcina.
- 
- Se asume que las coordenadas 
- están en el sistema de referencia 
- del proyecto.</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_14">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>480</y>
-     <width>171</width>
-     <height>81</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string> Si no se seleciona una ruta
- el resultado es una capa temporal
- que se borrará cuando salgamos 
- del qgis.</string>
-   </property>
-  </widget>
-  <widget class="Line" name="line_5">
-   <property name="geometry">
-    <rect>
-     <x>440</x>
-     <y>480</y>
-     <width>211</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="Line" name="line_6">
-   <property name="geometry">
-    <rect>
-     <x>440</x>
-     <y>400</y>
-     <width>211</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="Line" name="line_7">
-   <property name="geometry">
-    <rect>
-     <x>440</x>
-     <y>270</y>
-     <width>211</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="Line" name="line_8">
-   <property name="geometry">
-    <rect>
-     <x>430</x>
-     <y>90</y>
-     <width>211</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Horizontal</enum>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_15">
-   <property name="geometry">
-    <rect>
-     <x>210</x>
-     <y>120</y>
-     <width>55</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>o</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_limpiar">
-   <property name="geometry">
-    <rect>
-     <x>280</x>
-     <y>270</y>
-     <width>131</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Limpiar todos los datos</string>
-   </property>
-  </widget>
  </widget>
- <tabstops>
-  <tabstop>PRO</tabstop>
-  <tabstop>MUN</tabstop>
-  <tabstop>POL</tabstop>
-  <tabstop>PAR</tabstop>
-  <tabstop>mycheckBox</tabstop>
-  <tabstop>ruta_archivo</tabstop>
-  <tabstop>pushButton_select_path</tabstop>
-  <tabstop>XX</tabstop>
-  <tabstop>YY</tabstop>
-  <tabstop>cbMUN</tabstop>
- </tabstops>
  <resources/>
  <connections>
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>SigpacDialogBase</receiver>
+   <receiver>SilvilidarDialogBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -552,7 +474,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>SigpacDialogBase</receiver>
+   <receiver>SilvilidarDialogBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -192,7 +192,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>460</y>
+     <y>440</y>
      <width>211</width>
      <height>17</height>
     </rect>
@@ -208,7 +208,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>310</y>
+     <y>290</y>
      <width>211</width>
      <height>16</height>
     </rect>
@@ -228,7 +228,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>350</y>
+     <y>330</y>
      <width>45</width>
      <height>16</height>
     </rect>
@@ -241,7 +241,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>390</y>
+     <y>370</y>
      <width>45</width>
      <height>16</height>
     </rect>
@@ -254,26 +254,26 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>350</y>
+     <y>330</y>
      <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>565070</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLineEdit" name="YY">
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>390</y>
+     <y>370</y>
      <width>71</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>4626040</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -313,7 +313,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>420</y>
+     <y>400</y>
      <width>401</width>
      <height>16</height>
     </rect>
@@ -372,52 +372,150 @@
    <property name="geometry">
     <rect>
      <x>450</x>
-     <y>60</y>
+     <y>70</y>
      <width>171</width>
      <height>221</height>
     </rect>
    </property>
    <property name="text">
-    <string>Busca la referencia en SIGPAC introduciendo el código de Municipio, Polígono y Parcela. Si se desconoce el municipio puede dejarse en blanco y localizarse con el desplegable.</string>
+    <string> Carga las parcelas o  los recintos
+ del SIGPAC
+ introduciendo el código de 
+ Municipio, Polígono y Parcela.
+
+ Si se desconoce el código del 
+ municipio puede selecionarse con
+ el desplegable.
+
+ </string>
    </property>
   </widget>
   <widget class="QLabel" name="label_12">
    <property name="geometry">
     <rect>
-     <x>460</x>
-     <y>350</y>
+     <x>450</x>
+     <y>410</y>
      <width>171</width>
-     <height>221</height>
+     <height>81</height>
     </rect>
    </property>
    <property name="text">
-    <string>Si esta checheado, el resultado son las parcelas</string>
+    <string> Si esta checheado,
+ el resultado son las parcelas.
+ En caso contrario muestra recintos.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_13">
    <property name="geometry">
     <rect>
-     <x>460</x>
-     <y>250</y>
+     <x>450</x>
+     <y>270</y>
      <width>171</width>
-     <height>221</height>
+     <height>111</height>
     </rect>
    </property>
    <property name="text">
-    <string>Si hay datos de provincia, municipio poligono y parcela esta opcion no funcina. Meter las coordenadas en numeros enteros( sin decimales)</string>
+    <string> Si hay datos de  
+ polígono o parcela esta
+ opción no funcina.
+ 
+ Se asume que las coordenadas 
+ están en el sistema de referencia 
+ del proyecto.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_14">
    <property name="geometry">
     <rect>
-     <x>460</x>
-     <y>420</y>
+     <x>450</x>
+     <y>480</y>
      <width>171</width>
-     <height>221</height>
+     <height>81</height>
     </rect>
    </property>
    <property name="text">
-    <string>Si no se seleciona una ruta el resultado es una capa temporal que se borrara cuando salgamos del qgis.</string>
+    <string> Si no se seleciona una ruta
+ el resultado es una capa temporal
+ que se borrará cuando salgamos 
+ del qgis.</string>
+   </property>
+  </widget>
+  <widget class="Line" name="line_5">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>480</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_6">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>400</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_7">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>270</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_8">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>90</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_15">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>120</y>
+     <width>55</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>o</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_limpiar">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>270</y>
+     <width>131</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Limpiar todos los datos</string>
    </property>
   </widget>
  </widget>

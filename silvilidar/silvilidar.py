@@ -36,7 +36,7 @@ from .silvilidar_dialog import SilvilidarDialog
 import os.path
 
 #import para procesar
-from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer,QgsFeatureRequest,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsFillSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer
+from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer,QgsFeatureRequest,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsFillSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsExpressionContextUtils
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtCore import QFileInfo
@@ -85,8 +85,8 @@ class Silvilidar:
         self.actions = []
         self.menu = self.tr(u'&Silvilidar')
         
-        self.toolbar = self.iface.addToolBar(u'Silvilidar')             #creo que no hace nada
-        self.toolbar.setObjectName(u'Silvilidar')            #creo que no hace nada
+        #self.toolbar = self.iface.addToolBar(u'Silvilidar')             #creo que no hace nada
+        #self.toolbar.setObjectName(u'Silvilidar')            #creo que no hace nada
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
@@ -162,7 +162,9 @@ class Silvilidar:
 
         
         #cambio el icon path para mi equipo.
-        icon_path=r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\icon.png"
+        usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
+        icon_path=os.path.join(r"C:\Users",usuario,r"AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\icon.png")
+        #icon_path=r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\icon.png"
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -1043,3 +1045,4 @@ class Silvilidar:
             print (carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe, hmontebravo, hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo, longitudcopaminima, crecimientofcc)
             
             pass
+

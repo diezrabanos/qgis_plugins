@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<plugins>
+  <!--Put plugins in alphabetical order-->
+  <pyqgis_plugin version="1.0.0" name="Sigpac plugin" plugin_id="9991">
+      <description>Processing provider to use OTB applications</description>
+      <about>Orfeo ToolBox (OTB) is an open-source project for state-of-the-art remote sensing. It can process high resolution optical, multispectral and radar images at the terabyte scale. A wide variety of its applications such as Mosiac, Ortho-rectification, Pansharpening, Classification, Deep Learning (via tensorflow) are accessible in QGIS through this processing provider. OTB 6.6.0 or higher is required to use this plugin</about>
+      <version>1.0.0</version>
+      <trusted>True</trusted>
+      <qgis_minimum_version>3.4.0</qgis_minimum_version>
+      <qgis_maximum_version>3.8.0</qgis_maximum_version>
+      <homepage>https://github.com/diezrabanos/qgis_plugins/</homepage>
+      <file_name>sigpac.1.0.0.zip</file_name>
+      <author_name>CNES</author_name>
+      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/sigpac.1.0.0.zip</download_url>
+      <experimental>False</experimental>
+      <deprecated>False</deprecated>
+    </pyqgis_plugin>
+ </plugins>
+
+
+
+
+
+
+
+
+

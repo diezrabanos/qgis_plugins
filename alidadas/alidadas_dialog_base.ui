@@ -45,28 +45,28 @@
     <item>
      <widget class="QLabel" name="label_18">
       <property name="text">
-       <string>ยบ</string>
+       <string>º</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="label_19">
       <property name="text">
-       <string>ยบ</string>
+       <string>º</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="label_20">
       <property name="text">
-       <string>ยบ</string>
+       <string>º</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QLabel" name="label_22">
       <property name="text">
-       <string>ยบ</string>
+       <string>º</string>
       </property>
      </widget>
     </item>

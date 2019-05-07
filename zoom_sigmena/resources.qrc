@@ -1,7 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/zoomtopaste" >
+    <qresource prefix="/plugins/alidadas" >
         <file>icon.png</file>
-		<file>icon_now.png</file>
-		<file>icon_frm.png</file>
     </qresource>
 </RCC>

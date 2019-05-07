@@ -1,26 +1,30 @@
 # This file contains metadata for your plugin. Since 
-# version 3.0 of QGIS this is the proper way to supply 
+# version 2.0 of QGIS this is the proper way to supply 
 # information about a plugin. The old method of 
 # embedding metadata in __init__.py will 
-# is no longer supported since version 3.0.
+# is no longer supported since version 2.0.
 
 # This file should be included when you package your plugin.# Mandatory items:
 
+
 [general]
-name=zoomtopaste 
+
+name=ZoomSigmena
+
 qgisMinimumVersion=3.0
-description=Zoom to a specified point on the map from the Clipboard comma delimited
-version=3.0.1
-author=gerd 3er geoplaning GmbH
-email=kontakt@geoplaning.de
 
-about=Zoom to a specified point on the map from the Clipboard comma delimited
+description=Permite hacer zoom a una coordenada dada
+version=1.0.0
+author=F. Javier Diez Rabanos
+
+email=dierabfr@jcyl.es
 
 
-repository=https://github.com/Amphibitus/zoomtopaste
-tracker=https://github.com/Amphibitus/zoomtopaste/issues
-homepage=https://github.com/Amphibitus/zoomtopaste/wiki
+about=Permite hacer zoom a una determinada coordenada introducida en varios sistemas de coordenadas que se pueden seleccionar con un desplegable.Crea una capa temporal con el punto introducido y lo etique cao dicha coordenada.
 
+tracker=http://bugs
+
+repository=https://github.com/diezrabanos/qgis_plugins/
 
 # End of mandatory metadata
 
@@ -30,13 +34,14 @@ homepage=https://github.com/Amphibitus/zoomtopaste/wiki
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=zoom, paste, clipboard
+tags=python
 
-
-category=Plugin
-icon=./icon.png
+homepage=http://homepage
+category=Plugins
+icon=icon.png
 # experimental flag
 experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
 deprecated=False
+

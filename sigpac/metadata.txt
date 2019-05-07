@@ -8,16 +8,22 @@
 
 [general]
 name=Sigpac
+
 qgisMinimumVersion=3.0
-description=esto es lo que hace Sigpac
-version=0.1
-author=javier diez
+
+description=Carga el Sigpac en el Qgis, con la referencia o con una coordenada
+
+version=1.0.0
+
+author=F. Javier Diez Rabanos
+
 email=dierabfr@jcyl.es
 
-about=Provide a brief description of the plugin and its purpose. esto es lo que hacesuahdusacnjs alidadas
 
+about= Permite cargar la parcela o recintos del Sigpac correspondientes a una provincia, poligono y parcela dada, tanto con su codigo como con un desplegable como con una coordenada.
 tracker=http://bugs
-repository=http://repo
+
+repository=https://github.com/diezrabanos/qgis_plugins/
 # End of mandatory metadata
 
 # Recommended items:

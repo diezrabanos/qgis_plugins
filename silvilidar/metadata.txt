@@ -6,18 +6,23 @@
 
 # This file should be included when you package your plugin.# Mandatory items:
 
+
 [general]
 name=Silvilidar
+
 qgisMinimumVersion=3.0
-description=esto es lo que hace silvilidar
-version=0.1
-author=javier diez
+
+description=Permite procesar datos LiDAR de una manera sencilla para obtener
+version=1.0.0
+author=Alejandro Crespo Rodrigo y F. Javier Diez Rabanos
 email=dierabfr@jcyl.es
 
-about=Provide a brief description of the plugin and its purpose. esto es lo que hacesuahdusacnjs silvilidar
 
+about=Se trata de la creacion de una metodologia y de una herramienta informatica (SilviLiDAR), mediante un script, que analiza una serie de parametros selvicolas obtenidos a partir de los datos LiDAR y, con la utilizacion de un arbol de decision construido en base a la estructura, estado de desarrollo y grado de competencia del arbolado, clasifica por celdas (cuadriculas basicas) el territorio por tipos de masa y su posible necesidad de actuacion selvicola, y lo expresa cartograficamente a traves de QGIS.
 tracker=http://bugs
+
 repository=http://repo
+
 # End of mandatory metadata
 
 # Recommended items:
@@ -35,5 +40,6 @@ icon=icon.png
 experimental=False
 
 # deprecated flag (applies to the whole plugin, not just a single version)
+
 deprecated=False
 

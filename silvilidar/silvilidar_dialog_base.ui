@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1110</width>
-    <height>644</height>
+    <width>492</width>
+    <height>664</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>190</x>
-     <y>600</y>
+     <y>620</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -32,14 +32,14 @@
   <widget class="QLineEdit" name="carpetalaz">
    <property name="geometry">
     <rect>
-     <x>200</x>
-     <y>50</y>
-     <width>140</width>
+     <x>70</x>
+     <y>70</y>
+     <width>261</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>Carpeta con los datos lidar sin espacios</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -47,19 +47,19 @@
     <rect>
      <x>20</x>
      <y>50</y>
-     <width>101</width>
+     <width>411</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>Carpeta datos Lidar</string>
+    <string>Carpeta que contiene los datos Lidar, LAZ o LAZ. (por ejemplo C:/Datos_Silvilidar/)</string>
    </property>
   </widget>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>330</x>
-     <y>90</y>
+     <y>110</y>
      <width>241</width>
      <height>501</height>
     </rect>
@@ -186,7 +186,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>90</y>
+     <y>110</y>
      <width>241</width>
      <height>501</height>
     </rect>
@@ -313,7 +313,7 @@
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>90</y>
+     <y>110</y>
      <width>61</width>
      <height>501</height>
     </rect>
@@ -436,8 +436,8 @@
   <widget class="QPushButton" name="pushButton_select_path">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>50</y>
+     <x>340</x>
+     <y>70</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -450,6 +450,26 @@
    </property>
    <property name="text">
     <string>...</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_34">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
+     <width>141</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>16</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>SILVILIDAR</string>
    </property>
   </widget>
  </widget>

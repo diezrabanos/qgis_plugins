@@ -7,17 +7,22 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=gpsDescargaCarga
+
+name=gpsDescarga
+Carga
 qgisMinimumVersion=3.0
-description=esto es lo que hace gpsCargaDescarga
-version=0.1
-author=javier diez
+
+description=Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12
+
+version=1.0.0
+author=f. Javier Diez Rabanos
 email=dierabfr@jcyl.es
 
-about=Provide a brief description of the plugin and its purpose. esto es lo que hacesuahdusacnjs gpsDescargaCarga
 
+about=Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12. Lo hace en la carpeta C:SIGMENA_GPS con un nombre que no puede contener espacios. Una vez descargado lo transforma a Etrs89 huso 30.
 tracker=http://bugs
-repository=http://repo
+
+repository=https://github.com/diezrabanos/qgis_plugins/
 # End of mandatory metadata
 
 # Recommended items:

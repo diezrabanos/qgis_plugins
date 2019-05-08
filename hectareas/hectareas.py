@@ -38,7 +38,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtWidgets import QMessageBox
@@ -199,24 +199,24 @@ class Hectareas:
     def run(self):
         print ("paso por el run")
         vl = iface.activeLayer()
+        if vl.wkbType() == QgsWkbTypes.Polygon or vl.wkbType() == QgsWkbTypes.MultiPolygon:
+            vl.startEditing()
 
-        vl.startEditing()
+            fields = vl.fields()
+            idx = fields.indexFromName('hectareas')
+            
+            if idx == -1:
+                myField = QgsField( 'hectareas', QVariant.Double )
+                vl.dataProvider().addAttributes([myField])
+                vl.updateFields()
+            
 
-        fields = vl.fields()
-        idx = fields.indexFromName('hectareas')
-        
-        if idx == -1:
-            myField = QgsField( 'hectareas', QVariant.Double )
-            vl.dataProvider().addAttributes([myField])
-            vl.updateFields()
-        
+            for f in vl.getFeatures():
+                f.setAttribute(f.fieldNameIndex('hectareas'), f.geometry().area()/10000 )
+                #f[idx] = '"$area"*1000'
+                vl.updateFeature( f )
 
-        for f in vl.getFeatures():
-            f.setAttribute(f.fieldNameIndex('hectareas'), f.geometry().area()/10000 )
-            #f[idx] = '"$area"*1000'
-            vl.updateFeature( f )
-
-        vl.commitChanges()
+            vl.commitChanges()
         #coloco el puntero arriba del todo
         #QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
    

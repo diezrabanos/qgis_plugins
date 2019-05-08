@@ -131,7 +131,7 @@ class Hectareas:
         #cambio el icon path para mi equipo.
         usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
         icon_path=os.path.join(r"C:\Users",usuario,r"AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\hectareas\icon.png")
-        #icon_path=r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\alidadas\icon.png"
+
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -183,10 +183,7 @@ class Hectareas:
                 self.tr(u'&Sigmena'),
                 action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        #del self.toolbar        #PUEDO PROBAR A BORRAR COSAS
-        #del self.menu
-        #del self.dlg
+
 
 
 
@@ -228,132 +225,4 @@ class Hectareas:
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
         if self.first_start == True:
             self.first_start = False
-            #self.dlg = SilvilidarDialog()
-            #la siguiente linea inicia el boton de cargar carpetas, peta al cerrar el qgis, deberia poner algun close o algo
-            #self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
-            #print("inicio el boton en el gui")
-            #self.dlg.pushButton_select_path.setEnabled(True)
-            #print ("pone le boton como habiltado")
-            
-
-        # show the dialog
-        #self.dlg.show()
-        
-        #self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
-
-        # Run the dialog event loop
-        """result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            #print ("lo imprime si le doy a aceptar en el dialogo")
-            
-            #la carpeta la he cogido al pulsar el boton de la carpeta
-
-             #saco de  aqui variables que estan en las cajitas
-            src_seleccionado=self.dlg.comboBox_src.currentIndex()
-             
-            # Get the coordinates and scale factor from the dialog
-            x=self.dlg.XX.text()##displayText()
-            y=self.dlg.YY.text()##displayText()
-            
-            x=x.replace(',','.')
-            y=y.replace(',','.')
-            print (x)
-            print (y)
-            src=misdatos[int(src_seleccionado)][1]
-            print (src)
-
-            
-
-            #creo una capa temporal con las coordenadas
-            
-            # create layer
-            vl2 = QgsVectorLayer("Point?crs=EPSG:"+src, "Zoom", "memory")
-            pr2 = vl2.dataProvider()
-            
-            vl2.startEditing()
-            # add fields
-            pr2.addAttributes([
-                            QgsField("x",  QVariant.Double),
-                            QgsField("y", QVariant.Double)])
-            vl2.updateFields() 
-            # tell the vector layer to fetch changes from the provider
-            
-            #$add a feature
-            fet = QgsFeature()
-            fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
-            fet.setAttributes([ float(x),float( y)])
-            pr2.addFeatures([fet])
-            
-            
-           
-            #cambio la simbologia
-            symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'red','size': '3',})
-            vl2.renderer().setSymbol(symbol)
-
-            # update layer's extent when new features have been added
-            # because change of extent in provider is not propagated to the layer
-
-            layer_settings  = QgsPalLayerSettings()
-            text_format = QgsTextFormat()
-
-            text_format.setFont(QFont("Arial", 12))
-            text_format.setSize(12)
-            text_format.setColor(QColor("Orange"))
-
-            #buffer_settings = QgsTextBufferSettings()
-            #buffer_settings.setEnabled(True)
-            #buffer_settings.setSize(0.10)
-            #buffer_settings.setColor(QColor("Orange"))
-
-            #text_format.setBuffer(buffer_settings)
-            layer_settings.setFormat(text_format)
-            #myexp=QgsExpression('''concat('X: ',"X",' Y: ',"Y")''')
-            layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y")'''
-            layer_settings.isExpression = True
-            #layer_settings.placement = 7
-            #layer_settings.quadOffset = QgsPalLayerSettings.QuadrantBelow
-            #layer_settings.yOffset = 1
-
-            layer_settings.enabled = True
-
-            layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-            vl2.setLabelsEnabled(True)
-            vl2.setLabeling(layer_settings)
-            vl2.triggerRepaint()
-
-
-
-            
-
-
-            
-
-
-                
-            # update layer's extent when new features have been added
-            # because change of extent in provider is not propagated to the layer
-            vl2.updateExtents()
-            vl2.commitChanges()
-            vl2.updateExtents()
-            canvas = self.iface.mapCanvas()
-            canvas.setExtent(vl2.extent())
-         
-            crsSrc = QgsCoordinateReferenceSystem('EPSG:'+str(src))
-            crsDest = QgsProject.instance().crs()
-
-            if crsSrc!=crsDest:
-                print("paso por aqui")
-                xform = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
-                canvas.setExtent(xform.transform(vl2.extent()))
-            
-            self.iface.mapCanvas().zoomScale(10000)
-          
-
-            #QgsProject.instance().addMapLayer(vl)
-            QgsProject.instance().addMapLayer(vl2)
-            
-        """
+       

@@ -71,6 +71,20 @@
       <experimental>False</experimental>
       <deprecated>False</deprecated>
     </pyqgis_plugin>
+<pyqgis_plugin version="1.0.0" name="hectareas" plugin_id="9995">
+      <description>Calcula la superficie en hectareas de capa de poligonos e incorpora esta informacion a una columna llamada hecteras</description>
+      <about> Calcula la superficie en hectareas de capa de poligonos e incorpora esta informacion a una columna llamada hecteras </about>
+      <version>1.0.0</version>
+      <trusted>True</trusted>
+      <qgis_minimum_version>3.4.0</qgis_minimum_version>
+      <qgis_maximum_version>3.10.0</qgis_maximum_version>
+      <homepage>https://github.com/diezrabanos/qgis_plugins/</homepage>
+      <file_name>hectareas.1.0.0.zip</file_name>
+      <author_name>F. Javier Díez Rábanos</author_name>
+      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/hectareas.1.0.0.zip?raw=true</download_url>
+      <experimental>False</experimental>
+      <deprecated>False</deprecated>
+    </pyqgis_plugin>
  </plugins>
 
 

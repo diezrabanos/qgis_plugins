@@ -38,7 +38,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes,QgsApplication
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtWidgets import QMessageBox
@@ -129,8 +129,8 @@ class Hectareas:
 
         
         #cambio el icon path para mi equipo.
-        usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
-        icon_path=os.path.join(r"C:\Users",usuario,r"AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\hectareas\icon.png")
+        usuario=QgsApplication.qgisSettingsDirPath()
+        icon_path=os.path.join(usuario,r"python\plugins\zoomSigmena\icon.png")
 
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)

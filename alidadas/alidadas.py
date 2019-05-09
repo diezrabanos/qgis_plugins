@@ -38,7 +38,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsApplication
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtWidgets import QMessageBox
@@ -162,14 +162,13 @@ class Alidadas:
             added to self.actions list.
         :rtype: QAction
         """
-        #copiado del catastro
-        #self.dlg = SilvilidarDialog()
+
 
         
         #cambio el icon path para mi equipo.
         usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
         icon_path=os.path.join(r"C:\Users",usuario,r"AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\alidadas\icon.png")
-        #icon_path=r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\alidadas\icon.png"
+        
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)

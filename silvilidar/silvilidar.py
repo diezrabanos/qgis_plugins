@@ -85,8 +85,8 @@ class Silvilidar:
         self.actions = []
         self.menu = self.tr(u'&Silvilidar')
         
-        #self.toolbar = self.iface.addToolBar(u'Silvilidar')             #creo que no hace nada
-        #self.toolbar.setObjectName(u'Silvilidar')            #creo que no hace nada
+        self.toolbar = self.iface.addToolBar(u'Silvilidar')             
+        self.toolbar.setObjectName(u'Silvilidar')            
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
@@ -219,14 +219,9 @@ class Silvilidar:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginMenu(
-                self.tr(u'&Silvilidar'),
-                action)
+            self.iface.removePluginMenu(                self.tr(u'&Silvilidar'),                action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        del self.toolbar        #PUEDO PROBAR A BORRAR COSAS
-        del self.menu
-        del self.dlg
+
 
 
 

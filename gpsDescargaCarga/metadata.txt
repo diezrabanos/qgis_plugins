@@ -8,18 +8,18 @@
 
 [general]
 
-name=gpsDescarga
-Carga
+name=gpsDescargaCarga
+
 qgisMinimumVersion=3.0
 
 description=Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12
 
-version=1.0.0
+version=1.0.1
 author=f. Javier Diez Rabanos
 email=dierabfr@jcyl.es
 
 
-about=Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12. Lo hace en la carpeta C:SIGMENA_GPS con un nombre que no puede contener espacios. Una vez descargado lo transforma a Etrs89 huso 30.
+about=Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12. Lo hace en la carpeta C SIGMENA GPS con un nombre que no puede contener espacios. Una vez descargado lo transforma a Etrs89 huso 30.
 tracker=http://bugs
 
 repository=https://github.com/diezrabanos/qgis_plugins/

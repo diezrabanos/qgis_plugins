@@ -14,8 +14,7 @@ qgisMinimumVersion=3.0
 description=Carga el Sigpac en el Qgis, con la referencia o con una coordenada
 
 version=1.0.0
-
-author=F. Javier Diez Rabanos
+1author=F. Javier Diez Rabanos
 
 email=dierabfr@jcyl.es
 

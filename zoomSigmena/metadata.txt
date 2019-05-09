@@ -9,17 +9,18 @@
 
 [general]
 
-name=Hectareas
+name=ZoomSigmena
+
 qgisMinimumVersion=3.0
 
-description=Calcula la superficie en hectareas de una capa de poligonos y crea una columna llamada hectareas donde incorpora esta informacion.
+description=Permite hacer zoom a una coordenada dada
 version=1.0.1
 author=F. Javier Diez Rabanos
 
 email=dierabfr@jcyl.es
 
 
-about=Calcula la superficie en hectareas de una capa de poligonos y crea una columna llamada hectareas donde incorpora esta informacion.
+about=Permite hacer zoom a una determinada coordenada introducida en varios sistemas de coordenadas que se pueden seleccionar con un desplegable.Crea una capa temporal con el punto introducido y lo etique cao dicha coordenada.
 
 tracker=http://bugs
 

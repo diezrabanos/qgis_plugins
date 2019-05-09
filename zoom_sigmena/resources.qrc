@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/plugins/alidadas" >
-        <file>icon.png</file>
-    </qresource>
-</RCC>

@@ -1,2 +1,2 @@
 # qgis_plugins
-Mis propios plugins para qgis 3
+Plugins desarrollados para QGIS 3, relacionados con medioambiente

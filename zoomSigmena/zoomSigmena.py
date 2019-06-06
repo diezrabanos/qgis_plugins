@@ -52,6 +52,8 @@ import math
 import time
 
 import pyproj
+import webbrowser
+
 
 
 
@@ -166,7 +168,9 @@ class ZoomSigmena:
         
 
     
-    
+    def help_pressed(self):
+        help_file = 'file:' + os.path.dirname(__file__) + '/Ayuda_ZoomSigmena.pdf'
+        webbrowser.open_new(help_file)    
 
 
 
@@ -188,7 +192,7 @@ class ZoomSigmena:
 
 
     def run(self):
-        print ("paso por el run")
+       
        
         #coloco el puntero arriba del todo
         QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
@@ -207,7 +211,7 @@ class ZoomSigmena:
         if self.first_start == True:
             self.first_start = False
 
-            
+        self.dlg.help_button.clicked.connect(self.help_pressed)    
 
         # show the dialog
         self.dlg.show()
@@ -234,25 +238,34 @@ class ZoomSigmena:
             
             x=x.replace(',','.')
             y=y.replace(',','.')
-
+      
             src=misdatos[int(src_seleccionado)][1]
-            print (src)
+        
 
             if src=="4326":
                 print("entro en geograficas")
                 latext=y
                 longtext=x
+                print (latext)
+                print (longtext)
+
+
                 lag=float(latext.split()[0])
                 lam=float(latext.split()[1])
                 las=float(latext.split()[2])
                 log=float(longtext.split()[0])
                 lom=float(longtext.split()[1])
                 los=float(longtext.split()[2])
+ 
                 lon=-1*(log+(lom/60)+(los/3600))
                 lat=lag+(lam/60)+(las/3600)
+
                 x=float(lon)
                 y=float(lat)
-
+                #long=-3.801920627959275
+                #lat=43.4891944171743
+                #UTM_X=435157.5900
+                #UTM_Y =4815453.6400
                 huso=30
                 destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
                 origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
@@ -314,6 +327,15 @@ class ZoomSigmena:
             vl2.setLabeling(layer_settings)
             vl2.triggerRepaint()
 
+
+
+            
+
+
+            
+
+
+                
             # update layer's extent when new features have been added
             # because change of extent in provider is not propagated to the layer
             vl2.updateExtents()
@@ -326,7 +348,7 @@ class ZoomSigmena:
             crsDest = QgsProject.instance().crs()
 
             if crsSrc!=crsDest:
-
+           
                 xform = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
                 canvas.setExtent(xform.transform(vl2.extent()))
             

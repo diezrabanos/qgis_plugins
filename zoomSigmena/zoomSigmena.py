@@ -51,6 +51,8 @@ import sys
 import math
 import time
 
+import pyproj
+
 
 
 class ZoomSigmena:
@@ -232,12 +234,31 @@ class ZoomSigmena:
             
             x=x.replace(',','.')
             y=y.replace(',','.')
-            print (x)
-            print (y)
+
             src=misdatos[int(src_seleccionado)][1]
             print (src)
 
-            
+            if src=="4326":
+                print("entro en geograficas")
+                latext=y
+                longtext=x
+                lag=float(latext.split()[0])
+                lam=float(latext.split()[1])
+                las=float(latext.split()[2])
+                log=float(longtext.split()[0])
+                lom=float(longtext.split()[1])
+                los=float(longtext.split()[2])
+                lon=-1*(log+(lom/60)+(los/3600))
+                lat=lag+(lam/60)+(las/3600)
+                x=float(lon)
+                y=float(lat)
+
+                huso=30
+                destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                UTM_X,UTM_Y = pyproj.transform(origenProj, destinoProj, lon,lat)
+
+
 
             #creo una capa temporal con las coordenadas
             
@@ -256,6 +277,10 @@ class ZoomSigmena:
             #$add a feature
             fet = QgsFeature()
             fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
+            #para que lo pase a utms en pantalla
+            if src=="4326":
+                x=int(UTM_X)
+                y=int(UTM_Y)
             fet.setAttributes([ float(x),float( y)])
             pr2.addFeatures([fet])
             
@@ -275,6 +300,7 @@ class ZoomSigmena:
             text_format.setSize(12)
             text_format.setColor(QColor("Orange"))
 
+                
 
             layer_settings.setFormat(text_format)
             layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y")'''
@@ -288,15 +314,6 @@ class ZoomSigmena:
             vl2.setLabeling(layer_settings)
             vl2.triggerRepaint()
 
-
-
-            
-
-
-            
-
-
-                
             # update layer's extent when new features have been added
             # because change of extent in provider is not propagated to the layer
             vl2.updateExtents()
@@ -309,7 +326,7 @@ class ZoomSigmena:
             crsDest = QgsProject.instance().crs()
 
             if crsSrc!=crsDest:
-                print("paso por aqui")
+
                 xform = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
                 canvas.setExtent(xform.transform(vl2.extent()))
             

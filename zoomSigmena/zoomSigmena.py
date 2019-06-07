@@ -83,16 +83,16 @@ class ZoomSigmena:
 
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
-
+        
         self.dlg = ZoomSigmenaDialog()
 
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Sigmena')
         
-       
-        self.first_start = None
         
+        self.first_start = None
+        self.dlg.help_button.clicked.connect(self.help_pressed) 
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -211,7 +211,7 @@ class ZoomSigmena:
         if self.first_start == True:
             self.first_start = False
 
-        self.dlg.help_button.clicked.connect(self.help_pressed)    
+           
 
         # show the dialog
         self.dlg.show()
@@ -262,10 +262,8 @@ class ZoomSigmena:
 
                 x=float(lon)
                 y=float(lat)
-                #long=-3.801920627959275
-                #lat=43.4891944171743
-                #UTM_X=435157.5900
-                #UTM_Y =4815453.6400
+                print (x)
+                print (y)
                 huso=30
                 destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
                 origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')

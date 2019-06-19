@@ -28,16 +28,17 @@ La seleccion de provincia, de momento no hace nada.
 #from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 #from PyQt5.QtGui import QIcon
 #from PyQt5.QtWidgets import QAction
-
+from PyQt5 import QtWidgets 
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QVariant#,QFileInfo
 from qgis.PyQt.QtGui import QIcon, QColor,QFont
-from qgis.PyQt.QtWidgets import QAction, QFileDialog,QMessageBox
+from qgis.PyQt.QtWidgets import QAction, QFileDialog,QMessageBox,QInputDialog
 from PyQt5.QtWidgets import QMessageBox
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .sigpac_dialog import SigpacDialog
+from .config_dialog import ConfigDialog
 import os.path
 
 #import para procesar
@@ -46,7 +47,7 @@ from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpre
 from qgis.utils import iface
 
 #from qgis.gui import QgsMessageBar
-
+import os
 import processing
 import os
 import glob
@@ -58,7 +59,9 @@ import math
 import time
 import random
 
-
+class Config:
+    def __init__(self, iface):
+        self.dlg2 = ConfigDialog()
 
 class Sigpac:
     """QGIS Plugin Implementation."""
@@ -83,6 +86,7 @@ class Sigpac:
                 QCoreApplication.installTranslator(self.translator)
 
         self.dlg = SigpacDialog()
+        self.dlg2 = ConfigDialog()
 
         # Declare instance attributes
         self.actions = []
@@ -97,6 +101,10 @@ class Sigpac:
         self.dlg.pushButton_limpiar.clicked.connect(self.limpiar)
         self.dlg.cbMUN.activated.connect(self.limpiar2)
         self.dlg.MUN.textChanged.connect(self.limpiar3)
+        #abre la nueva ventana de configuracion
+        self.dlg.pushButton_configurar.clicked.connect(self.configurar)
+        self.dlg2.pushButton_select_path1.clicked.connect(self.select_file1)
+        self.dlg2.pushButton_select_path2.clicked.connect(self.select_file2)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -160,6 +168,26 @@ class Sigpac:
 
         # will be set False in run()
         self.first_start = True
+
+        #cojo los parametros necesarios del archivo de configuracion
+        global rutaarchivomunicipiossigpac
+        global rutacarpetarecintos
+        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
+        if os.path.isfile(rutaarchivoconfiguracion) ==True:
+            fileconfig = open(rutaarchivoconfiguracion, "r")
+            fileconfigleido=fileconfig.readlines()
+            try:
+                rutaarchivomunicipiossigpac= (fileconfigleido[0].replace('\n',''))
+                rutacarpetarecintos= (fileconfigleido[1].replace('\n',''))
+                fileconfig.close()
+            except:
+                rutaarchivomunicipiossigpac=""
+                rutacarpetarecintos=""
+        if os.path.isfile(rutaarchivoconfiguracion) ==False:
+            fileconfig = open(rutaarchivoconfiguracion, "w")
+            fileconfig.close()
+            rutaarchivomunicipiossigpac=""
+            rutacarpetarecintos=""
         
     def select_file(self): 
         """seleciono la carpeta con los datos de entrada"""
@@ -172,7 +200,45 @@ class Sigpac:
   
         archivo=carpeta[0]
  
-      
+    def select_file1(self):
+
+        """seleciono la capa con los datos de entrada terminos municipales del sigpac"""
+        global rutaarchivomunicipiossigpac
+        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
+        rutaarchivomunicipiossigpac = QFileDialog.getOpenFileName(self.dlg2 , "Capa provincial con los terminos municipales SIGPAC",None ,'SHP(*.shp)')
+        self.dlg2.ruta1.setText(rutaarchivomunicipiossigpac[0])
+        archivo=rutaarchivomunicipiossigpac[0]
+        #inserto en linea 0 el contenido
+        if len(rutaarchivomunicipiossigpac[0])>0:
+            contenido=open(rutaarchivoconfiguracion).read().splitlines()
+            contenido.insert(0,rutaarchivomunicipiossigpac[0])
+            fileconfig = open(rutaarchivoconfiguracion, "w")
+
+        
+            fileconfig.writelines("\n".join(contenido))
+            fileconfig.close()
+            iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
+
+    
+        
+    def select_file2(self):
+
+        """seleciono la carpeta con los datos de entrada de recintos"""
+        global rutacarpetarecintos
+        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
+        rutacarpetarecintos = QFileDialog.getExistingDirectory(self.dlg2 , "Carpeta con los shps con los recintos sigpac")
+        self.dlg2.ruta2.setText(rutacarpetarecintos)
+        #inserto en linea 1 el contenido
+        if len(rutacarpetarecintos)>0:
+            contenido=open(rutaarchivoconfiguracion).read().splitlines()
+            contenido.insert(1,rutacarpetarecintos)
+            fileconfig = open(rutaarchivoconfiguracion, "w")
+
+            fileconfig.writelines("\n".join(contenido))
+            fileconfig.close()
+            iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
+
+
     
 
     def limpiar(self):
@@ -191,6 +257,16 @@ class Sigpac:
     def limpiar3(self):
         self.dlg.cbMUN.setCurrentIndex(0)
        
+    def configurar(self):
+        contras = QInputDialog.getText(None, 'CONTRASEÑA', 'Introduce la contraseña')
+        print (contras)
+        if contras[0]=='SIGMENITA':
+            self.dlg2.show()
+        else:
+            iface.messageBar().pushMessage("PARA CONFIGURAR INRODUCIR CONTRASEÑA", qgisCore.Qgis.Warning,5)
+        
+
+
         
 
 
@@ -215,7 +291,8 @@ class Sigpac:
 
 
     def run(self):
-        
+        global rutaarchivomunicipiossigpac
+        global rutacarpetarecintos
 
 
         canvas = self.iface.mapCanvas()
@@ -228,12 +305,12 @@ class Sigpac:
 
         #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
         
-        layerlista = QgsVectorLayer(r'O:\sigmena\carto\SIGPAC\42_sigpac_municipios_etrs89.shp', 'Municipios Sigpac', 'ogr')
+        layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
         time.sleep(1)
         #layer = iface.activeLayer()
         ## ojo comprobar que layer existe
 
-        #genero una lista con las torres y ls coordenadas
+        #genero una lista con lo leido de esa capa
         misdatos=[]
         feats = [ feat for feat in layerlista.getFeatures() ]
         for feature in feats:
@@ -301,22 +378,9 @@ class Sigpac:
         # See if OK was pressed
         if result:
             archivo=self.dlg.ruta_archivo.text()
-            
-            
-            #archivo3=os.environ['TMP']+r"/"+str(random.random())+".shp"
-            
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-           
-            
-            #la carpeta la he cogido al pulsar el boton de la carpeta
+            #cojo lo que hay en cada recuadro o desplegable aqui variables que luego deberan estar en la cajita   OJO
+            indmun=self.dlg.cbMUN.currentIndex()
 
-             #cojo lo que hay en cada recuadro o desplegable aqui variables que luego deberan estar en la cajita   OJO
-            torret1=self.dlg.cbMUN.currentIndex()
-           
-            """torret2=self.dlg.cbMUN.currentIndex()
-            torret3=self.dlg.cbPOL.currentIndex()
-            torret4=self.dlg.cbPAR.currentIndex()"""
             pro= self.dlg.PRO.text()##displayText()
             mun=self.dlg.MUN.text()##displayText()
             pol=self.dlg.POL.text()##displayText()
@@ -331,13 +395,13 @@ class Sigpac:
 
             #si no hay nada en la casilla de municipio, coge la informacion del desplegable
             if mun == "":
-                mun=str(misdatos[int(torret1)-1][2])
+                mun=str(misdatos[int(indmun)-1][2])
            
 
 
            
-            rutaarchivomunicipiossigpac=r"O:\sigmena\carto\SIGPAC\42_sigpac_municipios_etrs89.shp"
-            rutacarpetarecintos=r"O:\sigmena\carto\SIGPAC\Sigpac_2019\Recintos"
+            #rutaarchivomunicipiossigpac=r"O:\sigmena\carto\SIGPAC\42_sigpac_municipios_etrs89.shp"
+            #rutacarpetarecintos=r"O:\sigmena\carto\SIGPAC\Sigpac_2019\Recintos"
             QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
             
 

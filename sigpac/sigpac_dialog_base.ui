@@ -518,6 +518,19 @@
     <string>Limpiar todos los datos</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButton_configurar">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>60</y>
+     <width>131</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Configurar</string>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>PRO</tabstop>

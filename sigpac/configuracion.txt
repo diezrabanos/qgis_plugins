@@ -1,0 +1,2 @@
+O:/sigmena/carto/SIGPAC/42_sigpac_municipios_etrs89.shp
+O:/sigmena/carto/SIGPAC/Sigpac_2019/Recintos

@@ -99,8 +99,9 @@
    </property>
    <property name="text">
     <string>Ruta de la capa shp que contiene
-los municipios del sigpac y que
-sirve de indice.</string>
+los puestos de vigilancia.
+ Debe tener al menos un campo
+&quot;Nombre&quot;, otro &quot;X&quot; y otro &quot;Y&quot;</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_select_path1">

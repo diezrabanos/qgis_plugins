@@ -13,12 +13,12 @@ name=Alidadas
 qgisMinimumVersion=3.0
 
 description=Permite hacer el cruce de visuales desde varias torres en QGIS 
-version=1.0.1
+version=1.0.2
 author=F. Javier Diez Rabanos
 email=dierabfr@jcyl.es
 
 
-about=Permite hacer el cruce de visuales desde varias torres en QGIS. La capa que contiene las torres debe especificarse editando el script. Puede introducirse varias visuales, crea un punto por cada uno de los cruces y seleciona la que tiene mas probabilidad de ser el mejor conforme a una formula matematica
+about=Permite hacer el cruce de visuales desde varias torres en QGIS. Puede introducirse varias visuales, crea un punto por cada uno de los cruces y seleciona la que tiene mas probabilidad de ser el mejor conforme a una formula matematica
 tracker=http://bugs
 
 repository=https://github.com/diezrabanos/qgis_plugins

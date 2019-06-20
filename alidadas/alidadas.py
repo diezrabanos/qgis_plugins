@@ -27,13 +27,14 @@
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication#,QFileInfo
 from qgis.PyQt.QtGui import QIcon, QColor,QFont
-from qgis.PyQt.QtWidgets import QAction, QFileDialog
+from qgis.PyQt.QtWidgets import QAction, QFileDialog, QInputDialog
 from PyQt5.QtWidgets import QMessageBox
 
 # Initialize Qt resources from file resources.py
 from .resources import *
 # Import the code for the dialog
 from .alidadas_dialog import AlidadasDialog
+from .config_dialog import ConfigDialog
 import os.path
 
 #import para procesar
@@ -55,7 +56,11 @@ import sys
 import math
 import time
 
+import webbrowser
 
+class Config:
+    def __init__(self, iface):
+        self.dlg2 = ConfigDialog()
 
 class Alidadas:
     """QGIS Plugin Implementation."""
@@ -85,6 +90,7 @@ class Alidadas:
                 QCoreApplication.installTranslator(self.translator)
 
         self.dlg = AlidadasDialog()
+        self.dlg2 = ConfigDialog()
 
         # Declare instance attributes
         self.actions = []
@@ -95,7 +101,10 @@ class Alidadas:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
-        #self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
+        #abre la nueva ventana de configuracion
+        self.dlg.pushButton_configurar.clicked.connect(self.configurar)
+        self.dlg2.pushButton_select_path1.clicked.connect(self.select_file1)
+        self.dlg.help_button.clicked.connect(self.help_pressed) 
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -166,8 +175,8 @@ class Alidadas:
 
         
         #cambio el icon path para mi equipo.
-        usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
-        icon_path=os.path.join(r"C:\Users",usuario,r"AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\alidadas\icon.png")
+        usuario=QgsApplication.qgisSettingsDirPath()
+        icon_path=os.path.join(usuario,r"python\plugins\alidadas\icon.png")
         
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
@@ -207,10 +216,53 @@ class Alidadas:
         # will be set False in run()
         self.first_start = True
         
+        #cojo los parametros necesarios del archivo de configuracion
+        global rutapuestosvigiancia
+        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\alidadas\configuracion.txt")
+        if os.path.isfile(rutaarchivoconfiguracion) ==True:
+            fileconfig = open(rutaarchivoconfiguracion, "r")
+            fileconfigleido=fileconfig.readlines()
+            try:
+                rutapuestosvigiancia= (fileconfigleido[0].replace('\n',''))
+                fileconfig.close()
+            except:
+                rutapuestosvigiancia=""
+                
+        if os.path.isfile(rutaarchivoconfiguracion) ==False:
+            fileconfig = open(rutaarchivoconfiguracion, "w")
+            fileconfig.close()
+            rutapuestosvigiancia=""
+            
+    def select_file1(self):
 
-    
-    
+        """seleciono la capa con los datos de entrada terminos municipales del sigpac"""
+        global rutapuestosvigiancia
+        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\alidadas\configuracion.txt")
+        rutapuestosvigiancia = QFileDialog.getOpenFileName(self.dlg2 , "Capa con los puestos de vigilancia",None ,'SHP(*.shp)')
+        self.dlg2.ruta1.setText(rutapuestosvigiancia[0])
+        archivo=rutapuestosvigiancia[0]
+        #inserto en linea 0 el contenido
+        if len(rutapuestosvigiancia[0])>0:
+            contenido=open(rutaarchivoconfiguracion).read().splitlines()
+            contenido.insert(0,rutapuestosvigiancia[0])
+            fileconfig = open(rutaarchivoconfiguracion, "w")
 
+        
+            fileconfig.writelines("\n".join(contenido))
+            fileconfig.close()
+            iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
+    
+    def configurar(self):
+        contras = QInputDialog.getText(None, 'CONTRASEÑA', 'Introduce la contraseña')
+        print (contras)
+        if contras[0]=='SIGMENITA':
+            self.dlg2.show()
+        else:
+            iface.messageBar().pushMessage("PARA CONFIGURAR INRODUCIR CONTRASEÑA", qgisCore.Qgis.Warning,5)    
+
+    def help_pressed(self):
+        help_file = 'file:' + os.path.dirname(__file__) + '/Ayuda_Alidadas.pdf'
+        webbrowser.open_new(help_file)  
 
 
     def unload(self):
@@ -220,15 +272,7 @@ class Alidadas:
                 self.tr(u'&Sigmena'),
                 action)
             self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        #del self.toolbar        #PUEDO PROBAR A BORRAR COSAS
-        #del self.menu
-        #del self.dlg
 
-
-
-
-    
 
     
 
@@ -358,7 +402,8 @@ class Alidadas:
         
         erroralidada=1
         #selecciono la capa de las torretas
-        layer = QgsVectorLayer('O:/sigmena/carto/INCENDIO/INFRAEST/42_Puestos_vigilancia_etrs89.shp', '42_Puestos_vigilancia_etrs89', 'ogr')
+        global rutapuestosvigiancia
+        layer = QgsVectorLayer(rutapuestosvigiancia, '42_Puestos_vigilancia_etrs89', 'ogr')
         time.sleep(1)
         #layer = iface.activeLayer()
         ## ojo comprobar que layer existe

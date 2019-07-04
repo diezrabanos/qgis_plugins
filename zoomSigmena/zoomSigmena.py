@@ -183,7 +183,7 @@ class ZoomSigmena:
             self.iface.removeToolBarIcon(action)
 
 
-
+    
 
 
     
@@ -227,7 +227,17 @@ class ZoomSigmena:
             # substitute with your code.
 
             
-      
+            def deg_to_dms(deg, type='lat'):
+                decimals, number = math.modf(deg)
+                d = int(number)
+                m = int(decimals * 60)
+                s = (deg - d - m / 60) * 3600.00
+                compass = {
+            'lat': ('N','S'),
+            'lon': ('E','W')
+        }
+                compass_str = compass[type][0 if d >= 0 else 1]
+                return '{}º{}\'{:.2f}"{}'.format(abs(d), abs(m), abs(s), compass_str)
 
              #saco de  aqui variables que estan en las cajitas
             src_seleccionado=self.dlg.comboBox_src.currentIndex()
@@ -243,13 +253,9 @@ class ZoomSigmena:
         
 
             if src=="4326":
-                print("entro en geograficas")
                 latext=y
                 longtext=x
-                print (latext)
-                print (longtext)
-
-
+                
                 lag=float(latext.split()[0])
                 lam=float(latext.split()[1])
                 las=float(latext.split()[2])
@@ -262,8 +268,7 @@ class ZoomSigmena:
 
                 x=float(lon)
                 y=float(lat)
-                print (x)
-                print (y)
+
                 huso=30
                 destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
                 origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
@@ -281,18 +286,58 @@ class ZoomSigmena:
             # add fields
             pr2.addAttributes([
                             QgsField("x",  QVariant.Double),
-                            QgsField("y", QVariant.Double)])
+                            QgsField("y", QVariant.Double),
+                            QgsField("xx",  QVariant.String),
+                            QgsField("yy", QVariant.String)])
             vl2.updateFields() 
             # tell the vector layer to fetch changes from the provider
             
             #$add a feature
             fet = QgsFeature()
             fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
+            if src=="25830":
+                huso=30
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
+
+                xx=(deg_to_dms(xxx,'lon'))
+                yy=(deg_to_dms(yyy))
+
+            if src=="25829":
+                huso=29
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
+
+                xx=(deg_to_dms(xxx,'lon'))
+                yy=(deg_to_dms(yyy))    
+
+            if src=="23030":
+                huso=30
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
+                destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
+
+                xx=(deg_to_dms(xxx,'lon'))
+                yy=(deg_to_dms(yyy))
+
+            if src=="23029":
+                huso=29
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
+                destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
+
+                xx=(deg_to_dms(xxx,'lon'))
+                yy=(deg_to_dms(yyy))    
+            
             #para que lo pase a utms en pantalla
             if src=="4326":
                 x=int(UTM_X)
                 y=int(UTM_Y)
-            fet.setAttributes([ float(x),float( y)])
+                xx=latext
+                yy=longtext
+            fet.setAttributes([ float(x),float(y),str(xx),str(yy)])
             pr2.addFeatures([fet])
             
             
@@ -314,7 +359,10 @@ class ZoomSigmena:
                 
 
             layer_settings.setFormat(text_format)
-            layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y")'''
+            layer_settings.placement = 1
+            layer_settings.xOffset = 0.0
+            layer_settings.yOffset = 10.0
+            layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y",'\n','Lon: ',"xx",' Lat: ',"yy" )'''
             layer_settings.isExpression = True
 
 

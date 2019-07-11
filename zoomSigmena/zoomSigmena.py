@@ -335,8 +335,8 @@ class ZoomSigmena:
             if src=="4326":
                 x=int(UTM_X)
                 y=int(UTM_Y)
-                xx=latext
-                yy=longtext
+                xx=longtext
+                yy=latext
             fet.setAttributes([ float(x),float(y),str(xx),str(yy)])
             pr2.addFeatures([fet])
             

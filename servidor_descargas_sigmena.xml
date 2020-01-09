@@ -87,7 +87,7 @@
     </pyqgis_plugin>
 <pyqgis_plugin version="1.0.0" name="PuntosSigmena" plugin_id="9996">
       <description>Permite crear un punto en unas coordenadas introduciodas dentro de una capa preexistente y abre el formulario</description>
-      <aboutPermite crear un punto en unas coordenadas introduciodas dentro de una capa preexistente y abre el formulario</about>
+      <about>Permite crear un punto en unas coordenadas introduciodas dentro de una capa preexistente y abre el formulario</about>
       <version>1.0.0</version>
       <trusted>True</trusted>
       <qgis_minimum_version>3.4.0</qgis_minimum_version>

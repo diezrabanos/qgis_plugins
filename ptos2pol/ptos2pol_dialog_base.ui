@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Introduce las coordenadas del nuevo punto</string>
+   <string>Convierte puntos en poligonos (SIGMENA)</string>
   </property>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">

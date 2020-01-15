@@ -139,7 +139,6 @@ class ptos2pol:
         if add_to_toolbar:
             # Adds plugin icon to Plugins toolbar
             self.iface.addToolBarIcon(action)
-            #self.toolbar.addAction(action)
 
         if add_to_menu:
             self.iface.addPluginToMenu(
@@ -169,11 +168,6 @@ class ptos2pol:
         self.dlg.rutaptos.setText(capaptos[0])
         print (capaptos[0])
 
-    
-    
-
-
-
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -182,88 +176,50 @@ class ptos2pol:
                 action)
             self.iface.removeToolBarIcon(action)
 
-
-
-
-    
-
-    
-
-
     def run(self):
         print ("paso por el run")
        
         #coloco el puntero arriba del todo
-        #QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
+        QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
    
-        #genero una lista con los sistemas de referencia
-        #misdatos=[["Etrs89 Zona30 (25830)","25830"],["Etrs89 Zona29 (25829)","25829"],["ED50 Zona30 (23030)","23030"],["ED50_Zona29 (23029)","23029"],["WGS84 geograficas (4326)","4326"] ]
-        #self.dlg.comboBox_src.clear() 
-        #for element in misdatos:
-            #self.dlg.comboBox_src.addItem( element[0])
-     
+             
         
         """Run method that performs all the real work"""
 
         
         #genero una lista con las columnas de la capa de puntos
         vl2=iface.activeLayer()
-        misdatos=[]
-        misdatos = [f.name() for f in vl2.fields()]
-        print (misdatos)
-        
-        
-        #trato de rellenar el desplegable con las columnas
-        #anado un elemneto enblanco en el desplegable
-        self.dlg.cb1.addItem( "")
-        for element in misdatos:
-            self.dlg.cb1.addItem( element)
-
-
-        
-
-        # Create the dialog with elements (after translation) and keep reference
-        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-        if self.first_start == True:
-            self.first_start = False
-
+        if vl2 is None:
+            iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
+        if vl2.wkbType()< 1 or vl2.wkbType() > 1:
+            iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
+        else:
+            misdatos=[]
+            misdatos = [f.name() for f in vl2.fields()]
             
-
-        # show the dialog
-        self.dlg.show()
-        
-        
-
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            column = self.dlg.cb1.currentIndex()
-            columna=misdatos[int(column)-1]
-            print(columna)
-
-
-            
-      
-
-             #saco de  aqui variables que estan en las cajitas
-            #src_seleccionado=self.dlg.comboBox_src.currentIndex()
-             
-            # Get the coordinates and scale factor from the dialog
-            #ruta=self.dlg.rutaptos.text()##displayText()
-            
-            
-            
-            
-
-            #parece que lo mejor sera la seleccion de una capa y dentro de ella de los elementos en ella seleccionados solo. Para ello habria que crear una capa temporal con solo los seleccioandos
-            
-
-            vl2=iface.activeLayer()
-            if vl2 is None:
-                iface.messageBar().pushMessage("ATENCION", "Selecciona la capa de puntos", duration=10)
-            else:
+            #trato de rellenar el desplegable con las columnas
+            #anado un elemneto en blanco en el desplegable
+            self.dlg.cb1.clear()
+            self.dlg.cb1.addItem( "")
+            for element in misdatos:
+                self.dlg.cb1.addItem( element)
                 
+            # Create the dialog with elements (after translation) and keep reference
+            # Only create GUI ONCE in callback, so that it will only load when the plugin is started
+            if self.first_start == True:
+                self.first_start = False
+
+            # show the dialog
+            self.dlg.show()
+            
+            # Run the dialog event loop
+            result = self.dlg.exec_()
+            # See if OK was pressed
+            if result:
+                column = self.dlg.cb1.currentIndex()
+                columna=misdatos[int(column)-1]                
+
+                #parece que lo mejor sera la seleccion de una capa y dentro de ella de los elementos en ella seleccionados solo. Para ello habria que crear una capa temporal con solo los seleccioandos      
                 if vl2.wkbType()== 1:
                     selection = vl2.selectedFeatures()
                     elementosseleccionados=len(selection)
@@ -274,45 +230,31 @@ class ptos2pol:
                         iface.messageBar().pushMessage("ATENCION", "Tienes algun elemento seleccionado pero no los suficientes para crear un poligono", duration=10)
                         
                     #onlySelectedFeatures
-                    results0=processing.run("native:saveselectedfeatures", {'INPUT':vl2,'OUTPUT':'memory:'})
+                    results0=processing.run("native:saveselectedfeatures", {'INPUT':vl2,'OUTPUT':'memory:puntos_seleccionados_ptos2pol'})
                     result_layer0 = results0['OUTPUT']
-    
                     entrada=result_layer0
                     QgsProject.instance().addMapLayer(result_layer0)
-                        
-
-                       
-
-                    #hay que haceer que cree una columna con el orden el solo por si por defecto no se pone ninguna
-                    campo=columna
-                    
-                    
-                    params={'INPUT':entrada,'GROUP_FIELD':None,'ORDER_FIELD':campo,'DATE_FORMAT':'', 'OUTPUT':'memory:'}
+                
+                    #hay que hacer que cree una columna con el orden el solo por si por defecto no se pone ninguna
+                    params={'INPUT':entrada,'GROUP_FIELD':None,'ORDER_FIELD':columna,'DATE_FORMAT':'', 'OUTPUT':'memory:lineas_ptos2pol'}
                     results=processing.run("qgis:pointstopath", params)
                     result_layer = results['OUTPUT']
                     QgsProject.instance().addMapLayer(result_layer)
-                    params={'INPUT':result_layer,'OUTPUT':'memory:'}
+                    params={'INPUT':result_layer,'OUTPUT':'memory:poligono_ptos2pol '}
                     results2=processing.run("qgis:linestopolygons", params )
                     result_layer2 = results2['OUTPUT']
                     QgsProject.instance().addMapLayer(result_layer2)
 
 
-
-
-
-
-
-
 """
 
                     
-                    #vl2.startEditing()
+                    vl2.startEditing()
             
                     # add fields
-                    #pr2.addAttributes([
-                                    #QgsField("x",  QVariant.Double),
-                                    #QgsField("y", QVariant.Double)])
-                    #vl2.updateFields() 
+                    pr2.addAttributes([
+                                    QgsField("hectareas",  QVariant.Double)])
+                    vl2.updateFields() 
                     # tell the vector layer to fetch changes from the provider
                     
                     #add a feature
@@ -320,9 +262,9 @@ class ptos2pol:
                   
                     fet = QgsFeature()
                   
-                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
+                    #fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
                    
-                    #fet.setAttributes([ float(x),float( y)])
+                    #fet.setAttributes([ 100])
                     fet.setFields(vl2.fields())
            
                     
@@ -362,5 +304,5 @@ class ptos2pol:
                 
                 
 
-            
+        
 

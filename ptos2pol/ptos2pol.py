@@ -36,7 +36,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsApplication,QgsRectangle
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsApplication,QgsRectangle,QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsLineSymbol,QgsFillSymbol,QgsSingleSymbolRenderer,QgsPalLayerSettings,QgsTextFormat ,QgsVectorLayerSimpleLabeling, QgsExpressionContextUtils
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 
@@ -191,9 +191,10 @@ class ptos2pol:
         vl2=iface.activeLayer()
         if vl2 is None:
             iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
-        if vl2.wkbType()< 1 or vl2.wkbType() > 1:
-            iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
-        else:
+        #if vl2.wkbType()< 1 or vl2.wkbType() > 1:
+            #iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
+        #else:
+        if vl2.wkbType()== 1 or vl2.wkbType()==1001:
             misdatos=[]
             misdatos = [f.name() for f in vl2.fields()]
             
@@ -220,89 +221,71 @@ class ptos2pol:
                 columna=misdatos[int(column)-1]                
 
                 #parece que lo mejor sera la seleccion de una capa y dentro de ella de los elementos en ella seleccionados solo. Para ello habria que crear una capa temporal con solo los seleccioandos      
-                if vl2.wkbType()== 1:
-                    selection = vl2.selectedFeatures()
-                    elementosseleccionados=len(selection)
+                #if vl2.wkbType()== 1 or vl2.wkbType()==1001:
+                selection = vl2.selectedFeatures()
+                elementosseleccionados=len(selection)
 
-                    if elementosseleccionados ==0:
-                        vl2.selectAll()
-                    if elementosseleccionados ==1 or elementosseleccionados ==2:
-                        iface.messageBar().pushMessage("ATENCION", "Tienes algun elemento seleccionado pero no los suficientes para crear un poligono", duration=10)
-                        
-                    #onlySelectedFeatures
-                    results0=processing.run("native:saveselectedfeatures", {'INPUT':vl2,'OUTPUT':'memory:puntos_seleccionados_ptos2pol'})
-                    result_layer0 = results0['OUTPUT']
-                    entrada=result_layer0
-                    QgsProject.instance().addMapLayer(result_layer0)
-                
-                    #hay que hacer que cree una columna con el orden el solo por si por defecto no se pone ninguna
-                    params={'INPUT':entrada,'GROUP_FIELD':None,'ORDER_FIELD':columna,'DATE_FORMAT':'', 'OUTPUT':'memory:lineas_ptos2pol'}
-                    results=processing.run("qgis:pointstopath", params)
-                    result_layer = results['OUTPUT']
-                    QgsProject.instance().addMapLayer(result_layer)
-                    params={'INPUT':result_layer,'OUTPUT':'memory:poligono_ptos2pol '}
-                    results2=processing.run("qgis:linestopolygons", params )
-                    result_layer2 = results2['OUTPUT']
-                    QgsProject.instance().addMapLayer(result_layer2)
-
-
-"""
-
+                if elementosseleccionados ==0:
+                    vl2.selectAll()
+                if elementosseleccionados ==1 or elementosseleccionados ==2:
+                    iface.messageBar().pushMessage("ATENCION", "Tienes algun elemento seleccionado pero no los suficientes para crear un poligono", duration=10)
                     
-                    vl2.startEditing()
+                #onlySelectedFeatures
+                results0=processing.run("native:saveselectedfeatures", {'INPUT':vl2,'OUTPUT':'memory:puntos_seleccionados_ptos2pol'})
+                result_layer0 = results0['OUTPUT']
+                entrada=result_layer0
+                QgsProject.instance().addMapLayer(result_layer0)
             
-                    # add fields
-                    pr2.addAttributes([
-                                    QgsField("hectareas",  QVariant.Double)])
-                    vl2.updateFields() 
-                    # tell the vector layer to fetch changes from the provider
-                    
-                    #add a feature
-              
-                  
-                    fet = QgsFeature()
-                  
-                    #fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
-                   
-                    #fet.setAttributes([ 100])
-                    fet.setFields(vl2.fields())
-           
-                    
-                    vl2.addFeature(fet)
-                    #para el futuro y configurar un formulario
-                    #my_vector_layer.setEditForm("C:/my_form.ui")
-                    
-                    if iface.openFeatureForm(vl2, fet, False):
-                        print("ok")
-                        
-              
-
-
-                    vl2.commitChanges()
-                  
-                    vl2.updateExtents()
-                    canvas = self.iface.mapCanvas()
-                    
-                    canvas.setExtent(vl2.extent())
-                    scale=100
-                    rect = QgsRectangle(float(x)-scale,float(y)-scale,float(x)+scale,float(y)+scale)
-                    canvas.setExtent(rect)
-                 
-            
-
-
-                    
-                    self.iface.mapCanvas().zoomScale(1000)
-
-                else:
-                    iface.messageBar().pushMessage("ATENCION", "La capa seleccionada debe ser una capa de puntos", duration=10)
-
-
-
-                    
-                """
+                #hay que hacer que cree una columna con el orden el solo por si por defecto no se pone ninguna
+                params={'INPUT':entrada,'GROUP_FIELD':None,'ORDER_FIELD':columna,'DATE_FORMAT':'', 'OUTPUT':'memory:lineas_ptos2pol'}
+                results=processing.run("qgis:pointstopath", params)
+                result_layer = results['OUTPUT']
+                QgsProject.instance().addMapLayer(result_layer)
+                params={'INPUT':result_layer,'OUTPUT':'memory:poligono_ptos2pol '}
+                results2=processing.run("qgis:linestopolygons", params )
+                result_layer2 = results2['OUTPUT']
+               
+                #por el mismo precio calculo la superficie
+                #ADDING NEW FIELD
+                layer_provider=result_layer2.dataProvider()
+                layer_provider.addAttributes([QgsField("hectarea",QVariant.Double, "double", 10, 4)])
+                result_layer2.updateFields()
+                #UPDATING/ADD ATTRIBUTE VALUE
+                result_layer2.startEditing()
+                features = result_layer2.getFeatures()
+                for f in features:
+                    id=f.id()
+                    area=f.geometry().area()/10000
+                    fieldindex = result_layer2.dataProvider().fieldNameIndex("hectarea")
+                    attr_value={fieldindex:area}#fieldindex, antes era 2
+                    layer_provider.changeAttributeValues({id:attr_value})
+                result_layer2.commitChanges()
                 
-                
+                #tendra que etiquetar la superficie con dos decimales y cambiar la simbologia, ya que estamos.
+                sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'red'})
+                renderer=QgsSingleSymbolRenderer(sym1)
+                #etiqueto
+                layer_settings  = QgsPalLayerSettings()
+                text_format = QgsTextFormat()
+                text_format.setFont(QFont("Arial", 12))
+                text_format.setSize(12)
+                text_format.setColor(QColor("Red"))
+                layer_settings.setFormat(text_format)
+                layer_settings.fieldName = '''concat(round("hectarea",2),' ha.')'''            
+                layer_settings.isExpression = True
+                layer_settings.enabled = True
+                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                result_layer2.setLabelsEnabled(True)
+                result_layer2.setLabeling(layer_settings)
+                result_layer2.triggerRepaint()
+                result_layer2.setRenderer(renderer)
+
+                QgsProject.instance().addMapLayer(result_layer2)
+        else:
+            print(vl2.wkbType())
+            iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
+
+
 
         
 

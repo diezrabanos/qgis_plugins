@@ -14,7 +14,7 @@ name=Ptos2Pol
 qgisMinimumVersion=3.0
 
 description=Permite crear una capa de poligonos partiendo de los elementos de una capa de puntos. Si se seleccionan ciertos elemento solo se tendran estos en cuenta.
-version=1.0.1
+version=1.0.2
 author=F. Javier Diez Rabanos
 
 email=dierabfr@jcyl.es

@@ -129,8 +129,8 @@ class GpsDescargaCarga:
 
         
         #cambio el icon path para mi equipo.
-        usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
-        icon_path=os.path.join(r"C:\Users",usuario,r"AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\gpsDescargaCarga\icon.png")
+        usuario=QgsApplication.qgisSettingsDirPath()
+        icon_path=os.path.join(usuario,r"python\plugins\gpsDescargaCarga\icon.png")
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
         action.triggered.connect(callback)
@@ -238,121 +238,84 @@ class GpsDescargaCarga:
             #src_seleccionado=self.dlg.comboBox_src.currentIndex()
              
             # Get the coordinates and scale factor from the dialog
-            nombre=self.dlg.nombrearchivo.text()##displayText()
+            nombre=self.dlg.nombrearchivo_entrada.text().replace(' ','_')##displayText()
            
             
-            #nombre=nombre.replace(' ','_')
             
-            print (nombre)
             
-            path = r'C:/sigmena/gps/'+nombre+'.gpx'
-            usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
-            comando=os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/descargagps.bat")
-            #comando= "C:/Users/descargagps.bat"
-
-            os.system(comando+" "+ path)
+            
 
 
             
-            
-            names =["waypoint", "track", "route"]
-
-    
+            #todas las posibles opciones
+            #names =["waypoint", "track", "route"]
+            names=[]
+            if self.dlg.checkBox_1.isChecked():
+                names.append("waypoint")
+            if self.dlg.checkBox_2.isChecked():    
+                names.append("track")
+            if self.dlg.checkBox_3.isChecked():
+                names.append("route")
             dest_crs = QgsCoordinateReferenceSystem(25830)
 
-            for name in names:
-                #iface.addVectorLayer(ruta+"?type="+name, name, "gpx")
-                vectorLyr =QgsVectorLayer(path+"?type="+name, name, "gpx")
-                QgsVectorFileWriter.writeAsVectorFormat(vectorLyr,str(path[:-4])+"_"+name,"utf-8",dest_crs,"ESRI Shapefile")
-                iface.addVectorLayer(str(path[:-4])+"_"+name+".shp", str(nombre)+"_"+name, "ogr")
+            #aqui habra que comprobar que names tiene algo y si no mostrar un texto al usuario
+            if len(names)>0:
+                print (nombre)
             
+                path = r'C:/sigmena/gps/'+nombre+'.gpx'
+                usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
+                comando=os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/descargagps.bat")
+                #comando= "C:/Users/descargagps.bat"
 
-            #creo una capa temporal con las coordenadas
-            """
-            # create layer
-            vl2 = QgsVectorLayer("Point?crs=EPSG:"+src, "Zoom", "memory")
-            pr2 = vl2.dataProvider()
-            
-            vl2.startEditing()
-            # add fields
-            pr2.addAttributes([
-                            QgsField("x",  QVariant.Double),
-                            QgsField("y", QVariant.Double)])
-            vl2.updateFields() 
-            # tell the vector layer to fetch changes from the provider
-            
-            #$add a feature
-            fet = QgsFeature()
-            fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
-            fet.setAttributes([ float(x),float( y)])
-            pr2.addFeatures([fet])
-            
-            
-           
-            #cambio la simbologia
-            symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'red','size': '3',})
-            vl2.renderer().setSymbol(symbol)
-
-            # update layer's extent when new features have been added
-            # because change of extent in provider is not propagated to the layer
-
-            layer_settings  = QgsPalLayerSettings()
-            text_format = QgsTextFormat()
-
-            text_format.setFont(QFont("Arial", 12))
-            text_format.setSize(12)
-            text_format.setColor(QColor("Orange"))
-
-            #buffer_settings = QgsTextBufferSettings()
-            #buffer_settings.setEnabled(True)
-            #buffer_settings.setSize(0.10)
-            #buffer_settings.setColor(QColor("Orange"))
-
-            #text_format.setBuffer(buffer_settings)
-            layer_settings.setFormat(text_format)
-            #myexp=QgsExpression('''concat('X: ',"X",' Y: ',"Y")''')
-            layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y")'''
-            layer_settings.isExpression = True
-            #layer_settings.placement = 7
-            #layer_settings.quadOffset = QgsPalLayerSettings.QuadrantBelow
-            #layer_settings.yOffset = 1
-
-            layer_settings.enabled = True
-
-            layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-            vl2.setLabelsEnabled(True)
-            vl2.setLabeling(layer_settings)
-            vl2.triggerRepaint()
-
-
-
-            
-
-
-            
+                os.system(comando+" "+ path)
 
 
                 
-            # update layer's extent when new features have been added
-            # because change of extent in provider is not propagated to the layer
-            vl2.updateExtents()
-            vl2.commitChanges()
-            vl2.updateExtents()
-            canvas = self.iface.mapCanvas()
-            canvas.setExtent(vl2.extent())
-         
-            crsSrc = QgsCoordinateReferenceSystem('EPSG:'+str(src))
-            crsDest = QgsProject.instance().crs()
+                
+                for name in names:
+                    #iface.addVectorLayer(ruta+"?type="+name, name, "gpx")
+                    vectorLyr =QgsVectorLayer(path+"?type="+name, name, "gpx")
+                    QgsVectorFileWriter.writeAsVectorFormat(vectorLyr,str(path[:-4])+"_"+name,"utf-8",dest_crs,"ESRI Shapefile")
+                    iface.addVectorLayer(str(path[:-4])+"_"+name+".shp", str(nombre)+"_"+name, "ogr")
+#empieza la carga
+            if self.dlg.checkBox_4.isChecked():
+                print("subir archivo")
+                #lo mejor sera subir el archivo selecionado y despues mejor aun solo los elementos selecionados. Habra que crear un
+"""
+                #debo meter el nombre de la capa selecionada, no el metido con el texto
+                vl2=iface.activeLayer()
+                if vl2 is None:
+                    iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
+                if vl2.wkbType()== 1:#lo siguiente es multipunto que habra que convertirlo antes en punto or vl2.wkbType()==1001:
+                    nombre= vl2.source()
+                #nombre = QInputDialog.getText(None, "NOMBRE DE LA CAPA","Introduce el nombre del archivo shp sin espacios")
 
-            if crsSrc!=crsDest:
-                print("paso por aqui")
-                xform = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
-                canvas.setExtent(xform.transform(vl2.extent()))
-            
-            self.iface.mapCanvas().zoomScale(10000)
-          
+                #shapefile=r'C:/sigmena/gps/'+nombre [0]+'.shp'
+                    shapefile=nombre
+                #vectorLyr =QgsVectorLayer(shapefile, nombre [0], "ogr")
+
+                #tendria que mirar si tiene src, si no lo tiene ponerle el del proyecto
+                #vectorLyr.setCrs(mycrs,True)
+                processing.runalg("qgis:reprojectlayer",shapefile, "epsg:4326",str(shapefile[:-4])+"_wgs84.shp")
+
+                #iface.addVectorLayer(shapefile, nombre [0], "ogr")
+
+                dest_crs = QgsCoordinateReferenceSystem(4326)
+                QgsVectorFileWriter.writeAsVectorFormat(vectorLyr,str(shapefile[:-4])+"_wgs84","utf-8",dest_crs,"ESRI Shapefile")
+                vectorLyr2 =QgsVectorLayer(str(shapefile[:-4])+"_wgs84.shp", nombre [0]+"_wgs84", "ogr")
+                vectorLyr2.setCrs(dest_crs,True)
+                iface.addVectorLayer(str(shapefile[:-4])+"_wgs84.shp", str(nombre[0])+"_wgs84", "ogr")
+                if os.path.exists(str(shapefile[:-4])+".gpx"):
+                    os.remove(str(shapefile[:-4])+".gpx")
+                comando="ogr2ogr -f GPX "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"# -sql SELECT nombre AS name"#ogr2ogr -f GPX output.gpx input.gpx waypoints routes tracks"
+                os.system(comando)
+
+                ruta =str(shapefile[:-4])+".gpx"
+                comando= "C:/Users/cargagps.bat"
+
+                os.system(comando+" "+ ruta)
+                            
 
             """
-            #QgsProject.instance().addMapLayer(vl2)
             
         

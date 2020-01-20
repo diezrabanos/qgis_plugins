@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>150</x>
-     <y>120</y>
+     <y>180</y>
      <width>161</width>
      <height>21</height>
     </rect>
@@ -42,11 +42,11 @@
     <string>Nombre del archivo de salida:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="nombrearchivo">
+  <widget class="QLineEdit" name="nombrearchivo_entrada">
    <property name="geometry">
     <rect>
      <x>310</x>
-     <y>120</y>
+     <y>180</y>
      <width>171</width>
      <height>20</height>
     </rect>
@@ -68,30 +68,63 @@
     <string>DESCARGA DE GPS</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>50</y>
-     <width>211</width>
-     <height>17</height>
+     <width>131</width>
+     <height>81</height>
     </rect>
    </property>
-   <property name="text">
-    <string>Descargar Waypoints</string>
-   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QCheckBox" name="checkBox_1">
+      <property name="text">
+       <string>Descargar Waypoints</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_2">
+      <property name="text">
+       <string>Descargar Tracks</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="checkBox_3">
+      <property name="text">
+       <string>Descargar Rutas</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
-  <widget class="QCheckBox" name="checkBox_2">
+  <widget class="QLabel" name="texto1_2">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>80</y>
-     <width>121</width>
+     <x>310</x>
+     <y>30</y>
+     <width>171</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>CARGA DE GPS</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_4">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>60</y>
+     <width>129</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
-    <string>Descargar Tracks</string>
+    <string>Cargar Waypoints</string>
    </property>
   </widget>
  </widget>

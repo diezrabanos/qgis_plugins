@@ -14,7 +14,7 @@ qgisMinimumVersion=3.0
 
 description=Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12
 
-version=1.0.1
+version=1.0.2
 author=f. Javier Diez Rabanos
 email=dierabfr@jcyl.es
 

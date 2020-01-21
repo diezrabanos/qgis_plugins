@@ -55,6 +55,8 @@ import sys
 import math
 import time
 
+import subprocess
+
 
 
 class GpsDescargaCarga:
@@ -227,57 +229,53 @@ class GpsDescargaCarga:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            #print ("lo imprime si le doy a aceptar en el dialogo")
-            
-            #la carpeta la he cogido al pulsar el boton de la carpeta
-
-             #saco de  aqui variables que estan en las cajitas
-            #src_seleccionado=self.dlg.comboBox_src.currentIndex()
-             
-            # Get the coordinates and scale factor from the dialog
             nombre=self.dlg.nombrearchivo_entrada.text().replace(' ','_')##displayText()
-           
-            usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')            
-            
-            
+            usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
+            puertos=["usb:","COM1","COM2","COM3","COM4","COM5","COM6","COM7"]
+
+            iface.messageBar().pushMessage("ATENCION", "POR FAVOR, ESPERE", duration=10)
+
+            #HAY QUE COMPROBAR QUE HAY ALGO SELECCIONADO, SI NO NO HACE NADA
             
 
-
-            
-            #todas las posibles opciones
-            #names =["waypoint", "track", "route"]
             names=[]
+            abreviaturas=[]
             if self.dlg.checkBox_1.isChecked():
                 names.append("waypoint")
+                abreviaturas.append("-w")
             if self.dlg.checkBox_2.isChecked():    
                 names.append("track")
+                abreviaturas.append("-t")
             if self.dlg.checkBox_3.isChecked():
                 names.append("route")
+                abreviaturas.append("-r")
             dest_crs = QgsCoordinateReferenceSystem(25830)
-
+            print ("hasta aqui bien")
             #aqui habra que comprobar que names tiene algo y si no mostrar un texto al usuario
             if len(names)>0:
                 print (nombre)
             
                 path = r'C:/sigmena/gps/'+nombre+'.gpx'
-                
-                comando=os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/descargagps.bat")
-                #comando= "C:/Users/descargagps.bat"
-
-                os.system(comando+" "+ path)
+                ruta=path
+                for puerto in puertos:
+                    for abreviatura in abreviaturas:
+                        comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe"'+' '+ abreviatura +' -i garmin -f '+ puerto +' -o gpx -F ' + ruta
+                        #print (comando)
+                        result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        output,error = result.communicate()
+                        #print (output)
+                        #print (error)
 
 
                 
                 
                 for name in names:
-                    #iface.addVectorLayer(ruta+"?type="+name, name, "gpx")
                     vectorLyr =QgsVectorLayer(path+"?type="+name, name, "gpx")
                     QgsVectorFileWriter.writeAsVectorFormat(vectorLyr,str(path[:-4])+"_"+name,"utf-8",dest_crs,"ESRI Shapefile")
                     iface.addVectorLayer(str(path[:-4])+"_"+name+".shp", str(nombre)+"_"+name, "ogr")
 #empieza la carga
+            
+            
             if self.dlg.checkBox_4.isChecked():
                 print("subir archivo punto")
                 #lo mejor sera solo los elementos selecionados. si no hay ninguno seleccionado usar todos. si no tiene columna name crearla y poner una columna para el nombre.
@@ -306,7 +304,7 @@ class GpsDescargaCarga:
                 #vectorLyr.setCrs(mycrs,True)
                     params=  {'INPUT':shapefile,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:4326'),'OUTPUT':str(shapefile[:-4])+"_wgs84.shp"}
                     processing.run("native:reprojectlayer",params)
-
+                    
                     #iface.addVectorLayer(shapefile, nombre [0], "ogr")
 
                     #dest_crs = QgsCoordinateReferenceSystem(4326)
@@ -320,9 +318,16 @@ class GpsDescargaCarga:
                     os.system(comando)
 
                     ruta =str(shapefile[:-4])+".gpx"
-                    comando= os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/cargagps.bat")
-
-                    os.system(comando+" "+ ruta)
+                    #metodo sencillo de ejecutar comando
+                    #comando= os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/cargagps.bat")
+                    #os.system(comando+" "+ ruta)
+                    
+                    for puerto in puertos:
+                        comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe" -w -i gpx -f '+ruta+' -o garmin -F ' + puerto
+                        result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        output,error = result.communicate()
+                        #print (output)
+                        #print (error)
 
             if self.dlg.checkBox_5.isChecked():
                 print("subir archivo linea")
@@ -369,9 +374,27 @@ class GpsDescargaCarga:
                     os.system(comando)
 
                     ruta =str(shapefile[:-4])+".gpx"
-                    comando= os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/cargagps.bat")
+                    #comando= os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/cargagps.bat")
 
-                    os.system(comando+" "+ ruta)
+                    #ojo lo cambio por lo de abajo
+                    #os.system(comando+" "+ ruta)
+                    
+
+                    #aqui es el metodo2 para abrir un cmd y ejecutarlo se puede aplicar a todo para no depender de ningun bat.##################################################################################################
+                    
+                    #sustituyo con el metodo de arriba
+                                       
+                
+                  
+                    for puerto in puertos:
+                        comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe" -t -i gpx -f '+ruta+' -o garmin -F ' + puerto
+                        result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        output,error = result.communicate()
+                        #print (output)
+                        #print (error)
+                    
+
+
 
            
             

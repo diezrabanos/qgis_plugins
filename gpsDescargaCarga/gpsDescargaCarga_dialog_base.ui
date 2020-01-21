@@ -32,8 +32,8 @@
   <widget class="QLabel" name="label_Y">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>180</y>
+     <x>30</x>
+     <y>160</y>
      <width>161</width>
      <height>21</height>
     </rect>
@@ -45,8 +45,8 @@
   <widget class="QLineEdit" name="nombrearchivo_entrada">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>180</y>
+     <x>30</x>
+     <y>190</y>
      <width>171</width>
      <height>20</height>
     </rect>
@@ -125,6 +125,19 @@
    </property>
    <property name="text">
     <string>Cargar Waypoints</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_5">
+   <property name="geometry">
+    <rect>
+     <x>280</x>
+     <y>90</y>
+     <width>129</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cargar Tracks</string>
    </property>
   </widget>
  </widget>

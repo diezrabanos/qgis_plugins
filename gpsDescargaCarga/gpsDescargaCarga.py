@@ -240,7 +240,7 @@ class GpsDescargaCarga:
             # Get the coordinates and scale factor from the dialog
             nombre=self.dlg.nombrearchivo_entrada.text().replace(' ','_')##displayText()
            
-            
+            usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')            
             
             
             
@@ -263,7 +263,7 @@ class GpsDescargaCarga:
                 print (nombre)
             
                 path = r'C:/sigmena/gps/'+nombre+'.gpx'
-                usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
+                
                 comando=os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/descargagps.bat")
                 #comando= "C:/Users/descargagps.bat"
 
@@ -279,43 +279,100 @@ class GpsDescargaCarga:
                     iface.addVectorLayer(str(path[:-4])+"_"+name+".shp", str(nombre)+"_"+name, "ogr")
 #empieza la carga
             if self.dlg.checkBox_4.isChecked():
-                print("subir archivo")
-                #lo mejor sera subir el archivo selecionado y despues mejor aun solo los elementos selecionados. Habra que crear un
-"""
-                #debo meter el nombre de la capa selecionada, no el metido con el texto
+                print("subir archivo punto")
+                #lo mejor sera solo los elementos selecionados. si no hay ninguno seleccionado usar todos. si no tiene columna name crearla y poner una columna para el nombre.
+
+                #nombre de la capa selecionada
                 vl2=iface.activeLayer()
+                nombre= vl2.source()
                 if vl2 is None:
                     iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
-                if vl2.wkbType()== 1:#lo siguiente es multipunto que habra que convertirlo antes en punto or vl2.wkbType()==1001:
-                    nombre= vl2.source()
-                #nombre = QInputDialog.getText(None, "NOMBRE DE LA CAPA","Introduce el nombre del archivo shp sin espacios")
-
-                #shapefile=r'C:/sigmena/gps/'+nombre [0]+'.shp'
+                if vl2.wkbType()==4:
+                    print("convertir en puntos")
+                    params={'MULTIPOINTS':nombre,'POINTS':'TEMPORARY_OUTPUT'}
+                    results0=processing.run("saga:convertmultipointstopoints", params)
+                    shapefile = results0['POINTS']
+                    
+                    
+                if vl2.wkbType()== 1:
+                    print(nombre)
                     shapefile=nombre
-                #vectorLyr =QgsVectorLayer(shapefile, nombre [0], "ogr")
+                else:
+                    iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de puntos", duration=10)
+                
 
+                if vl2.wkbType()== 1 or vl2.wkbType()== 4:    
                 #tendria que mirar si tiene src, si no lo tiene ponerle el del proyecto
                 #vectorLyr.setCrs(mycrs,True)
-                processing.runalg("qgis:reprojectlayer",shapefile, "epsg:4326",str(shapefile[:-4])+"_wgs84.shp")
+                    params=  {'INPUT':shapefile,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:4326'),'OUTPUT':str(shapefile[:-4])+"_wgs84.shp"}
+                    processing.run("native:reprojectlayer",params)
 
-                #iface.addVectorLayer(shapefile, nombre [0], "ogr")
+                    #iface.addVectorLayer(shapefile, nombre [0], "ogr")
 
-                dest_crs = QgsCoordinateReferenceSystem(4326)
-                QgsVectorFileWriter.writeAsVectorFormat(vectorLyr,str(shapefile[:-4])+"_wgs84","utf-8",dest_crs,"ESRI Shapefile")
-                vectorLyr2 =QgsVectorLayer(str(shapefile[:-4])+"_wgs84.shp", nombre [0]+"_wgs84", "ogr")
-                vectorLyr2.setCrs(dest_crs,True)
-                iface.addVectorLayer(str(shapefile[:-4])+"_wgs84.shp", str(nombre[0])+"_wgs84", "ogr")
-                if os.path.exists(str(shapefile[:-4])+".gpx"):
-                    os.remove(str(shapefile[:-4])+".gpx")
-                comando="ogr2ogr -f GPX "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"# -sql SELECT nombre AS name"#ogr2ogr -f GPX output.gpx input.gpx waypoints routes tracks"
-                os.system(comando)
+                    #dest_crs = QgsCoordinateReferenceSystem(4326)
+                    #QgsVectorFileWriter.writeAsVectorFormat(vectorLyr,str(shapefile[:-4])+"_wgs84","utf-8",dest_crs,"ESRI Shapefile")
+                    #vectorLyr2 =QgsVectorLayer(str(shapefile[:-4])+"_wgs84.shp", nombre [0]+"_wgs84", "ogr")
+                    #vectorLyr2.setCrs(dest_crs,True)
+                    #iface.addVectorLayer(str(shapefile[:-4])+"_wgs84.shp", str(nombre[0])+"_wgs84", "ogr")
+                    if os.path.exists(str(shapefile[:-4])+".gpx"):
+                        os.remove(str(shapefile[:-4])+".gpx")
+                    comando="ogr2ogr -f GPX "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"# -sql SELECT nombre AS name"#ogr2ogr -f GPX output.gpx input.gpx waypoints routes tracks"
+                    os.system(comando)
 
-                ruta =str(shapefile[:-4])+".gpx"
-                comando= "C:/Users/cargagps.bat"
+                    ruta =str(shapefile[:-4])+".gpx"
+                    comando= os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/cargagps.bat")
 
-                os.system(comando+" "+ ruta)
-                            
+                    os.system(comando+" "+ ruta)
 
-            """
+            if self.dlg.checkBox_5.isChecked():
+                print("subir archivo linea")
+                #lo mejor sera solo los elementos selecionados. si no hay ninguno seleccionado usar todos. si no tiene columna name crearla y poner una columna para el nombre.
+
+                #nombre de la capa selecionada
+                vl2=iface.activeLayer()
+                nombre= vl2.source()
+                if vl2 is None:
+                    iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de lineas o poligonos", duration=10)
+                """if vl2.wkbType()==4:
+                    print("convertir en puntos")
+                    params={'MULTIPOINTS':nombre,'POINTS':'TEMPORARY_OUTPUT'}
+                    results0=processing.run("saga:convertmultipointstopoints", params)
+                    shapefile = results0['POINTS']"""
+                    
+                #se podria convertir polilineas en lineas y poligonos en lineas tambien.    
+                if vl2.wkbType()== 5:
+                    print(nombre)
+                    #elimina la barra si la hay
+                    if '|' in nombre:
+                        nombre = nombre [:nombre.rfind('|')] 
+                    shapefile=nombre
+                    print("shapefile")
+                    print(shapefile)
+                else:
+                    iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de lineas o poligonos", duration=10)
+                
+
+                if vl2.wkbType()== 5:#o poligono o polilinea or vl2.wkbType()== 3:    
+                #tendria que mirar si tiene src, si no lo tiene ponerle el del proyecto
+                #vectorLyr.setCrs(mycrs,True)
+                    params=  {'INPUT':shapefile,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:4326'),'OUTPUT':str(shapefile[:-4])+"_wgs84.shp"}
+                    processing.run("native:reprojectlayer",params)
+                    if os.path.exists(str(shapefile[:-4])+".gpx"):
+                        os.remove(str(shapefile[:-4])+".gpx")
+                    #processing.run("gdal:convertformat", {'INPUT':shapefile,'OPTIONS':"'FORCE_GPX_TRACK:YES','GPX_USE_EXTENSIONS: YES'",'OUTPUT':str(shapefile[:-4])+".gpx"})
+                    
+                    #iface.addVectorLayer(shapefile, nombre [0], "ogr")
+
+
+                    comando="ogr2ogr.exe -f GPX "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"+" -dsco GPX_USE_EXTENSIONS=YES -lco FORCE_GPX_TRACK=YES"
+                    #comando="ogr2ogr -f GPX GPX_USE_EXTENSIONS=YES GPX_USE_EXTENSIONS=YES "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"# -sql SELECT nombre AS name"#ogr2ogr -f GPX output.gpx input.gpx waypoints routes tracks"
+                    os.system(comando)
+
+                    ruta =str(shapefile[:-4])+".gpx"
+                    comando= os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/cargagps.bat")
+
+                    os.system(comando+" "+ ruta)
+
+           
             
         

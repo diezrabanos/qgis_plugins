@@ -232,6 +232,8 @@ class GpsDescargaCarga:
             nombre=self.dlg.nombrearchivo_entrada.text().replace(' ','_')##displayText()
             usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
             puertos=["usb:","COM1","COM2","COM3","COM4","COM5","COM6","COM7"]
+            instalacion=QgsApplication.prefixPath()[:-9]
+            
 
             iface.messageBar().pushMessage("ATENCION", "POR FAVOR, ESPERE", duration=10)
 
@@ -259,7 +261,8 @@ class GpsDescargaCarga:
                 ruta=path
                 for puerto in puertos:
                     for abreviatura in abreviaturas:
-                        comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe"'+' '+ abreviatura +' -i garmin -f '+ puerto +' -o gpx -F ' + ruta
+                        #comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe"'+' '+ abreviatura +' -i garmin -f '+ puerto +' -o gpx -F ' + ruta
+                        comando='"'+instalacion+'bin/gpsbabel.exe"'+' '+ abreviatura +' -i garmin -f '+ puerto +' -o gpx -F ' + ruta
                         #print (comando)
                         result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         output,error = result.communicate()
@@ -323,7 +326,8 @@ class GpsDescargaCarga:
                     #os.system(comando+" "+ ruta)
                     
                     for puerto in puertos:
-                        comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe" -w -i gpx -f '+ruta+' -o garmin -F ' + puerto
+                        #comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe" -w -i gpx -f '+ruta+' -o garmin -F ' + puerto
+                        comando='"'+instalacion+'bin/gpsbabel.exe" -w -i gpx -f '+ruta+' -o garmin -F ' + puerto
                         result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         output,error = result.communicate()
                         #print (output)
@@ -338,11 +342,7 @@ class GpsDescargaCarga:
                 nombre= vl2.source()
                 if vl2 is None:
                     iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de lineas o poligonos", duration=10)
-                """if vl2.wkbType()==4:
-                    print("convertir en puntos")
-                    params={'MULTIPOINTS':nombre,'POINTS':'TEMPORARY_OUTPUT'}
-                    results0=processing.run("saga:convertmultipointstopoints", params)
-                    shapefile = results0['POINTS']"""
+
                     
                 #se podria convertir polilineas en lineas y poligonos en lineas tambien.    
                 if vl2.wkbType()== 5:
@@ -375,17 +375,8 @@ class GpsDescargaCarga:
 
                     ruta =str(shapefile[:-4])+".gpx"
                     #comando= os.path.join(r"C:\Users",usuario,r"AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins/gpsDescargaCarga/cmdbabel/cargagps.bat")
-
-                    #ojo lo cambio por lo de abajo
                     #os.system(comando+" "+ ruta)
                     
-
-                    #aqui es el metodo2 para abrir un cmd y ejecutarlo se puede aplicar a todo para no depender de ningun bat.##################################################################################################
-                    
-                    #sustituyo con el metodo de arriba
-                                       
-                
-                  
                     for puerto in puertos:
                         comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe" -t -i gpx -f '+ruta+' -o garmin -F ' + puerto
                         result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

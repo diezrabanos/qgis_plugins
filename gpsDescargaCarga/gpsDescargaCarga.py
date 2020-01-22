@@ -282,6 +282,7 @@ class GpsDescargaCarga:
             if self.dlg.checkBox_4.isChecked():
                 print("subir archivo punto")
                 #lo mejor sera solo los elementos selecionados. si no hay ninguno seleccionado usar todos. si no tiene columna name crearla y poner una columna para el nombre.
+                #ahora mismo si no tienen nombre, al menos los tracks, los llama track0 y los sobreescribe.
 
                 #nombre de la capa selecionada
                 vl2=iface.activeLayer()
@@ -293,6 +294,8 @@ class GpsDescargaCarga:
                     params={'MULTIPOINTS':nombre,'POINTS':'TEMPORARY_OUTPUT'}
                     results0=processing.run("saga:convertmultipointstopoints", params)
                     shapefile = results0['POINTS']
+                    print ("shapefile")
+                    print (shapefile)
                     
                     
                 if vl2.wkbType()== 1:
@@ -343,21 +346,44 @@ class GpsDescargaCarga:
                 if vl2 is None:
                     iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de lineas o poligonos", duration=10)
 
+
+                #CONVIERTO DE POLIGONOS A LINEAS
+                if vl2.wkbType()== 6:
+                    
+                    #elimina la barra si la hay
+                    if '|' in nombre:
+                        nombre = nombre [:nombre.rfind('|')]
+                    """    
+                    params={'INPUT':nombre,'OUTPUT':'TEMPORARY_OUTPUT'}
+                    results0=processing.run("native:polygonstolines", params)
+                    nombre = results0['OUTPUT']
+                    shapefile = results0['OUTPUT']
+                    print ("shapefile")
+                    print (shapefile)
+                   
+                    print("paso por pol2lin ok")
+                   
+"""
+                    params={'POLYGONS':nombre, 'EDGES':'TEMPORARY_OUTPUT','NODES':'TEMPORARY_OUTPUT'  }
+                    results0=processing.run("saga:polygonstoedgesandnodes", params)
+                    nombre = results0['EDGES']
+                    shapefile = results0['EDGES']
+                    print ("shapefile")
+                    print (shapefile)
                     
                 #se podria convertir polilineas en lineas y poligonos en lineas tambien.    
                 if vl2.wkbType()== 5:
-                    print(nombre)
+                    
                     #elimina la barra si la hay
                     if '|' in nombre:
                         nombre = nombre [:nombre.rfind('|')] 
                     shapefile=nombre
-                    print("shapefile")
-                    print(shapefile)
+                   
                 else:
                     iface.messageBar().pushMessage("ATENCION", "Selecciona una capa de lineas o poligonos", duration=10)
                 
 
-                if vl2.wkbType()== 5:#o poligono o polilinea or vl2.wkbType()== 3:    
+                if vl2.wkbType()== 5 or vl2.wkbType()== 6:#o poligono o polilinea or vl2.wkbType()== 3:    
                 #tendria que mirar si tiene src, si no lo tiene ponerle el del proyecto
                 #vectorLyr.setCrs(mycrs,True)
                     params=  {'INPUT':shapefile,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:4326'),'OUTPUT':str(shapefile[:-4])+"_wgs84.shp"}

@@ -380,9 +380,11 @@ class Sigpac:
             archivo=self.dlg.ruta_archivo.text()
             #cojo lo que hay en cada recuadro o desplegable aqui variables que luego deberan estar en la cajita   OJO
             indmun=self.dlg.cbMUN.currentIndex()
+            print(indmun)
 
             pro= self.dlg.PRO.text()##displayText()
             mun=self.dlg.MUN.text()##displayText()
+            print (mun)
             pol=self.dlg.POL.text()##displayText()
             par=self.dlg.PAR.text()##displayText()
             x=self.dlg.XX.text()##displayText()
@@ -396,6 +398,7 @@ class Sigpac:
             #si no hay nada en la casilla de municipio, coge la informacion del desplegable
             if mun == "":
                 mun=str(misdatos[int(indmun)-1][2])
+                print(mun)
            
 
 
@@ -411,7 +414,7 @@ class Sigpac:
             if x is not "" and y is not "" and par=="":
                 #creo una capa temporal con las coordenadas
                 # create layer
-                vl2 = QgsVectorLayer("Point", "Punto", "memory")
+                vl2 = QgsVectorLayer("Point?crs=epsg:25830", "Punto", "memory")
                 pr2 = vl2.dataProvider()
                 
                 vl2.startEditing()
@@ -445,7 +448,7 @@ class Sigpac:
 
                 #QgsProject.instance().addMapLayer(vl)
                 QgsProject.instance().addMapLayer(vl2)
-                layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac, mun, 'ogr')
+                layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac, "municipio", 'ogr')
 
                 processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
                 sellectionado = layerbase.selectedFeatureIds()

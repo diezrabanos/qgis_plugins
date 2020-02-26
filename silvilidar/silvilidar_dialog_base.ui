@@ -385,7 +385,7 @@
     <item>
      <widget class="QLineEdit" name="hclaras">
       <property name="text">
-       <string>7</string>
+       <string>12</string>
       </property>
      </widget>
     </item>

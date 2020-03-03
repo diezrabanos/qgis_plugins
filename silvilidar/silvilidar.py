@@ -33,6 +33,9 @@ from qgis.PyQt.QtWidgets import QAction, QFileDialog
 from .resources import *
 # Import the code for the dialog
 from .silvilidar_dialog import SilvilidarDialog
+from .config_dialog import ConfigDialog
+from .project_dialog import ProjectDialog
+from .salida_dialog import SalidaDialog
 import os.path
 
 #import para procesar
@@ -49,8 +52,19 @@ import re
 import sys
 #from qgis import *
 import time
+import webbrowser
 
+class Salida:
+    def __init__(self, iface):
+        self.dlg4 = SalidaDialog()
 
+class Project:
+    def __init__(self, iface):
+        self.dlg3 = ProjectDialog()
+
+class Config:
+    def __init__(self, iface):
+        self.dlg2 = ConfigDialog()
 
 class Silvilidar:
     """QGIS Plugin Implementation."""
@@ -80,6 +94,9 @@ class Silvilidar:
                 QCoreApplication.installTranslator(self.translator)
 
         self.dlg = SilvilidarDialog()
+        self.dlg2 = ConfigDialog()
+        self.dlg3 = ProjectDialog()
+        self.dlg4 = SalidaDialog()
 
         # Declare instance attributes
         self.actions = []
@@ -91,6 +108,10 @@ class Silvilidar:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
         self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
+        self.dlg.help_button.clicked.connect(self.help_pressed)
+        self.dlg.pushButton_parametros.clicked.connect(self.configurar_parametros)
+        self.dlg.pushButton_proyectar.clicked.connect(self.proyectar_datos_lidar)
+        self.dlg.pushButton_salida.clicked.connect(self.salida)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -157,8 +178,7 @@ class Silvilidar:
             added to self.actions list.
         :rtype: QAction
         """
-        #copiado del catastro
-        #self.dlg = SilvilidarDialog()
+
 
         
         #cambio el icon path para mi equipo.
@@ -211,7 +231,22 @@ class Silvilidar:
         carpeta = QFileDialog.getExistingDirectory(self.dlg , "Selecciona carpeta")
         self.dlg.carpetalaz.setText(carpeta)
         print(carpeta)
-    
+        
+    def help_pressed(self):
+        print("abre la ayuda")
+        help_file = 'file:' + os.path.dirname(__file__) + '/Ayuda_Silvilidar.pdf'
+        webbrowser.open_new(help_file)
+        
+    def configurar_parametros(self):
+        print("entro en configurar")
+        self.dlg2.show()
+    def proyectar_datos_lidar(self):
+        print("entro en proyectar datos lidar")
+        self.dlg3.show()
+    def salida(self):
+        print("entro en configurar salidas")
+        self.dlg4.show()
+       
 
  
 
@@ -766,21 +801,24 @@ class Silvilidar:
             #processing.run("gdalogr:polygonize",os.path.join(carpeta,troncoresumido+'_suma.tif'),"DN",os.path.join(carpeta,troncoresumido+'_suma.shp'))
             #sumashp=QgsVectorLayer(os.path.join(carpeta,troncoresumido+'_suma.shp'),"sumashp","ogr")
             #QgsMapLayerRegistry.instance().addMapLayer(sumashp)
- 
+
             #filtro para quedarme con la clara
-            calculo('c11@1 / 81 + c14@1 / 9  + c15@1 / 81 + c19@1 / 82 + c20@1 / 121 + c21@1 / 82 + c25@1 / 122 + c26@1 / 13', 'clara1')
-            StringToRaster(os.path.join(carpeta,troncoresumido+'_clara1.tif'),"clara1")
-            agregado("clara",0.26)
+            if self.dlg4.checkBox_claras.isChecked(): 
+                calculo('c11@1 / 81 + c14@1 / 9  + c15@1 / 81 + c19@1 / 82 + c20@1 / 121 + c21@1 / 82 + c25@1 / 122 + c26@1 / 13', 'clara1')
+                StringToRaster(os.path.join(carpeta,troncoresumido+'_clara1.tif'),"clara1")
+                agregado("clara",0.26)
 
             #filtro para quedarme con la regeneracion
-            calculo('c28@1 / 15 ','regeneracion1')
-            StringToRaster(os.path.join(carpeta,troncoresumido+'_regeneracion1.tif'),"regeneracion1")
-            agregado("regeneracion",0.26)
+            if self.dlg4.checkBox_regeneracion.isChecked():   
+                calculo('c28@1 / 15 ','regeneracion1')
+                StringToRaster(os.path.join(carpeta,troncoresumido+'_regeneracion1.tif'),"regeneracion1")
+                agregado("regeneracion",0.26)
 
             #filtro para quedarme con el resalveo
-            calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
-            StringToRaster(os.path.join(carpeta,troncoresumido+'_resalveo1.tif'),"resalveo1")
-            agregado("resalveo",0.16)
+            if self.dlg4.checkBox_resalveo.isChecked():
+                calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
+                StringToRaster(os.path.join(carpeta,troncoresumido+'_resalveo1.tif'),"resalveo1")
+                agregado("resalveo",0.16)
            
             #elimino las capas que he cargado durante el proceso
             capas =QgsProject.instance().mapLayers()
@@ -840,7 +878,9 @@ class Silvilidar:
             print(horaepiezajuntoshapes-horaacabajuntoshapes)
 
 
-
+        #defino una funcion que une en una capa el resultado de todas las hojas raster, hace un grid
+        def juntorasters(busca,salida):
+            pass
 
 
 
@@ -875,22 +915,22 @@ class Silvilidar:
             #la carpeta la he cogido al pulsar el boton de la carpeta
 
              #meto aqui variables que luego deberan estar en la cajita   OJO
-            crecimiento= self.dlg.crecimiento.text()##displayText()
-            fccbaja=self.dlg.fccbaja.text()##displayText()
-            fccterrazas=self.dlg.fccterrazas.text()##displayText()
-            fccmedia=self.dlg.fccmedia.text()##displayText()
-            fccalta=self.dlg.fccalta.text()##displayText()
-            hmontebravoe=self.dlg.hmontebravoe.text()##displayText()
-            hmontebravo=self.dlg.hmontebravo.text()##displayText()
-            hselvicolas=self.dlg.hselvicolas.text()##displayText()
-            hclaras=self.dlg.hclaras.text()#displayText()
-            hclaras2=self.dlg.hclaras2.text()#displayText()
-            hbcminima=self.dlg.hbcminima.text()#displayText()
-            hbcdesarrollado= self.dlg.hbcdesarrollado.text()#displayText()
-            rcclaras=self.dlg.rcclaras.text()#displayText()
-            rcextremo=self.dlg.rcextremo.text()#displayText()
-            longitudcopaminima=self.dlg.longitudcopaminima.text()##displayText()
-            crecimientofcc=self.dlg.crecimientofcc.text()##displayText()
+            crecimiento= self.dlg3.crecimiento.text()##displayText()
+            fccbaja=self.dlg2.fccbaja.text()##displayText()
+            fccterrazas=self.dlg2.fccterrazas.text()##displayText()
+            fccmedia=self.dlg2.fccmedia.text()##displayText()
+            fccalta=self.dlg2.fccalta.text()##displayText()
+            hmontebravoe=self.dlg2.hmontebravoe.text()##displayText()
+            hmontebravo=self.dlg2.hmontebravo.text()##displayText()
+            hselvicolas=self.dlg2.hselvicolas.text()##displayText()
+            hclaras=self.dlg2.hclaras.text()#displayText()
+            hclaras2=self.dlg2.hclaras2.text()#displayText()
+            hbcminima=self.dlg2.hbcminima.text()#displayText()
+            hbcdesarrollado= self.dlg2.hbcdesarrollado.text()#displayText()
+            rcclaras=self.dlg2.rcclaras.text()#displayText()
+            rcextremo=self.dlg2.rcextremo.text()#displayText()
+            longitudcopaminima=self.dlg2.longitudcopaminima.text()##displayText()
+            crecimientofcc=self.dlg3.crecimientofcc.text()##displayText()
             """crecimiento= 1.5
             fccbaja=20.0
             fccterrazas=57.5

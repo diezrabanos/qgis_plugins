@@ -143,7 +143,7 @@ sirve de indice.</string>
     </rect>
    </property>
    <property name="text">
-    <string>1.5</string>
+    <string>0</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_18">
@@ -182,7 +182,7 @@ sirve de indice.</string>
     </rect>
    </property>
    <property name="text">
-    <string>12.5</string>
+    <string>0</string>
    </property>
   </widget>
  </widget>

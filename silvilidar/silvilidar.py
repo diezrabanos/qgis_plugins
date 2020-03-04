@@ -112,6 +112,7 @@ class Silvilidar:
         self.dlg.pushButton_parametros.clicked.connect(self.configurar_parametros)
         self.dlg.pushButton_proyectar.clicked.connect(self.proyectar_datos_lidar)
         self.dlg.pushButton_salida.clicked.connect(self.salida)
+        self.dlg3.crecimiento.textChanged.connect(self.datosenlazados)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -246,7 +247,8 @@ class Silvilidar:
     def salida(self):
         print("entro en configurar salidas")
         self.dlg4.show()
-       
+    def datosenlazados(self):
+        self.dlg3.crecimientofcc.setText(str(8*float(self.dlg3.crecimiento.text())))
 
  
 
@@ -883,11 +885,16 @@ class Silvilidar:
             busca=os.path.join(carpeta,"*_"+cadena+".tif")
             files=glob.glob(busca)
             out=os.path.join(carpeta,cadena+".vrt")
-            #params={ 'INPUT':['C:/WORK/
             params={ 'INPUT':files,'RESOLUTION':0,'SEPARATE':False,'PROJ_DIFFERENCE':False,'ADD_ALPHA':False,'ASSIGN_CRS':None,'RESAMPLING':0,'SRC_NODATA':'','EXTRA':'','OUTPUT':out} 
-            processing.runAndLoadResults("gdal:buildvirtualraster", params)
-            #falta colorear
-            
+            result = processing.run("gdal:buildvirtualraster", params)
+            rutacapa=result['OUTPUT']
+            layer = QgsRasterLayer(rutacapa, cadena)
+            QgsProject.instance().addMapLayer(layer)
+            #coloreo
+
+            layer.loadNamedStyle(os.path.dirname(__file__)+'/styles/'+cadena+'.qml')
+            layer.triggerRepaint()
+            iface.layerTreeView().refreshLayerSymbology( layer.id() )
 
 
 
@@ -1048,7 +1055,7 @@ class Silvilidar:
                 juntarasters("rc")
             if self.dlg4.checkBox_lc.isChecked():
                 juntarasters("lc")
-            if self.dlg4.checkBox_hbcc.isChecked():
+            if self.dlg4.checkBox_hbc.isChecked():
                 juntarasters("hbc")
 
             

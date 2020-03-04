@@ -201,7 +201,7 @@ por la simplificación de la salida</string>
     <string>Altura de la base de copa</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_razoncopa_3">
+  <widget class="QCheckBox" name="checkBox_lc">
    <property name="geometry">
     <rect>
      <x>50</x>

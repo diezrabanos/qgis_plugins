@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>503</width>
-    <height>342</height>
+    <width>492</width>
+    <height>394</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,8 +16,8 @@
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>300</y>
+     <x>300</x>
+     <y>350</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -32,7 +32,7 @@
   <widget class="QLineEdit" name="carpetalaz">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>20</x>
      <y>80</y>
      <width>261</width>
      <height>20</height>
@@ -97,8 +97,8 @@
   <widget class="QPushButton" name="help_button">
    <property name="geometry">
     <rect>
-     <x>380</x>
-     <y>270</y>
+     <x>370</x>
+     <y>310</y>
      <width>101</width>
      <height>23</height>
     </rect>
@@ -114,7 +114,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>220</y>
+     <y>130</y>
      <width>181</width>
      <height>23</height>
     </rect>
@@ -129,8 +129,8 @@
   <widget class="QPushButton" name="pushButton_parametros">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>170</y>
+     <x>280</x>
+     <y>270</y>
      <width>191</width>
      <height>23</height>
     </rect>
@@ -146,7 +146,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>120</y>
+     <y>190</y>
      <width>141</width>
      <height>23</height>
     </rect>
@@ -162,44 +162,123 @@
    <property name="geometry">
     <rect>
      <x>240</x>
-     <y>200</y>
+     <y>110</y>
      <width>231</width>
      <height>51</height>
     </rect>
    </property>
    <property name="text">
-    <string>Permite seleccionar que capas queremos
-que se visualicen en QGIS al finalizar el proceso</string>
+    <string>Permite seleccionar que capas (además de
+las teselas) queremos que se visualicen en
+QGIS al finalizar el proceso.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
      <x>240</x>
-     <y>110</y>
+     <y>180</y>
      <width>231</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>Permite incrementar la altura y la fracción
-de cabida cubierta por el tiempo pasado
-desde la realización del vuelo LiDAR</string>
+de cabida cubierta por el tiempo transcurrido
+desde la realización del vuelo LiDAR.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>240</x>
-     <y>160</y>
-     <width>251</width>
+     <x>20</x>
+     <y>260</y>
+     <width>211</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
     <string>Permite cambiar los valores de corte
 que se tendrán en cuenta para clasificar
-cada tesela en el arbol de decisión</string>
+cada tesela en el arbol de decisión.</string>
+   </property>
+  </widget>
+  <widget class="Line" name="line">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>160</y>
+     <width>231</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_2">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>120</y>
+     <width>20</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_3">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>180</y>
+     <width>20</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_4">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>260</y>
+     <width>20</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Vertical</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_5">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>230</y>
+     <width>231</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="Line" name="line_6">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>230</y>
+     <width>191</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
    </property>
   </widget>
  </widget>

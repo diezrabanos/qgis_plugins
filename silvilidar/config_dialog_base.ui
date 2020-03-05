@@ -46,20 +46,20 @@
     </font>
    </property>
    <property name="text">
-    <string>Configuración</string>
+    <string>CONFIGURACIÓN</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_16">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>30</y>
+     <x>50</x>
+     <y>40</y>
      <width>331</width>
      <height>81</height>
     </rect>
    </property>
    <property name="text">
-    <string>CUIDADO, PUEDE DEJAR DE FUNCIONAR EL COMPLEMENTO</string>
+    <string>LA CLASIFICACIÓN DE LAS TESELAS DEPENDE DE ESTOS VALORES</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_11">

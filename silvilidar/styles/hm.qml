@@ -1,5 +1,5 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis minScale="1e+08" hasScaleBasedVisibilityFlag="0" version="3.10.2-A Coruña" maxScale="1000" styleCategories="AllStyleCategories">
+<qgis hasScaleBasedVisibilityFlag="0" minScale="1e+08" version="3.10.2-A Coruña" maxScale="0" styleCategories="AllStyleCategories">
   <flags>
     <Identifiable>1</Identifiable>
     <Removable>1</Removable>
@@ -12,7 +12,7 @@
     <property key="identify/format" value="Value"/>
   </customproperties>
   <pipe>
-    <rasterrenderer opacity="1" alphaBand="-1" classificationMax="20" type="singlebandpseudocolor" band="1" classificationMin="3">
+    <rasterrenderer opacity="1" classificationMin="3.5" band="1" type="singlebandpseudocolor" alphaBand="-1" classificationMax="inf">
       <rasterTransparency/>
       <minMaxOrigin>
         <limits>None</limits>
@@ -23,24 +23,27 @@
         <stdDevFactor>2</stdDevFactor>
       </minMaxOrigin>
       <rastershader>
-        <colorrampshader clip="0" colorRampType="DISCRETE" classificationMode="1">
-          <colorramp name="[source]" type="gradient">
-            <prop k="color1" v="247,252,245,255"/>
-            <prop k="color2" v="0,68,27,255"/>
-            <prop k="discrete" v="0"/>
-            <prop k="rampType" v="gradient"/>
-            <prop k="stops" v="0.13;229,245,224,255:0.26;199,233,192,255:0.39;161,217,155,255:0.52;116,196,118,255:0.65;65,171,93,255:0.78;35,139,69,255:0.9;0,109,44,255"/>
+        <colorrampshader clip="0" colorRampType="DISCRETE" classificationMode="2">
+          <colorramp name="[source]" type="cpt-city">
+            <prop k="inverted" v="0"/>
+            <prop k="rampType" v="cpt-city"/>
+            <prop k="schemeName" v="cb/seq/BuGn_09"/>
+            <prop k="variantName" v=""/>
           </colorramp>
-          <item value="3" alpha="255" label="&lt;= 3" color="#f7fcf5"/>
-          <item value="8" alpha="255" label="3 - 8" color="#bde5b7"/>
-          <item value="12" alpha="255" label="8 - 12" color="#70c274"/>
-          <item value="16" alpha="255" label="12 - 16" color="#268f48"/>
-          <item value="20" alpha="255" label="16 - 20" color="#00441b"/>
+          <item value="3.5" color="#dee4e0" alpha="255" label="&lt;= 3.5"/>
+          <item value="5" color="#c2cfc6" alpha="255" label="3.5 - 5"/>
+          <item value="7.5" color="#a6baad" alpha="255" label="5 - 7.5"/>
+          <item value="12" color="#8aa593" alpha="255" label="7.5 - 12"/>
+          <item value="16.5" color="#6f926e" alpha="255" label="12 - 16.5"/>
+          <item value="20" color="#537b60" alpha="255" label="16.5 - 20"/>
+          <item value="23" color="#376647" alpha="255" label="20 - 23"/>
+          <item value="25" color="#1b512d" alpha="255" label="23 - 25"/>
+          <item value="inf" color="#004614" alpha="255" label="> 25"/>
         </colorrampshader>
       </rastershader>
     </rasterrenderer>
-    <brightnesscontrast brightness="0" contrast="0"/>
-    <huesaturation saturation="0" colorizeOn="0" colorizeBlue="128" colorizeStrength="100" colorizeGreen="128" grayscaleMode="0" colorizeRed="255"/>
+    <brightnesscontrast contrast="0" brightness="0"/>
+    <huesaturation colorizeStrength="100" colorizeOn="0" saturation="0" grayscaleMode="0" colorizeGreen="128" colorizeRed="255" colorizeBlue="128"/>
     <rasterresampler maxOversampling="2"/>
   </pipe>
   <blendMode>0</blendMode>

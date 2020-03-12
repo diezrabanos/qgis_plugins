@@ -884,11 +884,11 @@ class Silvilidar:
         def juntarasters(cadena):
             busca=os.path.join(carpeta,"*_"+cadena+".tif")
             files=glob.glob(busca)
-            out=os.path.join(carpeta,cadena+".vrt")
+            out=os.path.join(carpeta,cadena.upper()+".vrt")
             params={ 'INPUT':files,'RESOLUTION':0,'SEPARATE':False,'PROJ_DIFFERENCE':False,'ADD_ALPHA':False,'ASSIGN_CRS':None,'RESAMPLING':0,'SRC_NODATA':'','EXTRA':'','OUTPUT':out} 
             result = processing.run("gdal:buildvirtualraster", params)
             rutacapa=result['OUTPUT']
-            layer = QgsRasterLayer(rutacapa, cadena)
+            layer = QgsRasterLayer(rutacapa, cadena.upper())
             QgsProject.instance().addMapLayer(layer)
             #coloreo
 

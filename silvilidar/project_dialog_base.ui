@@ -119,7 +119,7 @@ mayor de 5 m.</string>
     </rect>
    </property>
    <property name="text">
-    <string>Incremento en f.c.c.................................</string>
+    <string>Incremento en Fracción de Cabida Cubierta.................................</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_19">

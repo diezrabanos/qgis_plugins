@@ -52,7 +52,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Silvilidar/)</string>
+    <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Lidar/)</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_select_path">

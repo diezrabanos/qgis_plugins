@@ -38,7 +38,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes,QgsApplication
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes,QgsApplication,QgsFillSymbol,QgsSingleSymbolRenderer
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtWidgets import QMessageBox
@@ -216,6 +216,35 @@ class Hectareas:
             vl.commitChanges()
         #coloco el puntero arriba del todo
         #QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
+            
+            #defino simbologia
+            sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'red'})
+            renderer=QgsSingleSymbolRenderer(sym1)
+            #defino formato etiquetas
+            layer_settings  = QgsPalLayerSettings()
+            text_format = QgsTextFormat()
+            text_format.setFont(QFont("Arial", 12))
+            text_format.setSize(12)
+            text_format.setColor(QColor("Red"))
+            layer_settings.setFormat(text_format)
+
+            # defino etiquetas
+            layer_settings.fieldName = '''concat(format_number("hectareas",2),' ha.')'''            
+            layer_settings.isExpression = True
+            layer_settings.enabled = True
+            layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+            vl.setLabelsEnabled(True)
+            vl.setLabeling(layer_settings)
+            vl.triggerRepaint()
+            vl.setRenderer(renderer)
+            #QgsProject.instance().addMapLayer(v1)
+            #QgsProject.instance().removeMapLayer(layer)
+            #canvas.freeze(False)
+            vl.updateExtents()
+            vl.commitChanges()
+            vl.updateExtents()
+            #canvas.setExtent(lyr9.extent())
+
    
      
         

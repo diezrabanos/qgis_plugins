@@ -43,7 +43,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsFillSymbol,QgsSingleSymbolRenderer,QgsPalLayerSettings,QgsTextFormat ,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils, QgsApplication
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsFillSymbol,QgsSingleSymbolRenderer,QgsPalLayerSettings,QgsTextFormat ,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils, QgsApplication, QgsTextBufferSettings
 from qgis.utils import iface
 
 #from qgis.gui import QgsMessageBar
@@ -101,6 +101,9 @@ class Sigpac:
         self.dlg.pushButton_limpiar.clicked.connect(self.limpiar)
         self.dlg.cbMUN.activated.connect(self.limpiar2)
         self.dlg.MUN.textChanged.connect(self.limpiar3)
+        #self.dlg.PRO.textChanged.connect(self.rellenarcombo)
+        self.dlg.cbPRO.activated.connect(self.rellenarcombo)
+        #self.dlg.cbPRO.currentIndexChanged.connect(self.recuerdaprovincia)
         #abre la nueva ventana de configuracion
         self.dlg.pushButton_configurar.clicked.connect(self.configurar)
         self.dlg2.pushButton_select_path1.clicked.connect(self.select_file1)
@@ -172,7 +175,9 @@ class Sigpac:
         #cojo los parametros necesarios del archivo de configuracion
         global rutaarchivomunicipiossigpac
         global rutacarpetarecintos
+        global miprovincia
         rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
+        rutaarchivomiprovincia=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\miprovincia.txt")
         if os.path.isfile(rutaarchivoconfiguracion) ==True:
             fileconfig = open(rutaarchivoconfiguracion, "r")
             fileconfigleido=fileconfig.readlines()
@@ -188,6 +193,19 @@ class Sigpac:
             fileconfig.close()
             rutaarchivomunicipiossigpac=""
             rutacarpetarecintos=""
+        #para recuperar la ultima provincia
+        if os.path.isfile(rutaarchivomiprovincia) ==True:
+            fileprovincia = open(rutaarchivomiprovincia, "r")
+            fileprovincialeido=fileprovincia.readlines()
+            try:
+                miprovincia= (fileprovincialeido[0].replace('\n',''))
+                fileprovincia.close()
+            except:
+                miprovincia=""
+        if os.path.isfile(rutaarchivomiprovincia) ==False:
+            fileprovincia= open(rutaarchivomiprovincia, "w")
+            fileprovincia.close()
+            miprovincia=""
         
     def select_file(self): 
         """seleciono la carpeta con los datos de entrada"""
@@ -237,7 +255,8 @@ class Sigpac:
             fileconfig.writelines("\n".join(contenido))
             fileconfig.close()
             iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
-
+   
+       
 
     
 
@@ -256,10 +275,62 @@ class Sigpac:
         self.dlg.MUN.setText('')##displayText()
     def limpiar3(self):
         self.dlg.cbMUN.setCurrentIndex(0)
-       
+    def rellenarcombo(self):
+        #print("1 EMPIEZO A RELLENAR COMBO con los municipios")
+        self.dlg.cbMUN.setCurrentIndex(0)
+        self.dlg.MUN.setText('')
+        self.dlg.cbMUN.clear()
+        global misdatos
+        global miprovincia
+        
+        #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+        QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+        #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+        layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+        #time.sleep(1)
+        ## ojo comprobar que layer existe
+
+        #trabajo con el indice de la provincia
+        global pro
+        indpro=self.dlg.cbPRO.currentIndex()
+        pro=str("{:02d}".format(int((provincias[int(indpro)][1]))))
+        miprovincia=pro   
+        rutaarchivomiprovincia=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\miprovincia.txt")
+        if len(miprovincia)>0:
+            #contenido=open(rutaarchivomiprovincia).read().splitlines()
+            #contenido.insert(0,miprovincia)
+            fileprovincia = open(rutaarchivomiprovincia, "w")
+            fileprovincia.writelines(str(miprovincia))#("\n".join(contenido))
+            fileprovincia.close()
+            #iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
+        
+        #genero una lista con lo leido de esa capa, SE ENTIENDE QUE TIENES UNA CAPA CON TODOS LOS MUNICIPIOS DEL SIGPAC DE TRABAJO. POR EJEMPLO EN LAS COMARCAS SOLO TENDRIA QUE TENER LAS SUYAS Y EN VALLADOLID TODA LA COMUNIDAD. eS EL SHAPEFILE O:/sigmena/carto/SIGPAC/42_sigpac_municipios_etrs89.shp EN MI CASO SE CONFIGURA EN EL TXT CON EL MENU. 
+        misdatos=[]
+        feats = [ feat for feat in layerlista.getFeatures() ]
+        for feature in feats:
+            lista=[]
+            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+
+            #filtro para meter solo los municipios de la provincia que me interesa
+            if str("{:02d}".format(int((feature.attributes()[idpro]))))==str(miprovincia):#antes ponia pro
+                idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
+                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+            
+                lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                misdatos.append(lista)
+
+        #ordeno por el primer elemento
+        misdatos.sort(key=lambda x: x[2])
+
+        #anado un elemneto enblanco en el desplegable
+        self.dlg.cbMUN.addItem("" ) 
+        for element in misdatos:
+            self.dlg.cbMUN.addItem( element[0])
+
+   
     def configurar(self):
         contras = QInputDialog.getText(None, 'CONTRASEÑA', 'Introduce la contraseña')
-        print (contras)
+        #print (contras)
         if contras[0]=='SIGMENITA':
             self.dlg2.show()
         else:
@@ -296,12 +367,8 @@ class Sigpac:
 
 
         canvas = self.iface.mapCanvas()
-        #para evitar problemas con la codificacion de los shapes con los municipios y las tildes
+        #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
         QSettings().setValue("/qgis/ignoreShapeEncoding", False)
-        
-
-            
-
 
         #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
         
@@ -310,50 +377,58 @@ class Sigpac:
         #layer = iface.activeLayer()
         ## ojo comprobar que layer existe
 
-        #genero una lista con lo leido de esa capa
+        #DEBERIA ESPERAR A QUE LA PROVINCIA CAMBIE PARA HACER ESTO Y CARGAR SOLO LO QUE CONCUERDE CON LA PROVINCIA.
+        #lo primero seria leer la provincia.
+        #Combo con als provincias
+        global provincias
+        global miprovincia
+        global misdatos
+        self.dlg.cbPRO.clear()
+        provincias=[["","00"],["Avila","05"],["Burgos","09"],["León","24"],["Palencia","34"],["Salamanca","37"],["Segovia","40"],["Soria","42"],["Valladolid","47"],["Zamora","49"]]
+        for elemento in provincias:
+                self.dlg.cbPRO.addItem( elemento[0])
+        #esto es para poner por defecto la ultima provincia que se haya puesto.
+        lista2=[]
+        for elemen in provincias:
+            lista2.append(elemen[1])
+        indice=lista2.index(miprovincia)
+        #pone la provincia que tienes en el txt.
+        self.dlg.cbPRO.setCurrentIndex(indice)
+        
+        #relleno los municipios con los datos de esa provincia
+        self.dlg.cbMUN.clear()
+        #esto deberia ser una funcion pero de momento asi se queda
+        pro=str("{:02d}".format(int(miprovincia)))
+
+        #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+        QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+        #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+        layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+
+        #genero una lista con lo leido de esa capa, SE ENTIENDE QUE TIENES UNA CAPA CON TODOS LOS MUNICIPIOS DEL SIGPAC DE TRABAJO. POR EJEMPLO EN LAS COMARCAS SOLO TENDRIA QUE TENER LAS SUYAS Y EN VALLADOLID TODA LA COMUNIDAD. eS EL SHAPEFILE O:/sigmena/carto/SIGPAC/42_sigpac_municipios_etrs89.shp EN MI CASO SE CONFIGURA EN EL TXT CON EL MENU. 
         misdatos=[]
         feats = [ feat for feat in layerlista.getFeatures() ]
         for feature in feats:
-            #if feature.geometry().type() != 2: #0 es ptos, 1 lineas y 2 poligonos QGis.Point:
-            #   iface.messageBar().pushMessage("Warning:", u"Debe selecionar una capa de poligonos", QgsMessageBar.WARNING, 10)
             lista=[]
-
-            idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
-            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
-            idmun=  layerlista.dataProvider().fieldNameIndex('C_MUNICIPI')
+            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI') 
+            #filtro para meter solo los municipios de la provincia que me interesa
             
-            lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
-            misdatos.append(lista)
-       
- 
-        #trato de rellenar el desplegable con las torretas
-        #self.dlg.cb1.clear()
-       
+            if str("{:02d}".format(int((feature.attributes()[idpro]))))==str(pro):
+                idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
+                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+            
+                lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                misdatos.append(lista)
+
         #ordeno por el primer elemento
-        misdatos.sort(key=lambda x: x[0])
-        #anado un elemneto enblanco en el desplegable
-        #self.dlg.cbPRO.addItem( "")
-        self.dlg.cbMUN.addItem("" )
-        #self.dlg.cbPOL.addItem( "")
-        #self.dlg.cbPAR.addItem( "") 
+        misdatos.sort(key=lambda x: x[2])
+
+        #anado un elemneto enblanco en el desplegable de municipios
+        self.dlg.cbMUN.addItem("" ) 
         for element in misdatos:
-            #self.dlg.cbPRO.addItem( element[0])
             self.dlg.cbMUN.addItem( element[0])
-            #self.dlg.cbPOL.addItem( element[0])
-            #self.dlg.cbPAR.addItem( element[0]) 
-        #count vertices if there is layer in project in order to show it when dialog is loaded
-        #layer = self.dlg.cb1.itemData(self.cb1.currentIndex())"""
-
-        
-    
-
-
-
-
-        
-        
-
-        
+        #hasta aqui ha rellenado los municipios del txt por defecto.
+   
 
 
 
@@ -377,14 +452,13 @@ class Sigpac:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+            #print("pulso en ok")
             archivo=self.dlg.ruta_archivo.text()
             #cojo lo que hay en cada recuadro o desplegable aqui variables que luego deberan estar en la cajita   OJO
             indmun=self.dlg.cbMUN.currentIndex()
-            print(indmun)
-
-            pro= self.dlg.PRO.text()##displayText()
+            indpro=self.dlg.cbPRO.currentIndex()
+            pro=str(provincias[int(indpro)][1])
             mun=self.dlg.MUN.text()##displayText()
-            print (mun)
             pol=self.dlg.POL.text()##displayText()
             par=self.dlg.PAR.text()##displayText()
             x=self.dlg.XX.text()##displayText()
@@ -394,17 +468,14 @@ class Sigpac:
             y=y.replace(',','.')
       
             
-
+            #trabajo con el indice de la provincia, aqui no llega creo
+            
             #si no hay nada en la casilla de municipio, coge la informacion del desplegable
             if mun == "":
-                mun=str(misdatos[int(indmun)-1][2])
-                print(mun)
-           
+                mun=str(misdatos[int(indmun)-1][2])#coge la ultima columna de mis datos
+            else:
+                mun=str("{:02d}".format(int(pro)))+str("{:03d}".format(int(mun)))
 
-
-           
-            #rutaarchivomunicipiossigpac=r"O:\sigmena\carto\SIGPAC\42_sigpac_municipios_etrs89.shp"
-            #rutacarpetarecintos=r"O:\sigmena\carto\SIGPAC\Sigpac_2019\Recintos"
             QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
             
 
@@ -434,7 +505,7 @@ class Sigpac:
                 
                
                 #cambio la simbologia
-                symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'red','size': '3',})
+                symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'blue','size': '3',})
                 vl2.renderer().setSymbol(symbol)
 
                 # update layer's extent when new features have been added
@@ -453,9 +524,9 @@ class Sigpac:
                 processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
                 sellectionado = layerbase.selectedFeatureIds()
                 #QgsProject.instance().addMapLayers([layerbase])
-                mun = str(layerbase.getFeature(sellectionado[0])["C_MUNICIPI"])
+                mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
                 #cuando se el municipio lo cargo y seleciono el punto de nuevo
-                caparecintos=os.path.join(rutacarpetarecintos,"RECFE19_"+str(mun)+".shp")
+                caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+str(mun)+".shp")
                 layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
                 #seleciono de nuevo por la localizacion sobre esta capa del municipio
                 processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
@@ -475,7 +546,7 @@ class Sigpac:
 
 
 
-            caparecintos=os.path.join(rutacarpetarecintos,"RECFE19_"+mun+".shp")
+            caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+mun+".shp")
             layer = QgsVectorLayer(caparecintos, mun, 'ogr')
             #QgsProject.instance().addMapLayers([layer])
 
@@ -486,19 +557,27 @@ class Sigpac:
             #ojo esto es lo que acabo de cambiar
             #QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(), "ESRI Shapefile", onlySelected=True)
             #lyr9=QgsVectorLayer(output_path,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+
             lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
 
             
 
 
-            sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'red'})
+            sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
             renderer=QgsSingleSymbolRenderer(sym1)
             #etiqueto
             layer_settings  = QgsPalLayerSettings()
             text_format = QgsTextFormat()
             text_format.setFont(QFont("Arial", 12))
             text_format.setSize(12)
-            text_format.setColor(QColor("Red"))
+            text_format.setColor(QColor("Blue"))
+            #le meto un buffer a la etiqueta
+            buffer_settings = QgsTextBufferSettings()
+            buffer_settings.setEnabled(True)
+            buffer_settings.setSize(1)
+            buffer_settings.setColor(QColor("white"))
+
+            text_format.setBuffer(buffer_settings)
             layer_settings.setFormat(text_format)
 
 

@@ -68,19 +68,6 @@
     <string/>
    </property>
   </widget>
-  <widget class="QLineEdit" name="PRO">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>80</y>
-     <width>59</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>42</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
@@ -531,9 +518,18 @@
     <string>Configurar</string>
    </property>
   </widget>
+  <widget class="QComboBox" name="cbPRO">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>80</y>
+     <width>181</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <tabstops>
-  <tabstop>PRO</tabstop>
   <tabstop>MUN</tabstop>
   <tabstop>POL</tabstop>
   <tabstop>PAR</tabstop>

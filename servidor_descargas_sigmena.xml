@@ -1,17 +1,17 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <plugins>
   
-  <pyqgis_plugin version="1.20.3" name="Sigpac" plugin_id="9991">
+  <pyqgis_plugin version="1.20.4" name="Sigpac" plugin_id="9991">
       <description>Carga el Sigpac en el Qgis, con la referencia o con una coordenada</description>
       <about>Permite cargar la parcela o recintos del Sigpac correspondientes a una provincia, poligono y parcela dada, tanto con su código como con un desplegable como con una coordenada</about>
-      <version>1.20.3</version>
+      <version>1.20.4</version>
       <trusted>True</trusted>
       <qgis_minimum_version>3.4.0</qgis_minimum_version>
       <qgis_maximum_version>3.20.0</qgis_maximum_version>
       <homepage>https://github.com/diezrabanos/qgis_plugins/</homepage>
-      <file_name>sigpac.1.20.3.zip</file_name>
+      <file_name>sigpac.1.20.4.zip</file_name>
       <author_name>F. Javier Díez Rábanos</author_name>
-      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/sigpac.1.20.3.zip?raw=true</download_url>
+      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/sigpac.1.20.4.zip?raw=true</download_url>
       <experimental>False</experimental>
       <deprecated>False</deprecated>
     </pyqgis_plugin>

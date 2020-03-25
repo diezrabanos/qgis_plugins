@@ -1,0 +1,5 @@
+42
+True
+Vinuesa
+[Almazan,Almarza,Agreda,Bayubas de Abajo,Burgo de Osma,Covaleda,Gomara,Navaleno,Soria,San Pedro Manrique,San Leonardo de Yague,Vinuesa]
+[['Montenegro de Cameros', 42, '42197'], ['Vinuesa', 42, '42340']]

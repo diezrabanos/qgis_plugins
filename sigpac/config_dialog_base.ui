@@ -160,7 +160,7 @@ SIGPAC(año)_(municipio)</string>
     </rect>
    </property>
    <property name="text">
-    <string>Capa provincia</string>
+    <string>Capa índice</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="ruta1">

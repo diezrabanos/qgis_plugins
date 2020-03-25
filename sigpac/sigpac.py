@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
@@ -53,8 +54,8 @@ import os
 import glob
 import re
 import sys
-#from qgis import *
 
+import ast
 import math
 import time
 import random
@@ -65,8 +66,13 @@ class Config:
 
 class Sigpac:
     """QGIS Plugin Implementation."""
+    #la variable almacen contendra en forma de lista los datos necesario de provincia,usodecomarca, comarca, comarcas y municipios
+
     def __init__(self, iface):
-       
+        global almacen
+        global almacen0
+        almacen=["",False,"",[],[]]
+        almacen0=["",False,"",[],[]]
         # Save reference to the QGIS interface
         self.iface = iface
         # initialize plugin directory
@@ -96,14 +102,24 @@ class Sigpac:
         #self.toolbar.setObjectName(u'Sigmena')            #creo que no hace nada
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
+        global usarcomarca
+        #ojo esto luego lo debera buscar del gui
+        if self.dlg.mycheckbox2.isChecked():
+            usarcomarca=True
+        else:
+            usarcomarca=False
+        
         self.first_start = None
         self.dlg.pushButton_select_path.clicked.connect(self.select_file)
         self.dlg.pushButton_limpiar.clicked.connect(self.limpiar)
         self.dlg.cbMUN.activated.connect(self.limpiar2)
         self.dlg.MUN.textChanged.connect(self.limpiar3)
-        #self.dlg.PRO.textChanged.connect(self.rellenarcombo)
-        self.dlg.cbPRO.activated.connect(self.rellenarcombo)
-        #self.dlg.cbPRO.currentIndexChanged.connect(self.recuerdaprovincia)
+        self.dlg.mycheckbox2.toggled.connect(self.pinchoenusarcomarca)#(self.usarcomarcascambia)
+
+        
+        self.dlg.cbPRO.activated.connect(self.pinchoenprovincia)#(self.rellenarcombocom)
+        self.dlg.cbCOM.activated.connect(self.pinchoencomarca)#(self.rellenarcombomun)
+
         #abre la nueva ventana de configuracion
         self.dlg.pushButton_configurar.clicked.connect(self.configurar)
         self.dlg2.pushButton_select_path1.clicked.connect(self.select_file1)
@@ -175,9 +191,12 @@ class Sigpac:
         #cojo los parametros necesarios del archivo de configuracion
         global rutaarchivomunicipiossigpac
         global rutacarpetarecintos
+        global usarcomarca
         global miprovincia
+        global micomarca
+        global rutacache
         rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
-        rutaarchivomiprovincia=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\miprovincia.txt")
+        rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
         if os.path.isfile(rutaarchivoconfiguracion) ==True:
             fileconfig = open(rutaarchivoconfiguracion, "r")
             fileconfigleido=fileconfig.readlines()
@@ -193,20 +212,8 @@ class Sigpac:
             fileconfig.close()
             rutaarchivomunicipiossigpac=""
             rutacarpetarecintos=""
-        #para recuperar la ultima provincia
-        if os.path.isfile(rutaarchivomiprovincia) ==True:
-            fileprovincia = open(rutaarchivomiprovincia, "r")
-            fileprovincialeido=fileprovincia.readlines()
-            try:
-                miprovincia= (fileprovincialeido[0].replace('\n',''))
-                fileprovincia.close()
-            except:
-                miprovincia=""
-        if os.path.isfile(rutaarchivomiprovincia) ==False:
-            fileprovincia= open(rutaarchivomiprovincia, "w")
-            fileprovincia.close()
-            miprovincia=""
         
+    
     def select_file(self): 
         """seleciono la carpeta con los datos de entrada"""
      
@@ -261,7 +268,7 @@ class Sigpac:
     
 
     def limpiar(self):
-        
+        global almacen
         #self.dlg.PRO.setText('')##displayText()
         self.dlg.cbMUN.setCurrentIndex(0)
         self.dlg.MUN.setText('')##displayText()
@@ -271,66 +278,312 @@ class Sigpac:
         self.dlg.YY.setText('')##displayText()
 
     def limpiar2(self):
-        
         self.dlg.MUN.setText('')##displayText()
     def limpiar3(self):
         self.dlg.cbMUN.setCurrentIndex(0)
-    def rellenarcombo(self):
-        #print("1 EMPIEZO A RELLENAR COMBO con los municipios")
-        self.dlg.cbMUN.setCurrentIndex(0)
-        self.dlg.MUN.setText('')
+    def pinchoenprovincia(self):
+        global almacen
+        global almacen0
         self.dlg.cbMUN.clear()
-        global misdatos
-        global miprovincia
-        
-        #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
-        QSettings().setValue("/qgis/ignoreShapeEncoding", False)
-        #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
-        layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
-        #time.sleep(1)
-        ## ojo comprobar que layer existe
-
-        #trabajo con el indice de la provincia
-        global pro
+        self.dlg.cbMUN.setCurrentIndex(0)
+        print("1 cojo la provincia seleccionada en el combo")
+        provincias=[["","00"],["Avila","05"],["Burgos","09"],["León","24"],["Palencia","34"],["Salamanca","37"],["Segovia","40"],["Soria","42"],["Valladolid","47"],["Zamora","49"]]
         indpro=self.dlg.cbPRO.currentIndex()
-        pro=str("{:02d}".format(int((provincias[int(indpro)][1]))))
-        miprovincia=pro   
-        rutaarchivomiprovincia=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\miprovincia.txt")
-        if len(miprovincia)>0:
-            #contenido=open(rutaarchivomiprovincia).read().splitlines()
-            #contenido.insert(0,miprovincia)
-            fileprovincia = open(rutaarchivomiprovincia, "w")
-            fileprovincia.writelines(str(miprovincia))#("\n".join(contenido))
-            fileprovincia.close()
-            #iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
-        
-        #genero una lista con lo leido de esa capa, SE ENTIENDE QUE TIENES UNA CAPA CON TODOS LOS MUNICIPIOS DEL SIGPAC DE TRABAJO. POR EJEMPLO EN LAS COMARCAS SOLO TENDRIA QUE TENER LAS SUYAS Y EN VALLADOLID TODA LA COMUNIDAD. eS EL SHAPEFILE O:/sigmena/carto/SIGPAC/42_sigpac_municipios_etrs89.shp EN MI CASO SE CONFIGURA EN EL TXT CON EL MENU. 
-        misdatos=[]
-        feats = [ feat for feat in layerlista.getFeatures() ]
-        for feature in feats:
-            lista=[]
-            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+        provincia=str("{:02d}".format(int((provincias[int(indpro)][1]))))
+        print ("escribo la provincia en el almacen")
+        almacen[0]=provincia
 
-            #filtro para meter solo los municipios de la provincia que me interesa
-            if str("{:02d}".format(int((feature.attributes()[idpro]))))==str(miprovincia):#antes ponia pro
+        #para ver si tengo que rellenar las comarcas
+        print ("leo del almacen si true o false y lo pongo en pantalla")
+        print ("lacabo de pinchar en provincia")
+        if almacen[1]=="False":
+            print("1.1 no tengo selecionado que use la comarca")
+            self.dlg.cbMUN.clear()
+            self.dlg.cbMUN.setCurrentIndex(0)
+            self.dlg.mycheckbox2.setChecked (False)
+            usarcomarca=False
+            almacen[2]=""
+            almacen[3]=[]
+            #ahora deberia rellenar los municipios de la cache o no
+            if almacen[0]==almacen0[0] and almacen0[1]=="False":
+                print("1.1.1 la provincia es la misma dela cache y no tengo que mirar las comarcas, asi que pongo los municipios de la cahce")
+                #la lista de municipios que tengo de la cache es la buena
+                municipios=almacen[4]
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbMUN.addItem("" ) 
+                for element in municipios:
+                    self.dlg.cbMUN.addItem( element[0])
+
+            else:
+                print("1.1.2 no tengo selecionado que use la comarca y la provincia es distinta de la de la cache asi que tengo que leer la capa de munciipios")
+                #tengo que sacar los municipios de la capa
+                print("tengo que leer todo el shp de municipios")
+                #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
                 idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
                 idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                feats = [ feat for feat in layerlista.getFeatures() ]
+                for feature in feats:
+                    lista=[]
+                    #filtro para meter solo los municipios de la provincia que me interesa
+                    if str(feature.attributes()[idpro])==almacen[0]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
+                        lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                        municipios.append(lista)
+                #ordeno por el primer elemento
+                municipios.sort(key=lambda x: x[2])
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbMUN.addItem("" ) 
+                for element in municipios:
+                    self.dlg.cbMUN.addItem( element[0])
+                almacen[4]=municipios
+                almacen[2]=""
+                almacen[3]=[]
+                
             
-                lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
-                misdatos.append(lista)
+        else:
+            print("1.2")
+            usarcomarca=True
+            almacen[1]="True"
+            self.dlg.mycheckbox2.setChecked (True)
+            #relleno las comarcas
+            #si la provincia es la del cache
+            if almacen[0]==almacen0[0]:
+                print("1.2.1")
+                #para rellenar las comarcas 
+                comarca=almacen[2]
+                comarcas=almacen0[3]
+                print("lo limpio")
+                self.dlg.cbCOM.clear()
+                #anado un elemneto enblanco en el desplegable
+                print("Estoy cambaido la comarca porque he cambiado la provincia.")
+                self.dlg.cbCOM.addItem("") 
+                for element in comarcas:
+                    self.dlg.cbCOM.addItem(element)#[0])
+                #ahora tendre que tocar en una comarca para despues poner los municipios correspondientes. eso es otro cantar
+                    
+            else:
+                print("1.2.2")
+                #relleno las comarcas busscando en la capa shp
+                self.dlg.cbCOM.setCurrentIndex(0)
+                self.dlg.cbCOM.clear()
+                #tengo que leer todos los municipios para sacar las comarcas de esa provincia
+                print("tengo que leer todo el shp de municipios.......................")
+                #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                #para rellenar el combo de comarcas
+                comarcas=[]
+                feats = [ feat for feat in layerlista.getFeatures() ]
+                idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+                idCOM =layerlista.dataProvider().fieldNameIndex('COMARCA')
+                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                for feature in feats:
+                    #filtro para meter solo las comarcas de la provincia que me interesa
+                    if str("{:02d}".format(int((feature.attributes()[idpro]))))==almacen[0]:#antes ponia pro
+                        elemento=feature.attributes()[idCOM]
+                        if elemento not in comarcas:
+                            comarcas.append(elemento)
+                #ordeno por el primer elemento
+                comarcas.sort(key=lambda x: x[0]) 
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbCOM.addItem("" ) 
+                for element in comarcas:
+                    self.dlg.cbCOM.addItem( element)
+                almacen[3]=comarcas
+                almacen[2]=""
+                almacen[4]=[]
 
-        #ordeno por el primer elemento
-        misdatos.sort(key=lambda x: x[2])
+                #por aqui he acabado, tendre que tocar en municipio
+                
+                
+        
+    def pinchoencomarca(self):
+        global almacen
+        global almacen0
+        self.dlg.cbMUN.clear()
+        self.dlg.cbMUN.setCurrentIndex(0)
+        #lo unico que tengo que hacer es rellenar los municipios
+        #saco que comarca he seleccionado
+        comarcas=almacen[3]
+        indcom=self.dlg.cbCOM.currentIndex()
+        comarca=str(comarcas[int(indcom)-1])
+        print ("2. comarca seleccionada en el combo",comarca)
+        almacen[2]=comarca
 
-        #anado un elemneto enblanco en el desplegable
+        #si la comarca es la del almacen0, entonces solo tengo que leer los municipios del almacen0
+        if almacen[2]==almacen0[2]:
+            print("2.1")
+            municipios=almacen0[4]
+        #tengo que sacar los municipios de la capa
+        else:
+            print("2.2 tengo que leer todo el shp de municipios")
+            #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+            QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+            #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+            idCOM = layerlista.dataProvider().fieldNameIndex('COMARCA')
+            idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
+            idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+            feats = [ feat for feat in layerlista.getFeatures() ]
+            municipios=[]
+            for feature in feats:
+                lista=[]
+                #filtro para meter solo los municipios de la provincia que me interesa
+                if str(feature.attributes()[idCOM])==almacen[2]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
+                    lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                    municipios.append(lista)
+            #ordeno por el primer elemento
+            municipios.sort(key=lambda x: x[2])
+            #anado un elemneto enblanco en el desplegable
         self.dlg.cbMUN.addItem("" ) 
-        for element in misdatos:
+        for element in municipios:
             self.dlg.cbMUN.addItem( element[0])
+        almacen[4]=municipios
+        
+        
+        
+        #ssi no tengo que leer la capa
+    def pinchoenusarcomarca(self):
+        
+        global almacen
+        global almacen0
+
+        print("3. he vaciado los municipios y comarcas")
+        self.dlg.cbCOM.setCurrentIndex(0)
+        self.dlg.cbCOM.clear()
+        self.dlg.cbMUN.setCurrentIndex(0)
+        self.dlg.cbMUN.clear()
+        if self.dlg.mycheckbox2.isChecked():
+            print("3.1")
+            almacen[1]="True"
+            almacen[2]=""
+            #debo rellenar las comarcas de esa provincia.
+            #si la provincia es la del almacen0, cojo esas comarcas y las meto al combo
+            provincia=almacen[0]
+            #para rellenar las comarcas
+            if almacen[0]==almacen0[0]:
+                print("3.1.1 provincia del almacen0")
+                if almacen0[3] ==['']:
+                    
+                    #almacen[3]
+                    #tendre que rellenar las comarcas como siempre
+                    print("3.1.1.1 tengo que leer todo el shp de municipios")
+                    #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                    QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                    #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                    layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                    #para rellenar el combo de comarcas
+                    comarcas=[]
+                    feats = [ feat for feat in layerlista.getFeatures() ]
+                    idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+                    idCOM =layerlista.dataProvider().fieldNameIndex('COMARCA')
+                    idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                    for feature in feats:
+                        #filtro para meter solo las comarcas de la provincia que me interesa
+                        if str("{:02d}".format(int((feature.attributes()[idpro]))))==almacen[0]:#antes ponia pro
+                            elemento=feature.attributes()[idCOM]
+                            if elemento not in comarcas:
+                                comarcas.append(elemento)
+                    #ordeno por el primer elemento
+                    comarcas.sort(key=lambda x: x[0])
+                    almacen[3]=comarcas
+                else:
+                    print("3.1.1.2")
+                    comarcas=almacen0[3]
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbCOM.addItem("") 
+                for element in comarcas:
+                    self.dlg.cbCOM.addItem(element)#[0])
+                #ahora tendre que tocar en una comarca para despues poner los municipios correspondientes. eso es otro cantar
+                    
+            #si la provincia no es la del almacen busco todas las que coincidan en la capa con esa provincia        
+            else:
+                print("3.1.2")
+                #tengo que leer todos los municipios para sacar las comarcas de esa provincia
+                print("tengo que leer todo el shp de municipios")
+                #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                #para rellenar el combo de comarcas
+                comarcas=[]
+                feats = [ feat for feat in layerlista.getFeatures() ]
+                idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+                idCOM =layerlista.dataProvider().fieldNameIndex('COMARCA')
+                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                for feature in feats:
+                    #filtro para meter solo las comarcas de la provincia que me interesa
+                    if str("{:02d}".format(int((feature.attributes()[idpro]))))==almacen[0]:#antes ponia pro
+                        elemento=feature.attributes()[idCOM]
+                        if elemento not in comarcas:
+                            comarcas.append(elemento)
+                #ordeno por el primer elemento
+                comarcas.sort(key=lambda x: x[0])  
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbCOM.addItem("" ) 
+                for element in comarcas:
+                    self.dlg.cbCOM.addItem( element)
+                almacen[3]=comarcas
+        else:#si no esta checkeado el usar las comarcas
+            print("3.2")
+            almacen[1]="False"
+            almacen[2]=""
+            almacen[3]=[]
+            almacen[4]=[]
+            #deberia rellenar los municipios de la provincia seleccionada
+            #si la provincia seleccionada es la del cache, solo tengo que cogerlo de la cache
+
+            
+
+            print("si solo quito el usar comarcas y no tengo la provincia orignal voy por aqui")
+            #tengo que sacar los municipios de la capa
+            print("tengo que leer todo el shp de municipios")
+            #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+            QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+            #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+            idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
+            idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+            #idCOM=layerlista.dataProvider().fieldNameIndex('COMARCA')
+            feats = [ feat for feat in layerlista.getFeatures() ]
+            municipios=[]
+            for feature in feats:
+                lista=[]
+                #filtro para meter solo los municipios de la provincia que me interesa
+                if str(feature.attributes()[idpro])==almacen[0]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
+                    lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                    municipios.append(lista)
+            #ordeno por el primer elemento
+            municipios.sort(key=lambda x: x[2])
+            almacen[4]=municipios
+            #anado un elemneto enblanco en el desplegable
+            self.dlg.cbMUN.addItem("" ) 
+            for element in municipios:
+                self.dlg.cbMUN.addItem( element[0])
+        
+                
+            
+            
+
+
+        
+        
+
+
+
+
+    
+ 
 
    
     def configurar(self):
         contras = QInputDialog.getText(None, 'CONTRASEÑA', 'Introduce la contraseña')
-        #print (contras)
         if contras[0]=='SIGMENITA':
             self.dlg2.show()
         else:
@@ -362,8 +615,52 @@ class Sigpac:
 
 
     def run(self):
+        global almacen
+        global almacen0
         global rutaarchivomunicipiossigpac
         global rutacarpetarecintos
+        #global provincias
+        #global usarcomarca
+        #global miprovincia
+        #global micomarca
+        #global misdatos
+        #global misdatoscomarcas
+        #global mismunicipios
+
+        #lo primero leer la cache
+        #para recuperar los datos de la ultima vez que se cerro el complemento
+        print("0 inicio el run")
+        print ("leo la cache.........................................................................................................")
+        print("construyo el almecen que es una lista, se nutre de los datos de la cache, postseriormente modificados si pinchas en un combo o boton")
+        
+        rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
+        if os.path.isfile(rutacache) ==True:
+            filecache = open(rutacache, "r")
+            filecacheleido=filecache.readlines()
+            try:
+                miprovincia= (filecacheleido[0].replace('\n',''))
+                usarcomarca= (filecacheleido[1].replace('\n',''))
+                micomarca= (filecacheleido[2].replace('\n',''))
+                miscomarcas=(filecacheleido[3].replace('\n','')).strip('][').split(',') #convierto una str en una list
+                mismunicipios=ast.literal_eval((filecacheleido[4].replace('\n','')).replace(" [[","[[").replace("]] ","]]"))#.split(',')) #convierto una str en una list
+                filecache.close()
+            except:
+                print("esta no encuentra el file cache")
+                
+        
+        print("cache leida......................................................................................................................")
+        almacen0[0]=miprovincia
+        almacen0[1]=usarcomarca
+        almacen0[2]=micomarca
+        almacen0[3]=miscomarcas
+        almacen0[4]=mismunicipios
+        #hago una copia que no modificare para usar como cache
+        almacen[0]=miprovincia
+        almacen[1]=usarcomarca
+        almacen[2]=micomarca
+        almacen[3]=miscomarcas
+        almacen[4]=mismunicipios
+
 
 
         canvas = self.iface.mapCanvas()
@@ -379,56 +676,67 @@ class Sigpac:
 
         #DEBERIA ESPERAR A QUE LA PROVINCIA CAMBIE PARA HACER ESTO Y CARGAR SOLO LO QUE CONCUERDE CON LA PROVINCIA.
         #lo primero seria leer la provincia.
-        #Combo con als provincias
-        global provincias
-        global miprovincia
-        global misdatos
+        
+        #Relleno el Combo con als provincias
+        print("empiezo a rellenar los desplegables, las provincias del almacen ")
         self.dlg.cbPRO.clear()
         provincias=[["","00"],["Avila","05"],["Burgos","09"],["León","24"],["Palencia","34"],["Salamanca","37"],["Segovia","40"],["Soria","42"],["Valladolid","47"],["Zamora","49"]]
         for elemento in provincias:
                 self.dlg.cbPRO.addItem( elemento[0])
-        #esto es para poner por defecto la ultima provincia que se haya puesto.
+        #esto es para poner por defecto la provincia que tenga en el almacen
         lista2=[]
         for elemen in provincias:
             lista2.append(elemen[1])
-        indice=lista2.index(miprovincia)
-        #pone la provincia que tienes en el txt.
+        indice=lista2.index(almacen[0])
+        print("indice de provincia dentro del run",indice)
+        #pone la provincia en el combo que tienes en el txt.
         self.dlg.cbPRO.setCurrentIndex(indice)
         
-        #relleno los municipios con los datos de esa provincia
+        #para ver si tengo que rellenar las comarcas
+        print ("leo del almacen si true o false y lo pongo en pantalla")
+        if almacen[1]=="False":
+            self.dlg.mycheckbox2.setChecked (False)
+            usarcomarca=False
+            almacen[1]="False"
+            almacen[2]=""
+            almacen[3]=[]
+        else:
+            usarcomarca=True
+            almacen[1]="True"
+            self.dlg.mycheckbox2.setChecked (True)
+        
+        
+        #para rellenar las comarcas 
+            
+        print("paso a las comarcas, primero leo la que tengo en el almacen")
+        comarca=almacen[2]
+        comarcas=almacen[3]
+        print("lo limpio")
+        self.dlg.cbCOM.clear()
+        #anado un elemneto enblanco en el desplegable
+        print("Estoy en el run, dentro de lo que se abre la primera vez.")
+        self.dlg.cbCOM.addItem("") 
+        for element in comarcas:
+            self.dlg.cbCOM.addItem(element)#[0])
+        if almacen[1]=="True":
+            #pongo el indice en la que diga la cache
+            indice=comarcas.index(comarca)
+            self.dlg.cbCOM.setCurrentIndex(indice+1)#lo que pone en la ventanita, que esta bien
+        else:
+            pass
+
+        #relleno los municipios que tengo en la cache
+        print ("leo los municipios del almacen")
+        municipios=almacen[4]
+        print("empiezo a rellenar el combo con los municipios")
         self.dlg.cbMUN.clear()
-        #esto deberia ser una funcion pero de momento asi se queda
-        pro=str("{:02d}".format(int(miprovincia)))
 
-        #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
-        QSettings().setValue("/qgis/ignoreShapeEncoding", False)
-        #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
-        layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
-
-        #genero una lista con lo leido de esa capa, SE ENTIENDE QUE TIENES UNA CAPA CON TODOS LOS MUNICIPIOS DEL SIGPAC DE TRABAJO. POR EJEMPLO EN LAS COMARCAS SOLO TENDRIA QUE TENER LAS SUYAS Y EN VALLADOLID TODA LA COMUNIDAD. eS EL SHAPEFILE O:/sigmena/carto/SIGPAC/42_sigpac_municipios_etrs89.shp EN MI CASO SE CONFIGURA EN EL TXT CON EL MENU. 
-        misdatos=[]
-        feats = [ feat for feat in layerlista.getFeatures() ]
-        for feature in feats:
-            lista=[]
-            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI') 
-            #filtro para meter solo los municipios de la provincia que me interesa
-            
-            if str("{:02d}".format(int((feature.attributes()[idpro]))))==str(pro):
-                idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
-                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
-            
-                lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
-                misdatos.append(lista)
-
-        #ordeno por el primer elemento
-        misdatos.sort(key=lambda x: x[2])
-
+        #misdatos=ast.literal_eval(mismunicipios)
         #anado un elemneto enblanco en el desplegable de municipios
         self.dlg.cbMUN.addItem("" ) 
-        for element in misdatos:
-            self.dlg.cbMUN.addItem( element[0])
-        #hasta aqui ha rellenado los municipios del txt por defecto.
-   
+        for element in municipios:
+            self.dlg.cbMUN.addItem(element[0])#( element[0])
+
 
 
 
@@ -452,11 +760,21 @@ class Sigpac:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-            #print("pulso en ok")
+            comarcas=almacen[3]
+            municipios=almacen[4]
+            usarcomarca=almacen[1]
+            print("0.1 pulso en ok")
+            
             archivo=self.dlg.ruta_archivo.text()
-            #cojo lo que hay en cada recuadro o desplegable aqui variables que luego deberan estar en la cajita   OJO
+            #cojo lo que hay en cada recuadro o desplegable aqui variables que luego deberan estar en la cajita   primero los indicesOJO
             indmun=self.dlg.cbMUN.currentIndex()
             indpro=self.dlg.cbPRO.currentIndex()
+            indcom=self.dlg.cbCOM.currentIndex()
+            #saco los valores correspondientes
+            try:
+                comarca=str(comarcas[int(indcom)-1])
+            except:
+                comarca=""
             pro=str(provincias[int(indpro)][1])
             mun=self.dlg.MUN.text()##displayText()
             pol=self.dlg.POL.text()##displayText()
@@ -466,15 +784,20 @@ class Sigpac:
             
             x=x.replace(',','.')
             y=y.replace(',','.')
-      
-            
-            #trabajo con el indice de la provincia, aqui no llega creo
-            
-            #si no hay nada en la casilla de municipio, coge la informacion del desplegable
+         
+            #si no hay nada en la casilla de municipio, coge la informacion del desplegable mun es un numero del estilo 42001
             if mun == "":
-                mun=str(misdatos[int(indmun)-1][2])#coge la ultima columna de mis datos
+                mun=str(municipios[int(indmun)-1][2])#coge la ultima columna de mis datos
             else:
                 mun=str("{:02d}".format(int(pro)))+str("{:03d}".format(int(mun)))
+
+           
+            rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
+            #lo escribo en el txt, mavhacando lo que ya tenia
+            f=open(rutacache,"w")
+            escribir=str(pro)+"\n"+str(usarcomarca)+"\n"+comarca+"\n"+str(comarcas).replace("'","").replace(", ",",")+"\n"+str(municipios)+"\n"
+            f.write(escribir)
+            f.close()
 
             QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
             
@@ -545,7 +868,6 @@ class Sigpac:
                 
 
 
-
             caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+mun+".shp")
             layer = QgsVectorLayer(caparecintos, mun, 'ogr')
             #QgsProject.instance().addMapLayers([layer])
@@ -557,7 +879,6 @@ class Sigpac:
             #ojo esto es lo que acabo de cambiar
             #QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(), "ESRI Shapefile", onlySelected=True)
             #lyr9=QgsVectorLayer(output_path,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-
             lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
 
             

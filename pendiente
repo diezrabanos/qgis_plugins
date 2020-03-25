@@ -4,4 +4,3 @@ paleta de colores y simbologia sigmena a sigmena.py
 el xy que ponga las coordenadas como le digas
 el sigpac que funcione con la nueva estructhura y despues recuerde la provincia
 sigpac que se carge con un toque en la pantalla
-sigpac que no se cargen elementos en la lista de municipios si ya hay cargados, o que se borren cada vez que toques algo y se vuelvan a cargar siempre.

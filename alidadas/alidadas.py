@@ -39,7 +39,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsApplication
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsApplication, QgsTextBufferSettings
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtWidgets import QMessageBox
@@ -57,6 +57,8 @@ import math
 import time
 
 import webbrowser
+
+import pyproj
 
 class Config:
     def __init__(self, iface):
@@ -334,7 +336,7 @@ class Alidadas:
         def generapunto(x,y):
             #creo una capa de puntos temporal con los resultados
             # create layer
-            vl = QgsVectorLayer("Point", "Pto_Cruce", "memory")
+            vl = QgsVectorLayer("Point?crs=epsg:25830", "Pto_Cruce", "memory")
             pr = vl.dataProvider()
             #print ("ok creada la capa")
             vl.startEditing()
@@ -380,7 +382,7 @@ class Alidadas:
             #print (m)
 
             # create a new memory layer
-            v_layer = QgsVectorLayer("LineString", "visual", "memory")
+            v_layer = QgsVectorLayer("LineString?crs=epsg:25830", "visual", "memory")
             pr = v_layer.dataProvider()
             # create a new feature
             seg = QgsFeature()
@@ -395,6 +397,15 @@ class Alidadas:
             v_layer.renderer().setSymbol(symbol3)
             # show the line  
             QgsProject.instance().addMapLayers([v_layer])
+
+        def deg_to_dms(deg, type='lat'):
+                decimals, number = math.modf(deg)
+                d = int(number)
+                m = int(decimals * 60)
+                s = (deg - d - m / 60) * 3600.00
+                compass = {            'lat': ('N','S'),            'lon': ('E','W')        }
+                compass_str = compass[type][0 if d >= 0 else 1]
+                return '{}º{}\'{:.2f}"{}'.format(abs(d), abs(m), abs(s), compass_str)
 
 
 
@@ -429,6 +440,10 @@ class Alidadas:
         #ordeno por el primer elemento
         misdatos.sort(key=lambda x: x[0])
         #anado un elemneto enblanco en el desplegable
+        self.dlg.cb1.clear()
+        self.dlg.cb2.clear()
+        self.dlg.cb3.clear()
+        self.dlg.cb4.clear()
         self.dlg.cb1.addItem( "")
         self.dlg.cb2.addItem("" )
         self.dlg.cb3.addItem( "")
@@ -602,21 +617,32 @@ class Alidadas:
                 if x!=0 and y!=0:
                     #creo una capa temporal con los resultados
                     # create layer
-                    vl2 = QgsVectorLayer("Point", "MejorResultado", "memory")
+                    vl2 = QgsVectorLayer("Point?crs=epsg:25830", "MejorResultado", "memory")
                     pr2 = vl2.dataProvider()
                     #print ("ok creada la capa resultado final")
                     vl2.startEditing()
+                    #calculo las coordenadas geograficas
+                    huso=30
+                    origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                    destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                    xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
+
+                    xx=(deg_to_dms(xxx,'lon'))
+                    yy=(deg_to_dms(yyy))
+
                     # add fields
                     pr2.addAttributes([QgsField("error", QVariant.Int),
-                                    QgsField("x",  QVariant.Int),
-                                    QgsField("y", QVariant.Double)])
+                                    QgsField("x",  QVariant.Double),
+                                    QgsField("y", QVariant.Double),
+                                     QgsField("xx",  QVariant.String),
+                                       QgsField("yy",  QVariant.String)])
                     vl2.updateFields() 
                     # tell the vector layer to fetch changes from the provider
                     #print ("ok creados los campos")
                     #$add a feature
                     fet = QgsFeature()
                     fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(x,y)))
-                    fet.setAttributes([error, x, y])
+                    fet.setAttributes([error, x, y,xx,yy])
                     pr2.addFeatures([fet])
                     print("MEJOR RESULTADO")
                     print(int(resultado[0]),int(resultado[1]))
@@ -625,8 +651,9 @@ class Alidadas:
                     symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'red','size': '10',})
                     vl2.renderer().setSymbol(symbol)
 
-                    #etiqueto con la x e y
                     
+                    
+                    #etiqueto con la x e y
                     layer_settings  = QgsPalLayerSettings()
                     text_format = QgsTextFormat()
 
@@ -634,15 +661,16 @@ class Alidadas:
                     text_format.setSize(12)
                     text_format.setColor(QColor("Orange"))
 
-                    #buffer_settings = QgsTextBufferSettings()
-                    #buffer_settings.setEnabled(True)
-                    #buffer_settings.setSize(0.10)
-                    #buffer_settings.setColor(QColor("Orange"))
+                    # meto un buffer a la etiqueta
+                    buffer_settings = QgsTextBufferSettings()
+                    buffer_settings.setEnabled(True)
+                    buffer_settings.setSize(1)
+                    buffer_settings.setColor(QColor("white"))
 
-                    #text_format.setBuffer(buffer_settings)
+                    text_format.setBuffer(buffer_settings)
                     layer_settings.setFormat(text_format)
                     #myexp=QgsExpression('''concat('X: ',"X",' Y: ',"Y")''')
-                    layer_settings.fieldName = '''concat('X: ',round("X",0),' Y: ',round("Y"),0)'''
+                    layer_settings.fieldName = '''concat('X: ',round("X",0),' Y: ',round("Y",0),'\n','Lat: ',"yy",' Lon: ',"xx")'''
                     layer_settings.isExpression = True
                     #layer_settings.placement = 7
                     #layer_settings.quadOffset = QgsPalLayerSettings.QuadrantBelow

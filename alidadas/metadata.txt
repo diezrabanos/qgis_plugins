@@ -13,7 +13,7 @@ name=Alidadas
 qgisMinimumVersion=3.0
 
 description=Permite hacer el cruce de visuales desde varias torres en QGIS 
-version=1.0.2
+version=1.0.4
 author=F. Javier Diez Rabanos
 email=dierabfr@jcyl.es
 

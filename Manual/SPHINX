@@ -3,33 +3,34 @@ AYUDA COMPLEMENTOS SIGMENA
 ***************
 SIGPAC
 ***************
-TEXTO.
+Permite cargar una parcela o sus recintos del Sigpac correspondientes a una provincia, polígono y parcela dada, tanto con su código SIGPAC, como con un desplegable, como con una coordenada. Recuerda cual ha sido la última selección que se ha efectuado para acelerar el proceso de busqueda. Actualmente funciona con el SIGPAC 2020.
+
 
 .. image:: images\sigpac.gif
 
 ***************
 ALIDADAS
 ***************
-TEXTO.
+Permite el cruce de las visuales desde varios puestos de vigilancia de incendios simultaneamente hasta 4 y determina todos los cruces posibles y la opción más problable teniendo en cuenta los angulos de cruce y las distancias. Etiqueta la coordenada resultante tanto en UTM como en geográficas.
 
 ***************
 DESCARGA Y CARGA DE GPS
 ***************
-TEXTO.
+Permite la descarga y carga de un navegador garmin tanto de la serie XL12, como etrex tanto legend, vista o 20x 30x. Descarga los waypoints tracks o rutas en el gps, siempre dentro de la carpeta c:/sigmena/gps. Despues puede seleccionarse los de interés y exportarse a un lugar más conveniente dentro de SIGMENA. Tambien permite la carga del gps con puntos o lineas de una capa shape. En caso de tener un poligono lo transforma en lineas y luego lo envía. Hace siempre las transformaciones del sistema de referencia entre el que utiliza el GPS y el que emplea el usuario en el QGIS.
 
 .. image:: images\gpsdescargacarga.gif
 
 ***************
 HECTAREAS
 ***************
-TEXTO.
+Seleccionando una capa de polígonos añade una columna llamada hectareas y calcula la superficie de cada elemento. Después aplica simboogia a la capa y etiqueta la superficie de cada polígono.
 
 .. image:: images\hectareas.gif
 
 ***************
 ZOOM SIGMENA
 ***************
-TEXTO.
+Permite hacer zoom a una coordenada dada tanto en sistema de referecnia etrs89 como ed50 en utm tanto 29 como 30. Lo mismo sucede con las coordenadas geográficas. Hay una ayuda para ver en este caso como separar los grados minutos y segundos. 
 
 .. image:: images\zoomsigmena.gif
 
@@ -37,7 +38,7 @@ TEXTO.
 ***************
 PUNTOS SIGMENA
 ***************
-TEXTO.
+Permite añadir a una capa de puntos una coordenada tecleando su x e y y a continuación se abre un formulario para facilitar el relleno del resto de los campos. de la tabla
 
 .. image:: images\puntossigmena.gif
 
@@ -45,7 +46,7 @@ TEXTO.
 ***************
 PUNTOS A POLIGONOS
 ***************
-TEXTO.
+Convierte los puntos de una capa, todos o si hay alguno selecionado solo estos, en una capa de polígonos. Util para convertir un levantamiento de waypoints en polígonos.
 
 .. image:: images\ptos2pol.gif
 

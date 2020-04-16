@@ -13,6 +13,8 @@ ALIDADAS
 ***************
 Permite el cruce de las visuales desde varios puestos de vigilancia de incendios simultaneamente hasta 4 y determina todos los cruces posibles y la opción más problable teniendo en cuenta los angulos de cruce y las distancias. Etiqueta la coordenada resultante tanto en UTM como en geográficas.
 
+.. image:: images\alidadas.gif
+
 ***************
 DESCARGA Y CARGA DE GPS
 ***************
@@ -53,6 +55,7 @@ Convierte los puntos de una capa, todos o si hay alguno selecionado solo estos, 
 ***************
 SILVILIDAR
 ***************
-TEXTO.
+Se trata de la creación de una metodología y de una herramienta informática (SilviLiDAR) que analiza una serie de parámetros selvícolas obtenidos a partir de los datos LiDAR y, con la utilización de un arbol de decisión construido en base a la estructura, estado de desarrollo y grado de competencia del arbolado, clasifica por celdas (cuadriculas basicas) el territorio por tipos de masa y su posible necesidad de actuacion selvicola, y lo expresa cartograficamente a traves de QGIS.
+
 
 .. image:: images\silvilidar.gif

@@ -4,41 +4,42 @@
 <h1>AYUDA COMPLEMENTOS SIGMENA<a class="headerlink" href="#ayuda-complementos-sigmena" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="sigpac">
 <h2>SIGPAC<a class="headerlink" href="#sigpac" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="s53fa2b9bab934bf197653b4058d22b09">TEXTO.</p>
+<p class="sphinx-has-comment" id="s8b3d12d5dbfa4beb8d288aa3e3037e2a">Permite cargar una parcela o sus recintos del Sigpac correspondientes a una provincia, polígono y parcela dada, tanto con su código SIGPAC, como con un desplegable, como con una coordenada. Recuerda cual ha sido la última selección que se ha efectuado para acelerar el proceso de busqueda. Actualmente funciona con el SIGPAC 2020.</p>
 <img alt="images\sigpac.gif" src="images\sigpac.gif">
 </div>
 <div class="section" id="alidadas">
 <h2>ALIDADAS<a class="headerlink" href="#alidadas" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="sb05ca808b1f2454f9a2aa95654c05bdd">TEXTO.</p>
+<p class="sphinx-has-comment" id="s934f414a75534c589c943813522f5ae7">Permite el cruce de las visuales desde varios puestos de vigilancia de incendios simultaneamente hasta 4 y determina todos los cruces posibles y la opción más problable teniendo en cuenta los angulos de cruce y las distancias. Etiqueta la coordenada resultante tanto en UTM como en geográficas.</p>
+<img alt="images\alidadas.gif" src="images\alidadas.gif">
 </div>
 <div class="section" id="descarga-y-carga-de-gps">
 <h2>DESCARGA Y CARGA DE GPS<a class="headerlink" href="#descarga-y-carga-de-gps" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="s931525fe716247938ecb528191d1ef80">TEXTO.</p>
+<p class="sphinx-has-comment" id="s30e113256c28421fbc7c0aa33e7e61ca">Permite la descarga y carga de un navegador garmin tanto de la serie XL12, como etrex tanto legend, vista o 20x 30x. Descarga los waypoints tracks o rutas en el gps, siempre dentro de la carpeta c:/sigmena/gps. Despues puede seleccionarse los de interés y exportarse a un lugar más conveniente dentro de SIGMENA. Tambien permite la carga del gps con puntos o lineas de una capa shape. En caso de tener un poligono lo transforma en lineas y luego lo envía. Hace siempre las transformaciones del sistema de referencia entre el que utiliza el GPS y el que emplea el usuario en el QGIS.</p>
 <img alt="images\gpsdescargacarga.gif" src="images\gpsdescargacarga.gif">
 </div>
 <div class="section" id="hectareas">
 <h2>HECTAREAS<a class="headerlink" href="#hectareas" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="s001f6d04040f4d4aa7809a5e3d3cca9f">TEXTO.</p>
+<p class="sphinx-has-comment" id="s2611e6869be842b89dd645fd804a8b0e">Seleccionando una capa de polígonos añade una columna llamada hectareas y calcula la superficie de cada elemento. Después aplica simboogia a la capa y etiqueta la superficie de cada polígono.</p>
 <img alt="images\hectareas.gif" src="images\hectareas.gif">
 </div>
 <div class="section" id="zoom-sigmena">
 <h2>ZOOM SIGMENA<a class="headerlink" href="#zoom-sigmena" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="s02e0000def97497b9436a36402746213">TEXTO.</p>
+<p class="sphinx-has-comment" id="s26eb1f5bf5ce4a2d81c29919fd4777de">Permite hacer zoom a una coordenada dada tanto en sistema de referecnia etrs89 como ed50 en utm tanto 29 como 30. Lo mismo sucede con las coordenadas geográficas. Hay una ayuda para ver en este caso como separar los grados minutos y segundos.</p>
 <img alt="images\zoomsigmena.gif" src="images\zoomsigmena.gif">
 </div>
 <div class="section" id="puntos-sigmena">
 <h2>PUNTOS SIGMENA<a class="headerlink" href="#puntos-sigmena" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="s24e6cf5ac08e4572826177c9fbe53e18">TEXTO.</p>
+<p class="sphinx-has-comment" id="s5abde5d1fca54da89cf20541cb7792c7">Permite añadir a una capa de puntos una coordenada tecleando su x e y y a continuación se abre un formulario para facilitar el relleno del resto de los campos. de la tabla</p>
 <img alt="images\puntossigmena.gif" src="images\puntossigmena.gif">
 </div>
 <div class="section" id="puntos-a-poligonos">
 <h2>PUNTOS A POLIGONOS<a class="headerlink" href="#puntos-a-poligonos" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="s832f53de29c84ce295c966f5196d85d4">TEXTO.</p>
+<p class="sphinx-has-comment" id="s291ab2e0726741118cca9e0e7f07e6a6">Convierte los puntos de una capa, todos o si hay alguno selecionado solo estos, en una capa de polígonos. Util para convertir un levantamiento de waypoints en polígonos.</p>
 <img alt="images\ptos2pol.gif" src="images\ptos2pol.gif">
 </div>
 <div class="section" id="silvilidar">
 <h2>SILVILIDAR<a class="headerlink" href="#silvilidar" title="Permalink to this headline">¶</a></h2>
-<p class="sphinx-has-comment" id="s71cccc4bcd594735aa3279cd27bec74e">TEXTO.</p>
+<p class="sphinx-has-comment" id="s35a003cebf5044688e0911e72d170544">Se trata de la creación de una metodología y de una herramienta informática (SilviLiDAR) que analiza una serie de parámetros selvícolas obtenidos a partir de los datos LiDAR y, con la utilización de un arbol de decisión construido en base a la estructura, estado de desarrollo y grado de competencia del arbolado, clasifica por celdas (cuadriculas basicas) el territorio por tipos de masa y su posible necesidad de actuacion selvicola, y lo expresa cartograficamente a traves de QGIS.</p>
 <img alt="images\silvilidar.gif" src="images\silvilidar.gif">
 </div>
 </div>

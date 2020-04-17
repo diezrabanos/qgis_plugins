@@ -1,4 +1,5 @@
 
+
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
@@ -195,15 +196,43 @@ class Informes:
         global tablavvpps
         carpetasalida= '/'.join(capadetrabajo.split("/")[:-1])+"/capas_intermedias"
         sufijo=str(elementofijo.split("/")[-1])
+        print("sufijo")
         print (sufijo)
         salida=carpetasalida+"/"+sufijo
         print(capadetrabajo,elementofijo)
         #habra que hacer que carge la capa de mups.
         print("salida",salida)
-        processing.run("native:selectbylocation", {'INPUT':elementofijo,'PREDICATE':[0],'INTERSECT':capadetrabajo,'METHOD':0})
-        processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})
         
-        layer= QgsVectorLayer(salida, sufijo[-4], "ogr")
+        layer = QgsVectorLayer(elementofijo, sufijo, "ogr")#no es necesario con el saveselectedfeatures
+
+        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capadetrabajo,'METHOD':0})
+        #processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})#es lo mas facil pero cambia la codifiacion
+        #guardo los selecionados con la codifiacion indicada
+        selection = layer.selectedFeatures()
+        
+        feats = [feat for feat in layer.selectedFeatures()]
+        #hay que comprobar de que tipo es la capa si lineas o poligonos
+        print("tipo ",layer.wkbType())
+        if layer.wkbType()==3 or layer.wkbType()==6 :
+            print("es poligono")
+            mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", "duplicated_layer", "memory")
+        if layer.wkbType()==2 or layer.wkbType()==5:
+            print("es linea")
+            mem_layer = QgsVectorLayer("LineString?crs=epsg:25830", "duplicated_layer", "memory")
+
+        mem_layer_data = mem_layer.dataProvider()
+        attr = layer.dataProvider().fields().toList()
+        mem_layer_data.addAttributes(attr)
+        mem_layer.updateFields()
+        mem_layer_data.addFeatures(feats)
+        QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida,"utf-8",driverName="ESRI Shapefile")
+        #QgsProject.instance().addMapLayer(mem_layer)
+        
+        #hasta aqui para guardar lo selecionado
+
+        
+        layer= QgsVectorLayer(salida, sufijo, "ogr")
+        QgsProject.instance().addMapLayer(layer)
         #layer.setProviderEncoding(u'UTF-8')
         #layer.dataProvider().setEncoding(u'UTF-8')
 
@@ -307,6 +336,7 @@ class Informes:
             #print (capa)
             #if capa not in capasinteresantes:
             QgsProject.instance().removeMapLayers( [capa] )
+            
         del(capas)
 
        
@@ -391,11 +421,16 @@ class Informes:
             #le meto un buffer a la etiqueta
            
             layer_settings.setFormat(text_format)
-            layer_settings.fieldName = '''concat("NOMBRE",' ')'''            
+            layer_settings.fieldName = "NOMBRE"
+            #layer_settings.fieldName = '''concat("NOMBRE",' ')'''            
             layer_settings.isExpression = True
             layer_settings.enabled = True
+            layer_settings.placement = 2
+
+            
             layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
             vvpp.setLabelsEnabled(True)
+            
             vvpp.setLabeling(layer_settings)
             
             vvpp.triggerRepaint()
@@ -468,10 +503,6 @@ class Informes:
         t3.setStyle(tstyle)
         t3.wrapOn(c, width, height)
         t3.drawOn(c, 250*mm, 5*mm)        
-        
-        
-
-        
 
         #aqui mete un texto
         styles = getSampleStyleSheet()    
@@ -612,4 +643,4 @@ class Informes:
             
             
             
-            
+    

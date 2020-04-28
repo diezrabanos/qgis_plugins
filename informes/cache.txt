@@ -1,0 +1,5 @@
+42
+True
+Agreda
+[Almazan,Almarza,Agreda,Bayubas de Abajo,Burgo de Osma,Covaleda,Gomara,Navaleno,Soria,San Pedro Manrique,San Leonardo de Yague,Vinuesa]
+[['Ágreda', 42, '42006'], ['Beratón', 42, '42055'], ['Castilruiz', 42, '42093'], ['Cigudosa', 42, '42098'], ['Cueva de Ágreda', 42, '42114'], ['Dévanos', 42, '42120'], ['Fuentestrún', 42, '42147'], ['Hinojosa del Campo', 42, '42157'], ['Magaña', 42, '42178'], ['Matalebreras', 42, '42182'], ['Ólvega', 42, '42219'], ['Pozalmuro', 42, '42234'], ['San Felices', 42, '42264'], ['Suellacabras', 42, '42280'], ['Tajahuerce', 42, '42281'], ['Trévago', 42, '42299'], ['Valdegeña', 42, '42305'], ['Valdelagua del Cerro', 42, '42306'], ['Villar del Campo', 42, '42332'], ['Vozmediano', 42, '42342']]

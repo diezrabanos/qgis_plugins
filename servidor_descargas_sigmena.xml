@@ -123,7 +123,7 @@
       <homepage>https://github.com/diezrabanos/qgis_plugins/</homepage>
       <file_name>CensosPuntos.1.0.0.zip</file_name>
       <author_name>F. Javier Díez Rábanos</author_name>
-      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/CensosPuntos.0.0.zip?raw=true</download_url>
+      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/CensosPuntos.1.0.0.zip?raw=true</download_url>
       <experimental>False</experimental>
       <deprecated>False</deprecated>
     </pyqgis_plugin>

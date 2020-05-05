@@ -58,6 +58,19 @@ import sys
 
 import math
 import time
+import webbrowser
+
+#para los informes en pdf
+from reportlab.platypus import SimpleDocTemplate,Paragraph,Table,TableStyle,Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A3,A4,A6,portrait,landscape
+from reportlab.lib.units import mm
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from PyPDF2 import PdfFileWriter, PdfFileReader
+import io
 
 from .informes_dialog import InformesDialog
 
@@ -97,7 +110,9 @@ class Informes:
         self.dlg.mycheckbox2.toggled.connect(self.pinchoenusarcomarca)
         self.dlg.cbPRO.activated.connect(self.pinchoenprovincia)
         self.dlg.cbCOM.activated.connect(self.pinchoencomarca)
-
+        self.dlg.mycheckbox3.toggled.connect(self.pinchoenusarcomarca3)
+        self.dlg.cbPRO_3.activated.connect(self.pinchoenprovincia3)
+        self.dlg.cbCOM_3.activated.connect(self.pinchoencomarca3)
 
 
 
@@ -607,59 +622,12 @@ class Informes:
         try:
             simbologiayetiquetopol(mup, 'solid','0,0,0,0', 'red','1','''concat('MUP ',"ETIQUETA")'''   ,"Red","white")
             QgsProject.instance().addMapLayer(mup)
-            """symbol = QgsFillSymbol.createSimple({'color': '0,0,0,0', 'outline_color': 'red','width_border':'1'})#({'line_style': 'dash', 'color': layercolour })
-            symbol.setOpacity(1)
-            #etiqueto
-            layer_settings  = QgsPalLayerSettings()
-            text_format = QgsTextFormat()
-            text_format.setFont(QFont("Arial", 12))
-            text_format.setSize(12)
-            text_format.setColor(QColor("Red"))
-            #le meto un buffer a la etiqueta
-            buffer_settings = QgsTextBufferSettings()
-            buffer_settings.setEnabled(True)
-            buffer_settings.setSize(1)
-            buffer_settings.setColor(QColor("white"))
-
-            text_format.setBuffer(buffer_settings)
-            layer_settings.setFormat(text_format)
-            layer_settings.fieldName = '''concat('MUP ',"ETIQUETA")'''            
-            layer_settings.isExpression = True
-            layer_settings.enabled = True
-            layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-            mup.setLabelsEnabled(True)
-            mup.setLabeling(layer_settings)
-            mup.triggerRepaint()
-            mup.renderer().setSymbol(symbol)
-            QgsProject.instance().addMapLayer(mup)  """ 
+            
         except: 
             pass
         try:
             simbologiayetiquetopol(consorcio,'solid', '0,0,0,0', 'yellow','1','''concat('SO',"CONSORCIO")'''   ,"Yellow","grey")
-            """
-            symbol = QgsFillSymbol.createSimple({'color': '0,0,0,0', 'outline_color': 'yellow','width_border':'1'})
-            #etiqueto
-            layer_settings  = QgsPalLayerSettings()
-            text_format = QgsTextFormat()
-            text_format.setFont(QFont("Arial", 12))
-            text_format.setSize(12)
-            text_format.setColor(QColor("Yellow"))
-            #le meto un buffer a la etiqueta
-            buffer_settings = QgsTextBufferSettings()
-            buffer_settings.setEnabled(True)
-            buffer_settings.setSize(1)
-            buffer_settings.setColor(QColor("grey"))
-            text_format.setBuffer(buffer_settings)
-            layer_settings.setFormat(text_format)
-            layer_settings.fieldName = '''concat('SO',"CONSORCIO")'''            
-            layer_settings.isExpression = True
-            layer_settings.enabled = True
-            layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-            consorcio.setLabelsEnabled(True)
-            consorcio.setLabeling(layer_settings)
-            consorcio.triggerRepaint()
-            consorcio.renderer().setSymbol(symbol)
-            QgsProject.instance().addMapLayer(consorcio)"""
+           
         except: 
             pass
 
@@ -746,6 +714,160 @@ class Informes:
 
 
         
+#configuro los mapas necesarios para la serie de ortos
+    #configuro el mapa con las capas necesarias para los cambios de cultivo
+    def hagomapa3(self,ano1,ano2, municip,polig,parcel):
+        import time
+        import tempfile
+        import shutil
+
+        filePath = tempfile.mkdtemp()
+        print (filePath)
+        #filePath=r"c:/work/temporal/"
+
+        #elimino capas del proeycto actual
+        def eliminacapas():
+            capasinteresantes=["Sigpac"]
+            capas =QgsProject.instance().mapLayers()
+            for capa in capas:
+                if capa[:6] not in capasinteresantes :
+                    #QgsProject.instance().removeMapLayers( [capa] )   
+                    QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)
+            del(capas)
+        
+        eliminacapas()
+            
+        QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 1 )
+        projectInstance = QgsProject.instance()
+        layoutmanager = projectInstance.layoutManager()
+        layout = layoutmanager.layoutByName("A6") #Layout name
+        mapItem = layout.referenceMap()
+        mapItem.zoomToExtent(iface.mapCanvas().extent())
+        
+        listaanos=[1956,1977,1997,1999,2000,2001,2002,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017]
+
+        # cargo el wms de la ortofoto y genero el png
+        imagenes=[]
+        for ano in listaanos:
+            if ano>=ano1 and ano<=ano2:
+                print(ano)
+                #try:
+                QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 1 )
+                if ano==1977:
+                    print("empiezo 1977")
+                    rlayer = QgsRasterLayer("contextualWMSLegend=0&crs=EPSG:25830&dpiMode=7&featureCount=10&format=image/png&layers=Ortofoto_1973_1986&styles&url=http://orto.wms.itacyl.es/WMS?", "1977", 'wms')
+                    print("1977 ok")
+                else:
+                    rlayer = QgsRasterLayer("contextualWMSLegend=0&crs=EPSG:25830&dpiMode=7&featureCount=10&format=image/png&layers=Ortofoto_"+str(ano)+'&styles=&url=http://orto.wms.itacyl.es/WMS?', str(ano), 'wms')
+                eliminacapas()
+                QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 1 )
+                if rlayer.isValid()==True:
+                    QgsProject.instance().addMapLayer(rlayer)
+                    print("true ",ano)
+                    time.sleep(2)
+
+                    mapItem.zoomToExtent(iface.mapCanvas().extent())
+                    legendExporter=QgsLayoutExporter(layout)
+                    imageSettings=legendExporter.ImageExportSettings()
+                    imageSettings.cropToContents=True
+                    imageSettings.dpi=100
+                    imageSettings.pages=[0]
+                    exporter = QgsLayoutExporter(layout)
+                    archi=( filePath + str(ano) + ".png" )
+                    exporter.exportToImage(archi,imageSettings )
+                    imagenes.append(archi)
+        print("todas las imagenes de comienzo")
+        print (imagenes)
+        #saco valor de la imagen en varios sitios para ver si esta en blanco
+        from PIL import Image as Imagepil
+        borrar=[]
+                       
+        print("empiezo a quitar las no validas")
+        print("imagenes ahora",imagenes)
+        for imagen in imagenes:
+            print("por si estan en blanco",imagen)
+            im = Imagepil.open(imagen) # Can be many different formats., ruta de la imagen
+            pix = im.load()
+            #print im.size  # Get the width and hight of the image for iterating over
+            print (imagen, pix[1,1],pix[10,100],pix[100,10])
+            if pix[1,1]==(255, 255, 255, 255) or pix[10,100]==(255, 255, 255, 255) or pix[100,10]==(255, 255, 255, 255) :
+                borrar.append(imagen)
+        for imagen in borrar:
+            imagenes.remove(imagen)
+            
+        print( "final ",imagenes)
+        #anado todas las imagenes a un pdf
+        carpetasalida=filePath
+        c = canvas.Canvas(carpetasalida+"/salida.pdf", pagesize=portrait(A4))#landscape(A4))  # alternatively use bottomup=False
+        ruta_logo=r"o:/sigmena/logos/color_consejeria.jpg"
+        img_logo=Image(ruta_logo)#,, width)#250*mm,250*mm)#los numeross son opcionales para determinar el tamaño
+        img_logo._restrictSize(30 * mm, 20 * mm)
+        img_logo.drawOn(c,170*mm,275 * mm)
+        width, height = A6
+        n=0
+        if n==0:
+            c.setFont("Helvetica", 10)
+            #aqui meto un texto
+            ptext = "Municipio: " +municip+"   Polígono: "+str(polig)+"   Parcela: "+str(parcel)
+            c.drawString(30*mm, 270*mm, ptext)
+        nmax=len(imagenes)
+        print (nmax)
+        #meto la imagen y el texto
+        for imagen in imagenes:
+            c.setFont("Helvetica", 12)
+            #aqui meto un texto
+            ptext = "Año Ortofoto " +str(imagen[-8:-4])
+            print(ptext)
+            #p = Paragraph(ptext, style=styles["Normal"])
+            
+            img_data1=Image(imagen,height, width)#250*mm,250*mm)#los numeross son opcionales para determinar el tamaño
+            #img_data1.wrapOn(c, 200*mm,200*mm)
+            if n%2==0:
+                x,y =30,150
+                z,t=100,260
+                c.drawCentredString( 100*mm, 15*mm, "- "+str(n//2+1) +" -")
+                c.setFont("Helvetica", 8)
+                c.drawString(190*mm, 15*mm, "SIGMENA")
+                c.setFont("Helvetica", 12)
+            else:
+                x,y=30,20
+                z,t=100,130
+            #p.wrapOn(c, 50*mm, 50*mm)  # size of 'textbox' for linebreaks etc.
+            #p.drawOn(c, z * mm, t * mm)    # position of text / where to draw
+            img_data1.drawOn(c,x*mm,y * mm)
+            c.drawCentredString( z*mm, t*mm, ptext)
+            #c.drawString(z*mm, t*mm, ptext)
+            
+            if n%2==1:
+                print (n)
+                if n< nmax-1:
+                    c.showPage()
+            n=n+1
+        #c.drawCentredString( 100*mm, 15*mm, "- "+str(n//2+1) +" -")
+        #c.setFont("Helvetica", 8)
+        #c.drawString(190*mm, 15*mm, "SIGMENA")
+    
+        c.save()
+        help_file = 'file:' + carpetasalida + '/salida.pdf'
+        print(help_file)
+        webbrowser.open_new(help_file)
+        
+                
+
+
+                
+                #except:
+                 #   pass
+        # ... do stuff with dirpath
+        #shutil.rmtree(filePath,ignore_errors=True)
+
+
+
+        
+
+    
+
+
 
     
     def plantillaapng(self,plantilla,Titulo ,rutapng):
@@ -875,6 +997,7 @@ class Informes:
         exporter = QgsLayoutExporter(layout)
         exporter.exportToPdf(rutapdf, QgsLayoutExporter.PdfExportSettings() )
 
+    #funcion que genera el plano a partir de la plantilla incluyendo las tablas para las rutas 4x4 
     def plantillaamapa2(self,plantilla,Titulo,tablamups,tablaconsorcios,tablavvpps):
         print("empiezo a configurar el layout")
         global ruta1
@@ -1120,16 +1243,7 @@ class Informes:
     
 #funcion que crea el informe en pdf con los datos que salen de la funcion anterior y el tipo de informe que saldra del dialogo, crea un pdf con todo, partiendo de otro pdf, y encima poniendo imagen y tablas y textos
     def creaelpdf(self,tipo,datosmontes,x1,y1,datosconsorcios,x2,y2,datosvvpps,x3,y3,pdfbase):
-        from reportlab.platypus import SimpleDocTemplate,Paragraph,Table,TableStyle,Image
-        from reportlab.lib.styles import getSampleStyleSheet
-        from reportlab.lib import colors
-        from reportlab.lib.pagesizes import A3,portrait,landscape
-        from reportlab.lib.units import mm
-        from reportlab.pdfgen import canvas
-        from reportlab.pdfbase import pdfmetrics
-        from reportlab.pdfbase.ttfonts import TTFont
-        from PyPDF2 import PdfFileWriter, PdfFileReader
-        import io
+        
         global carpetasalida
         global tablamontes
         global tablaconsorcios
@@ -1505,6 +1619,296 @@ class Informes:
             self.dlg.cbMUN.addItem("" ) 
             for element in municipios:
                 self.dlg.cbMUN.addItem( element[0])
+
+
+#empiezo con la serie de ortofotos a configurar el menu sigmena::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+    def pinchoenprovincia3(self):
+        global almacen
+        global almacen0
+        self.dlg.cbMUN_3.clear()
+        self.dlg.cbMUN_3.setCurrentIndex(0)
+        print("1 cojo la provincia seleccionada en el combo")
+        provincias=[["","00"],["Avila","05"],["Burgos","09"],["León","24"],["Palencia","34"],["Salamanca","37"],["Segovia","40"],["Soria","42"],["Valladolid","47"],["Zamora","49"]]
+        indpro=self.dlg.cbPRO_3.currentIndex()
+        provincia=str("{:02d}".format(int((provincias[int(indpro)][1]))))
+        print ("escribo la provincia en el almacen")
+        almacen[0]=provincia
+
+        #para ver si tengo que rellenar las comarcas
+        print ("leo del almacen si true o false y lo pongo en pantalla")
+        print ("lacabo de pinchar en provincia")
+        if almacen[1]=="False":
+            print("1.1 no tengo selecionado que use la comarca")
+            self.dlg.cbMUN_3.clear()
+            self.dlg.cbMUN_3.setCurrentIndex(0)
+            self.dlg.mycheckbox3.setChecked (False)
+            usarcomarca=False
+            almacen[2]=""
+            almacen[3]=[]
+            #ahora deberia rellenar los municipios de la cache o no
+            if almacen[0]==almacen0[0] and almacen0[1]=="False":
+                print("1.1.1 la provincia es la misma dela cache y no tengo que mirar las comarcas, asi que pongo los municipios de la cahce")
+                #la lista de municipios que tengo de la cache es la buena
+                municipios=almacen[4]
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbMUN_3.addItem("" ) 
+                for element in municipios:
+                    self.dlg.cbMUN_3.addItem( element[0])
+
+            else:
+                municipios=[]
+                print("1.1.2 no tengo selecionado que use la comarca y la provincia es distinta de la de la cache asi que tengo que leer la capa de munciipios")
+                #tengo que sacar los municipios de la capa
+                print("tengo que leer todo el shp de municipios")
+                #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                #QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+                idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
+                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                feats = [ feat for feat in layerlista.getFeatures() ]
+                for feature in feats:
+                    lista=[]
+                    #filtro para meter solo los municipios de la provincia que me interesa
+                    if str(feature.attributes()[idpro])==almacen[0]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
+                        lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                        municipios.append(lista)
+                #ordeno por el primer elemento
+                municipios.sort(key=lambda x: x[2])
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbMUN_3.addItem("" ) 
+                for element in municipios:
+                    self.dlg.cbMUN_3.addItem( element[0])
+                almacen[4]=municipios
+                almacen[2]=""
+                almacen[3]=[]
+                
+            
+        else:
+            print("1.2")
+            usarcomarca=True
+            almacen[1]="True"
+            self.dlg.mycheckbox3.setChecked (True)
+            #relleno las comarcas
+            #si la provincia es la del cache
+            if almacen[0]==almacen0[0]:
+                print("1.2.1")
+                #para rellenar las comarcas 
+                comarca=almacen[2]
+                comarcas=almacen0[3]
+                print("lo limpio")
+                self.dlg.cbCOM_3.clear()
+                #anado un elemneto enblanco en el desplegable
+                print("Estoy cambaido la comarca porque he cambiado la provincia.")
+                self.dlg.cbCOM_3.addItem("") 
+                for element in comarcas:
+                    self.dlg.cbCOM_3.addItem(element)#[0])
+                #ahora tendre que tocar en una comarca para despues poner los municipios correspondientes. eso es otro cantar
+                    
+            else:
+                print("1.2.2")
+                #relleno las comarcas busscando en la capa shp
+                self.dlg.cbCOM_3.setCurrentIndex(0)
+                self.dlg.cbCOM_3.clear()
+                #tengo que leer todos los municipios para sacar las comarcas de esa provincia
+                print("tengo que leer todo el shp de municipios.......................")
+                #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                #para rellenar el combo de comarcas
+                comarcas=[]
+                feats = [ feat for feat in layerlista.getFeatures() ]
+                idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+                idCOM =layerlista.dataProvider().fieldNameIndex('COMARCA')
+                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                for feature in feats:
+                    #filtro para meter solo las comarcas de la provincia que me interesa
+                    if str("{:02d}".format(int((feature.attributes()[idpro]))))==almacen[0]:#antes ponia pro
+                        elemento=feature.attributes()[idCOM]
+                        if elemento not in comarcas:
+                            comarcas.append(elemento)
+                #ordeno por el primer elemento
+                comarcas.sort(key=lambda x: x[0]) 
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbCOM_3.addItem("" ) 
+                for element in comarcas:
+                    self.dlg.cbCOM_3.addItem( element)
+                almacen[3]=comarcas
+                almacen[2]=""
+                almacen[4]=[]
+
+                #por aqui he acabado, tendre que tocar en municipio
+                
+                
+        
+    def pinchoencomarca3(self):
+        global almacen
+        global almacen0
+        self.dlg.cbMUN_3.clear()
+        self.dlg.cbMUN_3.setCurrentIndex(0)
+        #lo unico que tengo que hacer es rellenar los municipios
+        #saco que comarca he seleccionado
+        comarcas=almacen[3]
+        indcom=self.dlg.cbCOM_3.currentIndex()
+        comarca=str(comarcas[int(indcom)-1])
+        print ("2. comarca seleccionada en el combo",comarca)
+        almacen[2]=comarca
+
+        #si la comarca es la del almacen0, entonces solo tengo que leer los municipios del almacen0
+        if almacen[2]==almacen0[2]:
+            print("2.1")
+            municipios=almacen0[4]
+        #tengo que sacar los municipios de la capa
+        else:
+            print("2.2 tengo que leer todo el shp de municipios")
+            #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+            QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+            #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+            idCOM = layerlista.dataProvider().fieldNameIndex('COMARCA')
+            idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
+            idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+            feats = [ feat for feat in layerlista.getFeatures() ]
+            municipios=[]
+            for feature in feats:
+                lista=[]
+                #filtro para meter solo los municipios de la provincia que me interesa
+                if str(feature.attributes()[idCOM])==almacen[2]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
+                    lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                    municipios.append(lista)
+            #ordeno por el primer elemento
+            municipios.sort(key=lambda x: x[2])
+            #anado un elemneto enblanco en el desplegable
+        self.dlg.cbMUN_3.addItem("" ) 
+        for element in municipios:
+            self.dlg.cbMUN_3.addItem( element[0])
+        almacen[4]=municipios
+        
+        
+        
+        #ssi no tengo que leer la capa
+    def pinchoenusarcomarca3(self):
+        
+        global almacen
+        global almacen0
+
+        print("3. he vaciado los municipios y comarcas")
+        self.dlg.cbCOM_3.setCurrentIndex(0)
+        self.dlg.cbCOM_3.clear()
+        self.dlg.cbMUN_3.setCurrentIndex(0)
+        self.dlg.cbMUN_3.clear()
+        if self.dlg.mycheckbox3.isChecked():
+            print("3.1")
+            almacen[1]="True"
+            almacen[2]=""
+            #debo rellenar las comarcas de esa provincia.
+            #si la provincia es la del almacen0, cojo esas comarcas y las meto al combo
+            provincia=almacen[0]
+            #para rellenar las comarcas
+            if almacen[0]==almacen0[0]:
+                print("3.1.1 provincia del almacen0")
+                if almacen0[3] ==['']:
+                    
+                    #almacen[3]
+                    #tendre que rellenar las comarcas como siempre
+                    print("3.1.1.1 tengo que leer todo el shp de municipios")
+                    #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                    QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                    #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                    layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                    #para rellenar el combo de comarcas
+                    comarcas=[]
+                    feats = [ feat for feat in layerlista.getFeatures() ]
+                    idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+                    idCOM =layerlista.dataProvider().fieldNameIndex('COMARCA')
+                    idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                    for feature in feats:
+                        #filtro para meter solo las comarcas de la provincia que me interesa
+                        if str("{:02d}".format(int((feature.attributes()[idpro]))))==almacen[0]:#antes ponia pro
+                            elemento=feature.attributes()[idCOM]
+                            if elemento not in comarcas:
+                                comarcas.append(elemento)
+                    #ordeno por el primer elemento
+                    comarcas.sort(key=lambda x: x[0])
+                    almacen[3]=comarcas
+                else:
+                    print("3.1.1.2")
+                    comarcas=almacen0[3]
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbCOM.addItem("") 
+                for element in comarcas:
+                    self.dlg.cbCOM_3.addItem(element)#[0])
+                #ahora tendre que tocar en una comarca para despues poner los municipios correspondientes. eso es otro cantar
+                    
+            #si la provincia no es la del almacen busco todas las que coincidan en la capa con esa provincia        
+            else:
+                print("3.1.2")
+                #tengo que leer todos los municipios para sacar las comarcas de esa provincia
+                print("tengo que leer todo el shp de municipios")
+                #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+                QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+                #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                #para rellenar el combo de comarcas
+                comarcas=[]
+                feats = [ feat for feat in layerlista.getFeatures() ]
+                idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+                idCOM =layerlista.dataProvider().fieldNameIndex('COMARCA')
+                idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+                for feature in feats:
+                    #filtro para meter solo las comarcas de la provincia que me interesa
+                    if str("{:02d}".format(int((feature.attributes()[idpro]))))==almacen[0]:#antes ponia pro
+                        elemento=feature.attributes()[idCOM]
+                        if elemento not in comarcas:
+                            comarcas.append(elemento)
+                #ordeno por el primer elemento
+                comarcas.sort(key=lambda x: x[0])  
+                #anado un elemneto enblanco en el desplegable
+                self.dlg.cbCOM_3.addItem("" ) 
+                for element in comarcas:
+                    self.dlg.cbCOM_3.addItem( element)
+                almacen[3]=comarcas
+        else:#si no esta checkeado el usar las comarcas
+            print("3.2")
+            almacen[1]="False"
+            almacen[2]=""
+            almacen[3]=[]
+            almacen[4]=[]
+            #deberia rellenar los municipios de la provincia seleccionada
+            #si la provincia seleccionada es la del cache, solo tengo que cogerlo de la cache
+
+            
+
+            print("si solo quito el usar comarcas y no tengo la provincia orignal voy por aqui")
+            #tengo que sacar los municipios de la capa
+            print("tengo que leer todo el shp de municipios")
+            #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
+            QSettings().setValue("/qgis/ignoreShapeEncoding", False)
+            #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
+            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+            idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
+            idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
+            idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
+            #idCOM=layerlista.dataProvider().fieldNameIndex('COMARCA')
+            feats = [ feat for feat in layerlista.getFeatures() ]
+            municipios=[]
+            for feature in feats:
+                lista=[]
+                #filtro para meter solo los municipios de la provincia que me interesa
+                if str(feature.attributes()[idpro])==almacen[0]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
+                    lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
+                    municipios.append(lista)
+            #ordeno por el primer elemento
+            municipios.sort(key=lambda x: x[2])
+            almacen[4]=municipios
+            #anado un elemneto enblanco en el desplegable
+            self.dlg.cbMUN_3.addItem("" ) 
+            for element in municipios:
+                self.dlg.cbMUN_3.addItem( element[0])
         
 
     
@@ -1571,10 +1975,8 @@ class Informes:
         layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
         time.sleep(1)
         #layer = iface.activeLayer()
-        ## ojo comprobar que layer existe
 
-        #DEBERIA ESPERAR A QUE LA PROVINCIA CAMBIE PARA HACER ESTO Y CARGAR SOLO LO QUE CONCUERDE CON LA PROVINCIA.
-        #lo primero seria leer la provincia.
+        #para los cambios de cultivo::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
         
         #Relleno el Combo con als provincias
         print("empiezo a rellenar los desplegables, las provincias del almacen ")
@@ -1642,6 +2044,77 @@ class Informes:
             print("mismo municipio")
         else:
             self.dlg.cbMUN.setCurrentIndex(0)
+            print("otro municipio")
+            
+#para la serie de ortofotos::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+        #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::.
+        
+        #Relleno el Combo con als provincias
+        print("empiezo a rellenar los desplegables, las provincias del almacen ")
+        self.dlg.cbPRO_3.clear()
+        provincias=[["","00"],["Avila","05"],["Burgos","09"],["León","24"],["Palencia","34"],["Salamanca","37"],["Segovia","40"],["Soria","42"],["Valladolid","47"],["Zamora","49"]]
+        for elemento in provincias:
+                self.dlg.cbPRO_3.addItem( elemento[0])
+        #esto es para poner por defecto la provincia que tenga en el almacen
+        lista2=[]
+        for elemen in provincias:
+            lista2.append(elemen[1])
+        indice=lista2.index(almacen[0])
+        print("indice de provincia dentro del run",indice)
+        #pone la provincia en el combo que tienes en el txt.
+        self.dlg.cbPRO_3.setCurrentIndex(indice)
+        
+        #para ver si tengo que rellenar las comarcas
+        print ("leo del almacen si true o false y lo pongo en pantalla")
+        if almacen[1]=="False":
+            self.dlg.mycheckbox3.setChecked (False)
+            usarcomarca=False
+            almacen[1]="False"
+            almacen[2]=""
+            almacen[3]=[]
+        else:
+            usarcomarca=True
+            almacen[1]="True"
+            self.dlg.mycheckbox3.setChecked (True)
+        
+        
+        #para rellenar las comarcas 
+            
+        print("paso a las comarcas, primero leo la que tengo en el almacen")
+        comarca=almacen[2]
+        comarcas=almacen[3]
+        print("lo limpio")
+        self.dlg.cbCOM_3.clear()
+        #anado un elemneto enblanco en el desplegable
+        print("Estoy en el run, dentro de lo que se abre la primera vez.")
+        self.dlg.cbCOM_3.addItem("") 
+        for element in comarcas:
+            self.dlg.cbCOM_3.addItem(element)#[0])
+        if almacen[1]=="True":
+            #pongo el indice en la que diga la cache
+            indice=comarcas.index(comarca)
+            self.dlg.cbCOM_3.setCurrentIndex(indice+1)#lo que pone en la ventanita, que esta bien
+        else:
+            pass
+
+        #relleno los municipios que tengo en la cache
+        print ("leo los municipios del almacen")
+        municipios=almacen[4]
+        print("empiezo a rellenar el combo con los municipios")
+        self.dlg.cbMUN_3.clear()
+
+        #misdatos=ast.literal_eval(mismunicipios)
+        #anado un elemneto enblanco en el desplegable de municipios
+        self.dlg.cbMUN_3.addItem("" ) 
+        for element in municipios:
+            self.dlg.cbMUN_3.addItem(element[0])#( element[0])
+
+        #dejo el puntero del municipio donde estaba si no he cambiado de provincia ni de comarca 
+        if almacen[0]==almacen0[0] and almacen[1]==almacen0[1] and almacen[2]==almacen0[2]:
+            self.dlg.cbMUN_3.setCurrentIndex(almacen[5])
+            print("mismo municipio")
+        else:
+            self.dlg.cbMUN_3.setCurrentIndex(0)
             print("otro municipio")
             
         
@@ -1922,6 +2395,225 @@ class Informes:
 
                 
                 pass
+            if index==2:
+                global muni
+                global poli
+                global parc
+                print("serie ortos")
+                #cargo la capa de la parcela
+                comarcas=almacen[3]
+                municipios=almacen[4]
+                usarcomarca=almacen[1]
+                print("0.1 pulso en ok")
+                
+                archivo=""
+                #cojo lo que hay en cada recuadro o desplegable aqui variables que luego deberan estar en la cajita   primero los indicesOJO
+                indmun=self.dlg.cbMUN_3.currentIndex()
+                indpro=self.dlg.cbPRO_3.currentIndex()
+                indcom=self.dlg.cbCOM_3.currentIndex()
+                #saco los valores correspondientes
+                try:
+                    comarca=str(comarcas[int(indcom)-1])
+                except:
+                    comarca=""
+                pro=str(provincias[int(indpro)][1])
+                mun=self.dlg.MUN_3.text()##displayText()
+                pol=self.dlg.POL_3.text()##displayText()
+                par=self.dlg.PAR_3.text()##displayText()
+                ano1=int(self.dlg.text_ano1.text())##displayText()
+                ano2=int(self.dlg.text_ano2.text())##displayText()
+                poli=pol
+                parc=par
+                             
+                #si no hay nada en la casilla de municipio, coge la informacion del desplegable mun es un numero del estilo 42001
+                if mun == "":
+                    mun=str(municipios[int(indmun)-1][2])
+                    muni=str(municipios[int(indmun)-1][0])
+                    #coge la ultima columna de mis datos
+                else:
+                    mun=str("{:02d}".format(int(pro)))+str("{:03d}".format(int(mun)))
+                print("mun",mun)
+                print("indmun",indmun)
+                almacen[5]=indmun
+                
+
+               
+                rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\informes\cache.txt")
+                #lo escribo en el txt, mavhacando lo que ya tenia
+                f=open(rutacache,"w")
+                escribir=str(pro)+"\n"+str(usarcomarca)+"\n"+comarca+"\n"+str(comarcas).replace("'","").replace(", ",",")+"\n"+str(municipios)+"\n"
+                f.write(escribir)
+                f.close()
+
+                QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
+                
+
+                #canvas.freeze(True)
+
+
+                caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+mun+".shp")
+                layer = QgsVectorLayer(caparecintos, mun, 'ogr')
+                #QgsProject.instance().addMapLayers([layer])
+
+                
+                layer.selectByExpression("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par),QgsVectorLayer.SetSelection)
+                #creo la nueva capa con la seleccion
+                #output_path=archivo3
+                #ojo esto es lo que acabo de cambiar
+                #QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(), "ESRI Shapefile", onlySelected=True)
+                #lyr9=QgsVectorLayer(output_path,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
+
+                
+
+
+                sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
+                renderer=QgsSingleSymbolRenderer(sym1)
+                #etiqueto
+                layer_settings  = QgsPalLayerSettings()
+                text_format = QgsTextFormat()
+                text_format.setFont(QFont("Arial", 12))
+                text_format.setSize(12)
+                text_format.setColor(QColor("Blue"))
+                #le meto un buffer a la etiqueta
+                buffer_settings = QgsTextBufferSettings()
+                buffer_settings.setEnabled(True)
+                buffer_settings.setSize(1)
+                buffer_settings.setColor(QColor("white"))
+
+                text_format.setBuffer(buffer_settings)
+                layer_settings.setFormat(text_format)
+
+
+                #cuenta elementos
+                elementos=len(list(lyr9.getFeatures()))
+                if elementos==0:
+                    iface.messageBar().pushMessage("SIGPAC","En el municipio "+str(mun)+" poligono " +str(pol)+" no existe la parcela "+str(par), qgisCore.Qgis.Info,5)
+                    
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)  
+                if elementos==1 and archivo == "":
+                    
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''            
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr9.setLabelsEnabled(True)
+                    lyr9.setLabeling(layer_settings)
+                    lyr9.triggerRepaint()
+                    lyr9.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr9)
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+                    lyr9.updateExtents()
+                    lyr9.commitChanges()
+                    lyr9.updateExtents()
+                    canvas.setExtent(lyr9.extent())
+                
+
+                            
+                            
+                if elementos>1  and archivo == "":
+                   
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr9.setLabelsEnabled(True)
+                    lyr9.setLabeling(layer_settings)
+                    lyr9.triggerRepaint()
+                    lyr9.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr9)
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+                    lyr9.updateExtents()
+                    lyr9.commitChanges()
+                    lyr9.updateExtents()
+                    canvas.setExtent(lyr9.extent())
+
+                if elementos>1  and archivo is not "":
+                    
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    #lyr9.setLabelsEnabled(True)
+                    #lyr9.setLabeling(layer_settings)
+                    #lyr9.triggerRepaint()
+                    #lyr9.setRenderer(renderer)
+                    #QgsProject.instance().addMapLayer(lyr9)
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+                 
+                    QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
+                    #QgsProject.instance().removeMapLayer(lyr9)
+                    lyr8=QgsVectorLayer(archivo,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                    #etiqueto
+                    """layer_settings  = QgsPalLayerSettings()
+                    text_format = QgsTextFormat()
+                    text_format.setFont(QFont("Arial", 12))
+                    text_format.setSize(12)
+                    text_format.setColor(QColor("Red"))
+                    layer_settings.setFormat(text_format)
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    layer_settings.isExpression = True"""
+                    #layer_settings.enabled = True
+                    #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr8.setLabelsEnabled(True)
+                    lyr8.setLabeling(layer_settings)
+                    lyr8.triggerRepaint()
+                    lyr8.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr8)
+                    #QgsProject.instance().removeMapLayer(lyr9.id())
+                    #canvas.freeze(False)
+                    lyr8.updateExtents()
+                    lyr8.commitChanges()
+                    lyr8.updateExtents()
+                    canvas.setExtent(lyr8.extent())
+
+                
+                if elementos==1 and archivo is not "":
+                    
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''            
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    #lyr9.setLabelsEnabled(True)
+                    #lyr9.setLabeling(layer_settings)
+                    #lyr9.triggerRepaint()
+                    #lyr9.setRenderer(renderer)
+            
+                    QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
+                    #QgsProject.instance().removeMapLayer(lyr9)
+                    lyr8=QgsVectorLayer(archivo,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                    #etiqueto
+                    """layer_settings  = QgsPalLayerSettings()
+                    text_format = QgsTextFormat()
+                    text_format.setFont(QFont("Arial", 12))
+                    text_format.setSize(12)
+                    text_format.setColor(QColor("Red"))
+                    layer_settings.setFormat(text_format)
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    layer_settings.isExpression = True"""
+                    #layer_settings.enabled = True
+                    #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr8.setLabelsEnabled(True)
+                    lyr8.setLabeling(layer_settings)
+                    lyr8.triggerRepaint()
+                    lyr8.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr8)
+                    #QgsProject.instance().removeMapLayer(lyr9.id())
+                    #canvas.freeze(False)
+                    lyr8.updateExtents()
+                    lyr8.commitChanges()
+                    lyr8.updateExtents()
+                    canvas.setExtent(lyr8.extent())
+                               
+
+                
+                self.hagomapa3(ano1,ano2, muni,poli,parc)
+                canvas.freeze(False)
+
 
                 
                 

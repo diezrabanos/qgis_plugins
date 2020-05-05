@@ -437,7 +437,7 @@
         <string/>
        </property>
       </widget>
-      <widget class="QCheckBox" name="mycheckbox2_3">
+      <widget class="QCheckBox" name="mycheckbox3">
        <property name="geometry">
         <rect>
          <x>180</x>
@@ -516,6 +516,58 @@
        </property>
        <property name="text">
         <string>POLIGONO</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="text_ano1">
+       <property name="geometry">
+        <rect>
+         <x>130</x>
+         <y>290</y>
+         <width>59</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>2005</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="text_ano2">
+       <property name="geometry">
+        <rect>
+         <x>300</x>
+         <y>290</y>
+         <width>59</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>2015</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_29">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>290</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Año Inicial</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_30">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>290</y>
+         <width>61</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Año Final</string>
        </property>
       </widget>
      </widget>

@@ -23,6 +23,7 @@ Saca un informe en pdf con el cruce de capas
  ***************************************************************************/
 """
 from .HTML import Table
+from qgis.PyQt.QtXml import QDomDocument
 #from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 #from PyQt5.QtGui import QIcon
 #from PyQt5.QtWidgets import QAction
@@ -40,7 +41,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes,QgsApplication,QgsFillSymbol,QgsSingleSymbolRenderer,QgsLayoutExporter,QgsLayout,QgsLayoutSize,QgsUnitTypes, QgsTextBufferSettings,QgsRasterLayer,QgsSymbolLayerRegistry,QgsLayoutItemLegend,QgsLayoutPoint,QgsLayoutItemLabel,QgsLayoutItemTextTable,QgsLayoutTableColumn,QgsLayoutFrame,QgsProcessingAlgorithm,QgsLayoutItemHtml,QgsLayoutMeasurement,QgsUnitTypes
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes,QgsApplication,QgsFillSymbol,QgsSingleSymbolRenderer,QgsLayoutExporter,QgsLayout,QgsLayoutSize,QgsUnitTypes, QgsTextBufferSettings,QgsRasterLayer,QgsSymbolLayerRegistry,QgsLayoutItemLegend,QgsLayoutPoint,QgsLayoutItemLabel,QgsLayoutItemTextTable,QgsLayoutTableColumn,QgsLayoutFrame,QgsProcessingAlgorithm,QgsLayoutItemHtml,QgsLayoutMeasurement,QgsUnitTypes,QgsPrintLayout,QgsReadWriteContext,QgsLayoutItemPage,QgsLayoutItemMapGrid
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtWidgets import QMessageBox
@@ -414,11 +415,12 @@ class Informes:
 
 
 
-#empiezo el cruce de capas con la parcela de la que se ha pedido el cambio de cultivo
+#empiezo el cruce de capas vectoriales con la parcela de la que se ha pedido el cambio de cultivo
     def crucecambiocultivo(self,capadetrabajo,elementofijo,carpetasalida):
         print("entro en cruce cambio de cultivo")
         
         global resultadocambiocultivo
+        
         #global carpetasalida
 
         
@@ -469,12 +471,29 @@ class Informes:
             #QgsProject.instance().addMapLayer(layer)
             #layer.setProviderEncoding(u'UTF-8')
             #layer.dataProvider().setEncoding(u'UTF-8')
-            resultadocambiocultivo.append("Si")
+            resultadocambiocultivo.append("&#9745;")#("Si")
         else:
-            resultadocambiocultivo.append("No")
+            resultadocambiocultivo.append("&#9744;")
+        print(sufijo, resultadocambiocultivo)
         
-
-       
+    def crucecambiocultivoraster(self,capadetrabajo,elementofijo,carpetasalida):#PARA LAS PENDIENTES
+        print("entro en cruce cambio de cultivo raster")
+        global resultadocambiocultivo
+        
+        pendiente=0
+        processing.run("qgis:zonalstatistics", {'INPUT_RASTER':elementofijo,'RASTER_BAND':1,'INPUT_VECTOR':capadetrabajo,'COLUMN_PREFIX':'_','STATS':[6]})
+        for feature in capadetrabajo.getFeatures():
+            for field in capadetrabajo.fields():
+                if "_max"== field.name():
+                    if feature["_max"]==2:
+                        pendiente=1
+        print(pendiente)
+        print("antes",resultadocambiocultivo)
+        if pendiente==1:
+            resultadocambiocultivo.append("&#9745;")#("Si")
+        else:
+            resultadocambiocultivo.append("&#9744;")
+                            
         
 
 #configuro el mapa con las capas necesarias para las rutas 4x4
@@ -617,15 +636,16 @@ class Informes:
 
 
 #configuro el mapa con las capas necesarias para los cambios de cultivo
-    def hagomapa2(self,resultadocambiocultivo,carpetasalida):
+    def hagomapa2(self,resultadocambiocultivo,carpetasalida,munic,polig,parc):
+        global extension
         #lo primero si no lo he hecho ya seria congelar la vista.
         
         #elimino capas del proeycto actual
-        capasinteresantes=[]
+        capasinteresantes=['Sigpac']
         capas =QgsProject.instance().mapLayers()
         for capa in capas:
             #print (capa)
-            if capa not in capasinteresantes :
+            if capa[:6] not in capasinteresantes :
                 #QgsProject.instance().removeMapLayers( [capa] )
                 QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)
             
@@ -637,31 +657,32 @@ class Informes:
 
        
        
-        if resultadocambiocultivo[0]=="Si":
+        if resultadocambiocultivo[0]=="&#9745;":#"Si":
             mup=QgsVectorLayer(os.path.join(carpetasalida,'Mup_etrs89.shp') ,"M.U.P.","ogr")
-        if resultadocambiocultivo[1]=="Si":
+        if resultadocambiocultivo[1]=="&#9745;":#"Si":
             consorcio=QgsVectorLayer(os.path.join(carpetasalida,"Consorcios_etrs89.shp"),"Consorcios","ogr")
-        if resultadocambiocultivo[2]=="Si":
+        if resultadocambiocultivo[2]=="&#9745;":#"Si":
             vvpp=QgsVectorLayer(os.path.join(carpetasalida,"42_vvpp_etrs89.shp"),"VVPP","ogr")
-        if resultadocambiocultivo[3]=="Si":
+        if resultadocambiocultivo[3]=="&#9745;":#"Si":
             ren=QgsVectorLayer(os.path.join(carpetasalida,"42_ren_ex_etrs89.shp"),"R.E.N","ogr")
-        if resultadocambiocultivo[4]=="Si":
+        if resultadocambiocultivo[4]=="&#9745;":#"Si":
             zec=QgsVectorLayer(os.path.join(carpetasalida,"42_ZEC.shp"),"Z.E.C","ogr")
-        if resultadocambiocultivo[5]=="Si":
+        if resultadocambiocultivo[5]=="&#9745;":#"Si":
             zepa=QgsVectorLayer(os.path.join(carpetasalida,"42_ZEPA.shp"),"Z.E.P.A","ogr")
-        if resultadocambiocultivo[6]=="Si":
+        if resultadocambiocultivo[6]=="&#9745;":#"Si":
             alondra=QgsVectorLayer(os.path.join(carpetasalida,"42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp"),"Z. Alondra","ogr")
-        if resultadocambiocultivo[7]=="Si":
+        if resultadocambiocultivo[7]=="&#9745;":#"Si":
             yacimientos=QgsVectorLayer(os.path.join(carpetasalida,"42_VW_BIENES.shp"),"Yacimientos","ogr")
+        
         
         
         
 
         def simbologiayetiquetopol(capa, estilo, colorrelleno, colorborde,gruesoborde,texto,coloretiqueta,colorsombra):
-            QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
+            QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 1 )
             print
             symbol = QgsFillSymbol.createSimple({'color': colorrelleno,'style':estilo, 'outline_color': colorborde,'width_border':'1'})#({'line_style': 'dash', 'color': layercolour })
-            symbol.setOpacity(1)
+            symbol.setOpacity(0.8)
             #etiqueto
             layer_settings  = QgsPalLayerSettings()
             text_format = QgsTextFormat()
@@ -749,7 +770,7 @@ class Informes:
         except:
             pass
         try:
-            simbologiayetiquetopol(yacimientos,'dense1', '0,255,255', 'yellow','1','''concat('',"CONSORCIO")'''   ,"Yellow","grey")
+            simbologiayetiquetopol(yacimientos,'dense1', '255,255,255,255', 'black','1','''concat('YAC. ',"A_DENO_PPA")'''   ,"Black","grey")
         except:
             pass
         """symbol=QgsLineSymbol.createSimple({'color': 'black', 'line_width': '1.3'})
@@ -771,7 +792,7 @@ class Informes:
 
         
         # cargo el wms de la ortofoto
-        sies=resultadocambiocultivo.count('Si')
+        sies=resultadocambiocultivo.count("&#9745;")#('Si')
 
         QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), sies+1 )
         urlWithParams='contextualWMSLegend=0&crs=EPSG:25830&dpiMode=7&featureCount=10&format=image/png&layers=Ortofoto_2001&styles=&url=http://orto.wms.itacyl.es/WMS?'
@@ -785,17 +806,47 @@ class Informes:
         rlayer.loadNamedStyle(os.path.join(rutaestilos,'pendiente_10_15.qml'))
         QgsProject.instance().addMapLayer(rlayer)
 
-
-
-
+        #desde aqui empiezo a arreglarlo
         #los paso al layout
 
         projectInstance = QgsProject.instance()
         layoutmanager = projectInstance.layoutManager()
-        layout = layoutmanager.layoutByName("A4_H") #Layout name
-        mapItem = layout.referenceMap()
+        lay = layoutmanager.layoutByName("A4_H") #Layout name
+
+        """
+        #1 empiezo
+        tmpfile = 'o:/sigmena/leyendas/cambio_cultivo.qpt'
+        # Load template from file
+        p = QgsProject()
+        l = QgsLayout(p)
+
+        with open(tmpfile) as f:
+            template_content = f.read()
+
+        # it return a QgsComposerView
+
+        doc1 = QDomDocument()
+        doc1.setContent(template_content)
+        ele = doc1.documentElement()
+        print("leo la plantilla")
+        project = QgsProject.instance()
+        lay = QgsPrintLayout(project)
+        #lay.initializeDefaults()
+        #layout.setName("cambioslayout")
+        #pc = layout.pageCollection()
+        #pc.pages()[0].setPageSize('A4', QgsLayoutItemPage.Orientation.Landscape)
+        
+        lay.addItemsFromXml(ele, doc1, QgsReadWriteContext())
+        iface.openLayoutDesigner(lay)
+        print("acabo de abrir el plano")
+        #1 acabo
+        """
+
+        
+        mapItem = lay.referenceMap()
+        mapItem.attemptResize(QgsLayoutSize(240, 190, QgsUnitTypes.LayoutMillimeters))
         #meto la leyenda
-        legend = QgsLayoutItemLegend(layout)
+        legend = QgsLayoutItemLegend(lay)
         legend.setTitle("Leyenda")
         
         legend.setLinkedMap(mapItem) # pass a QgsLayoutItemMap object
@@ -817,17 +868,17 @@ class Informes:
                     #subgroup.addLayer(c)
                     group.addLayer(c)
                 
-        layout.addItem(legend)
+        lay.addItem(legend)
         legend.adjustBoxSize()
-        legend.attemptMove(QgsLayoutPoint(26, 8, QgsUnitTypes.LayoutCentimeters))
+        legend.attemptMove(QgsLayoutPoint(25.5, 8, QgsUnitTypes.LayoutCentimeters))
         #legend.attemptResize(QgsLayoutSize(2.8, 2.2, QgsUnitTypes.LayoutCentimeters))
         legend.refresh()
         
-        layout.addLayoutItem(legend)
-
+        lay.addLayoutItem(legend)
+        
         #cambio el titulo
         #Titulo="Mi titulo"
-        for i in layout.items():
+        for i in lay.items():
              if isinstance(i, QgsLayoutItemLabel) and i.id() == "titulo":
                 i.setText("")
 
@@ -836,15 +887,15 @@ class Informes:
 
 #METO LA TABLA CON LOS SIES
          
-        layout_html = QgsLayoutItemHtml(layout)
-        html_frame = QgsLayoutFrame(layout, layout_html)
-        html_frame.attemptSetSceneRect(QRectF(10, 10, 200, 200))
+        layout_html = QgsLayoutItemHtml(lay)
+        html_frame = QgsLayoutFrame(lay, layout_html)
+        html_frame.attemptSetSceneRect(QRectF(255, 40, 50, 100))
         html_frame.setFrameEnabled(True)
         layout_html.addFrame(html_frame)
         layout_html.setContentMode(QgsLayoutItemHtml.ManualHtml)#background-color: white ;
-        estilo="<style> table { font-size: 9px; background-color:white; border-collapse: collapse;}tr {border: 2px solid black;bgcolor :white;}td {white-space: nowrap; padding: 1px;bgcolor :white;}td.bold {font-weight: bold;}td.gap {background-color:black;padding:1px;}</style>"      
-        htmlcode = '<TABLE><TR><TD>M.U.P.</TD><TD>'+resultadocambiocultivo[0]+'</TD></TR><TR><TD>Consorcios</TD><TD>'+resultadocambiocultivo[1]+'</TD></TR><TR><TD>V.V.P.P.</TD><TD>'+resultadocambiocultivo[2]+'</TD></TR><TR><TD>R.E.N.</TD><TD>'+resultadocambiocultivo[3]+'</TD></TR><TR><TD>Z.E.C.</TD><TD>'+resultadocambiocultivo[4]+'</TD></TR><TR><TD>Z.E.P.A.</TD><TD>'+resultadocambiocultivo[5]+'</TD></TR><TR><TD>Z. Alondra</TD><TD>'+resultadocambiocultivo[6]+'</TD></TR><TR><TD>Yacimientos</TD><TD>'+resultadocambiocultivo[7]+'</TD></TR><TR><TD></TABLE>'
-        
+        estilo="<style> table { font-size: 12px; background-color:white; border-collapse: collapse;}tr {border: 0px solid black;bgcolor :white;}td {white-space: nowrap; padding: 0px;bgcolor :white;}td.bold {font-weight: bold;}td.gap {background-color:white;padding:1px;}</style>"      
+        htmlcode = '<TABLE><CAPTION>LIMITACIONES</CAPTION><TR><TD>'+resultadocambiocultivo[0]+'</TD><TD>M.U.P.</TD></TR><TR><TD>'+resultadocambiocultivo[1]+'</TD><TD>Consorcios</TD></TR><TR><TD>'+resultadocambiocultivo[2]+'</TD><TD>V.V.P.P.</TD></TR><TR><TD>'+resultadocambiocultivo[3]+'</TD><TD>R.E.N.</TD></TR><TR><TD>'+resultadocambiocultivo[4]+'</TD><TD>Z.E.C.</TD></TR><TR><TD>'+resultadocambiocultivo[5]+'</TD><TD>Z.E.P.A.</TD></TR><TR><TD>'+resultadocambiocultivo[6]+'</TD><TD>Z. Alondra</TD></TR><TR><TD>'+resultadocambiocultivo[7]+'</TD><TD>Yacimientos</TD></TR><TR><TD>'+resultadocambiocultivo[8]+'</TD><TD>Pendiente</TD></TR></TABLE>'
+       
         layout_html.setHtml(estilo+" "+str(htmlcode))
         layout_html.loadHtml()
         html_frame.setFrameStrokeWidth(QgsLayoutMeasurement(0.5, QgsUnitTypes.LayoutMillimeters))
@@ -853,28 +904,59 @@ class Informes:
 
 
 
-                
-                
-        #label.setText("Hello world")
-        #label.adjustSizeToText()
-        #layout.addItem(label)
+        label0 = QgsLayoutItemLabel(lay)
+        label0.setFont(QFont("Arial", 10))
+        label0.setText("CAMBIO DE CULTIVO")
+        label0.adjustSizeToText()
+        lay.addItem(label0)
+        label0.attemptMove(QgsLayoutPoint(255, 10, QgsUnitTypes.LayoutMillimeters))
+        label1 = QgsLayoutItemLabel(lay)
+        label2 = QgsLayoutItemLabel(lay)
+        label3 = QgsLayoutItemLabel(lay)
+        label1.setFont(QFont("Arial", 12))
+        label2.setFont(QFont("Arial", 12))
+        label3.setFont(QFont("Arial", 12)) 
+        label1.setText(munic)
+        label2.setText("Polígono: "+polig)
+        label3.setText("Parcela: "+parce)
+        label1.adjustSizeToText()
+        label2.adjustSizeToText()
+        label3.adjustSizeToText()
+        lay.addItem(label1)
+        lay.addItem(label2)
+        lay.addItem(label3)
+        label1.attemptMove(QgsLayoutPoint(255, 15, QgsUnitTypes.LayoutMillimeters))
+        label2.attemptMove(QgsLayoutPoint(255, 20, QgsUnitTypes.LayoutMillimeters))
+        label3.attemptMove(QgsLayoutPoint(255, 25, QgsUnitTypes.LayoutMillimeters))
+        label4 = QgsLayoutItemLabel(lay)
+        label4.setFont(QFont("Arial", 10))
+        label4.setText("Ortofoto 2001")
+        label4.adjustSizeToText()
+        lay.addItem(label4)
+        label4.attemptMove(QgsLayoutPoint(255, 30, QgsUnitTypes.LayoutMillimeters))
 
         
         #print(mapItem)
         #mapItem.setExtent(iface.mapCanvas().extent())
         #mapItem.attemptResize(QgsLayoutSize(410, 260, QgsUnitTypes.LayoutMillimeters))
-        mapItem.zoomToExtent(iface.mapCanvas().extent())
-        
-        #layout = layoutmanager.layoutByName(plantilla) #Layout name
-        #mapItem = QgsLayout.referenceMap()
-        #mapItem.setExtent(iface.mapCanvas().extent())
-        legendExporter=QgsLayoutExporter(layout)
+
+        iface.mapCanvas().setExtent(extension)
+        mapItem.zoomToExtent(extension)#(iface.mapCanvas().extent())
+        #activo el grid
+        mapItem.grid().setEnabled(True)
+
+
+
+        legendExporter=QgsLayoutExporter(lay)
         imageSettings=legendExporter.ImageExportSettings()
         imageSettings.cropToContents=True
         imageSettings.dpi=300
         imageSettings.pages=[0]
-        exporter = QgsLayoutExporter(layout)
+        exporter = QgsLayoutExporter(lay)
+        iface.openLayoutDesigner(lay)
         
+        
+
 
 
 
@@ -2352,6 +2434,10 @@ class Informes:
 
                 #self.creaelpdf("1",tablamontes,x1,y1,tablaconsorcios,x2,y2,tablavvpps,x3,y3,rutapdf)
             if index==1:
+                global munic
+                global polig
+                global parce
+                global extension
                 print("CAMBIOS DE CULTIVO")
                 #cargo la capa de la parcela
                 comarcas=almacen[3]
@@ -2372,12 +2458,15 @@ class Informes:
                 pro=str(provincias[int(indpro)][1])
                 mun=self.dlg.MUN.text()##displayText()
                 pol=self.dlg.POL.text()##displayText()
+                polig=pol
                 par=self.dlg.PAR.text()##displayText()
+                parce=par
  
              
                 #si no hay nada en la casilla de municipio, coge la informacion del desplegable mun es un numero del estilo 42001
                 if mun == "":
                     mun=str(municipios[int(indmun)-1][2])#coge la ultima columna de mis datos
+                    munic=str(municipios[int(indmun)-1][0])
                 else:
                     mun=str("{:02d}".format(int(pro)))+str("{:03d}".format(int(mun)))
                 print("mun",mun)
@@ -2456,6 +2545,7 @@ class Informes:
                     lyr9.commitChanges()
                     lyr9.updateExtents()
                     canvas.setExtent(lyr9.extent())
+                    extension=lyr9.extent()
                 
 
                             
@@ -2477,6 +2567,7 @@ class Informes:
                     lyr9.commitChanges()
                     lyr9.updateExtents()
                     canvas.setExtent(lyr9.extent())
+                    extension=lyr9.extent()
 
                 if elementos>1  and archivo is not "":
                     
@@ -2567,21 +2658,23 @@ class Informes:
                 zepa=r"O:/sigmena/carto/ESPACIOS/NATU2000/ZEPA/42_ZEPA.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPACIOS\NATU2000\ZEPA\42_ZEPA.shp","Z.E.P.A","ogr")
                 alondra=r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPECIES\ESTUDIOS\CENSOS\ALONDRA RICOTI\42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp","Z. Alondra","ogr")
                 yacimientos=r"O:/sigmena/carto/OTROS/BIENPATCULT/42_VW_BIENES.shp"#QgsVectorLayer(r"O:\sigmena\carto\OTROS\BIENPATCULT\42_VW_BIENES.shp","Yacimientos","ogr")
+                pendientes=r"O:/sigmena/carto/M_FISICO/RELIEVE/PENDIENT/MDT5CYL_PEND_10_15.TIF"
                 #carpeta de trabajo
                 carpetasalida = tempfile.mkdtemp()
                 print (carpetasalida)
                 #hago los cruces
-                self.crucecambiocultivo(lyr9,mup,carpetasalida)
+                self.crucecambiocultivo(lyr9,mup,carpetasalida)#tengo que ver como llamar al mup, tb layer 8 o 9
                 self.crucecambiocultivo(lyr9,consorcio,carpetasalida)
                 self.crucecambiocultivo(lyr9,vvpp,carpetasalida)
                 self.crucecambiocultivo(lyr9,ren,carpetasalida)
                 self.crucecambiocultivo(lyr9,zec,carpetasalida)
                 self.crucecambiocultivo(lyr9,zepa,carpetasalida)
                 self.crucecambiocultivo(lyr9,alondra,carpetasalida)
-                self.crucecambiocultivo(lyr9,yacimientos,carpetasalida)#tengo que ver como llamar al mup, tb layer 8 o 9
+                self.crucecambiocultivo(lyr9,yacimientos,carpetasalida)
+                self.crucecambiocultivoraster(lyr9,pendientes,carpetasalida)
                 print(resultadocambiocultivo)
                 
-                self.hagomapa2(resultadocambiocultivo,carpetasalida)
+                self.hagomapa2(resultadocambiocultivo,carpetasalida, munic,polig,parce)
                 canvas.freeze(False)
 
                 
@@ -2819,118 +2912,123 @@ class Informes:
                 
 #genero tabla de coordenadas de una capa seleccionada                
             if index==3:
+                layer=iface.activeLayer()
+                if layer is None:
+                    iface.messageBar().pushMessage("INFORMES","Selecciona una capa para calcular sus coordenadas", qgisCore.Qgis.Info,5)
+                else:
+                    decimales=int(self.dlg.lineEdit_decimales.text())
+                    #layer = iface.activeLayer()
+                    extent = layer.extent()
+                    extent.scale( 1.15 )
+                    iface.mapCanvas().setExtent(extent)
+                    iface.mapCanvas().refresh()
+                    
+                    puntos=processing.run("native:extractvertices", {'INPUT':layer,'OUTPUT':'TEMPORARY_OUTPUT'})
+                    layer2=puntos['OUTPUT']
+                    #print(layer2)
 
-                decimales=int(self.dlg.lineEdit_decimales.text())
-                layer = iface.activeLayer()
-                extent = layer.extent()
-                extent.scale( 1.15 )
-                iface.mapCanvas().setExtent(extent)
-                iface.mapCanvas().refresh()
+
+
+                    idx = layer2.fields().indexFromName("x")
+                    #print (idx)
+                    if idx ==-1:
+                        print("ya existe")
+                        res = layer2.dataProvider().addAttributes([QgsField("x", QVariant.Double)])
+                    idx2 = layer2.fields().indexFromName("y")
+                    if idx2 ==-1:
+                        print("ya existe")
+                        res = layer2.dataProvider().addAttributes([QgsField("y", QVariant.Double)])
+                    #layer.addAttribute(QgsField("valido", QVariant.String))
+                    layer2.updateFields()
+                    features = layer2.getFeatures()
+                    n=1
+                    for feature in features:
+                        geom = feature.geometry()
+                        geomSingleType = QgsWkbTypes.isSingleType(geom.wkbType())
+                        if geom.type() == QgsWkbTypes.PointGeometry:
+                            punto = geom.asPoint()
+                            xx=round(punto.x(),decimales)
+                            yy=round(punto.y(),decimales)
+                            layer2.startEditing()
+                            feature.setAttribute(idx, xx)
+                            feature.setAttribute(idx2, yy)
+                            feature.setAttribute('id', n)
+                            
+                            layer2.updateFeature(feature)
+                            #Call commit to save the changes
+                            layer2.commitChanges()
+                            n=n+1
+                    QgsProject.instance().addMapLayer(layer2)
+                    layer_settings  = QgsPalLayerSettings()
+                    text_format = QgsTextFormat()
+                    text_format.setFont(QFont("Arial", 10))
+                    text_format.setSize(12)
+                    text_format.setColor(QColor("Red"))
+                                #le meto un buffer a la etiqueta
+                    buffer_settings = QgsTextBufferSettings()
+                    buffer_settings.setEnabled(True)
+                    buffer_settings.setSize(1)
+                    buffer_settings.setColor(QColor("white"))
+
+                    text_format.setBuffer(buffer_settings)
+                    layer_settings.setFormat(text_format)
+                    layer_settings.fieldName = '''concat(' ',"ID")'''            
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    layer2.setLabelsEnabled(True)
+                    layer2.setLabeling(layer_settings)
+                    layer2.triggerRepaint()
+                    print("hasta aqui bien1")
+                    #hago la tabla para el html
+                    interesantes=["Id","x","y"]
+                    cabecera=["PUNTO","X","Y"]
+                    tablatotal=[]
+                    #listado de columnas que me interesan
+                    for feature in layer2.getFeatures():
+                        tablaparcial=[]
+                        #print(feature)
+                        for field in layer2.fields():
+                        #print(field)
+                            for campo in interesantes:
+                                if campo== field.name():
+                                    tablaparcial.append(feature[campo])
+                                    #print(tablamonte)
+                                    tablatotal.append(tablaparcial)
+
+                            #tablatotal.sort(key=lambda x: x[0])            
+                            tablatotal.insert(0,cabecera)
+                            #elimino los duplicados
+                            lista_nueva = []
+                            for i in tablatotal:
+                                if i not in lista_nueva:
+                                        lista_nueva.append(i)
+                            tablatotal=lista_nueva
+
+                    projectInstance = QgsProject.instance()
+                    layoutmanager = projectInstance.layoutManager()
+                    layout = layoutmanager.layoutByName("A3_H")
+                    mapItem = layout.referenceMap()
+
+
+                    layout_html = QgsLayoutItemHtml(layout)
+                    html_frame = QgsLayoutFrame(layout, layout_html)
+                    html_frame.attemptSetSceneRect(QRectF(10, 10, 200, 200))
+                    html_frame.setFrameEnabled(True)
+                    layout_html.addFrame(html_frame)
+                    layout_html.setContentMode(QgsLayoutItemHtml.ManualHtml)#background-color: white ;
+                    estilo="<style> table { font-size: 15px; background-color:white; border-collapse: collapse;}tr {border: 3px solid black;bgcolor :white;}td {white-space: nowrap; padding: 2px;bgcolor :white;}td.bold {font-weight: bold;}td.gap {background-color:black;padding:2px;}</style>"      
+                    htmlcode = Table(tablatotal[1:],header_row=tablatotal[0])
+                    layout_html.setHtml(estilo+" "+str(htmlcode))
+                    layout_html.loadHtml()
+                    html_frame.setFrameStrokeWidth(QgsLayoutMeasurement(0.5, QgsUnitTypes.LayoutMillimeters))
+                    html_frame.setFrameStrokeColor(QColor("transparent"))
+                    extent = layer.extent()
+                    extent.scale( 1.15 )
+                    iface.mapCanvas().setExtent(extent)
+                    iface.mapCanvas().refresh()
+                    mapItem.zoomToExtent(extent)#(iface.mapCanvas().extent())
+                    #mapItem.setExtent(iface.mapCanvas().extent())   cambia la forma del mapa
+                    iface.openLayoutDesigner(layout)
                 
-                puntos=processing.run("native:extractvertices", {'INPUT':layer,'OUTPUT':'TEMPORARY_OUTPUT'})
-                layer2=puntos['OUTPUT']
-                print(layer2)
-
-
-
-                idx = layer2.fields().indexFromName("x")
-                print (idx)
-                if idx ==-1:
-                    print("ya existe")
-                    res = layer2.dataProvider().addAttributes([QgsField("x", QVariant.Double)])
-                idx2 = layer2.fields().indexFromName("y")
-                if idx2 ==-1:
-                    print("ya existe")
-                    res = layer2.dataProvider().addAttributes([QgsField("y", QVariant.Double)])
-                #layer.addAttribute(QgsField("valido", QVariant.String))
-                layer2.updateFields()
-                features = layer2.getFeatures()
-                n=1
-                for feature in features:
-                    geom = feature.geometry()
-                    geomSingleType = QgsWkbTypes.isSingleType(geom.wkbType())
-                    if geom.type() == QgsWkbTypes.PointGeometry:
-                        punto = geom.asPoint()
-                        xx=round(punto.x(),decimales)
-                        yy=round(punto.y(),decimales)
-                        layer2.startEditing()
-                        feature.setAttribute(idx, xx)
-                        feature.setAttribute(idx2, yy)
-                        feature.setAttribute('id', n)
-                        
-                        layer2.updateFeature(feature)
-                        #Call commit to save the changes
-                        layer2.commitChanges()
-                        n=n+1
-                QgsProject.instance().addMapLayer(layer2)
-                layer_settings  = QgsPalLayerSettings()
-                text_format = QgsTextFormat()
-                text_format.setFont(QFont("Arial", 10))
-                text_format.setSize(12)
-                text_format.setColor(QColor("Red"))
-                            #le meto un buffer a la etiqueta
-                buffer_settings = QgsTextBufferSettings()
-                buffer_settings.setEnabled(True)
-                buffer_settings.setSize(1)
-                buffer_settings.setColor(QColor("white"))
-
-                text_format.setBuffer(buffer_settings)
-                layer_settings.setFormat(text_format)
-                layer_settings.fieldName = '''concat(' ',"ID")'''            
-                layer_settings.isExpression = True
-                layer_settings.enabled = True
-                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                layer2.setLabelsEnabled(True)
-                layer2.setLabeling(layer_settings)
-                layer2.triggerRepaint()
-                #hago la tabla para el html
-                interesantes=["Id","x","y"]
-                cabecera=["PUNTO","X","Y"]
-                tablatotal=[]
-                #listado de columnas que me interesan
-                for feature in layer2.getFeatures():
-                    tablaparcial=[]
-                    #print(feature)
-                    for field in layer2.fields():
-                    #print(field)
-                        for campo in interesantes:
-                            if campo== field.name():
-
-
-                                            
-                                            
-                                tablaparcial.append(feature[campo])
-                                #print(tablamonte)
-                                tablatotal.append(tablaparcial)
-
-                        #tablatotal.sort(key=lambda x: x[0])            
-                        tablatotal.insert(0,cabecera)
-                        #elimino los duplicados
-                        lista_nueva = []
-                        for i in tablatotal:
-                            if i not in lista_nueva:
-                                    lista_nueva.append(i)
-                        tablatotal=lista_nueva
-
-                projectInstance = QgsProject.instance()
-                layoutmanager = projectInstance.layoutManager()
-                layout = layoutmanager.layoutByName("A3_H")
-                mapItem = layout.referenceMap()
-
-
-                layout_html = QgsLayoutItemHtml(layout)
-                html_frame = QgsLayoutFrame(layout, layout_html)
-                html_frame.attemptSetSceneRect(QRectF(10, 10, 200, 200))
-                html_frame.setFrameEnabled(True)
-                layout_html.addFrame(html_frame)
-                layout_html.setContentMode(QgsLayoutItemHtml.ManualHtml)#background-color: white ;
-                estilo="<style> table { font-size: 15px; background-color:white; border-collapse: collapse;}tr {border: 3px solid black;bgcolor :white;}td {white-space: nowrap; padding: 2px;bgcolor :white;}td.bold {font-weight: bold;}td.gap {background-color:black;padding:2px;}</style>"      
-                htmlcode = Table(tablatotal[1:],header_row=tablatotal[0])
-                layout_html.setHtml(estilo+" "+str(htmlcode))
-                layout_html.loadHtml()
-                html_frame.setFrameStrokeWidth(QgsLayoutMeasurement(0.5, QgsUnitTypes.LayoutMillimeters))
-                html_frame.setFrameStrokeColor(QColor("transparent"))
-
-                mapItem.zoomToExtent(iface.mapCanvas().extent())
-            
-            
+                

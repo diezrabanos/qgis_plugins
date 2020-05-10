@@ -60,6 +60,7 @@ import webbrowser
 class ZoomSigmena:
     """QGIS Plugin Implementation."""
     def __init__(self, iface):
+        global almacen
         """Constructor.
         :param iface: An interface instance that will be passed to this class
             which provides the hook by which you can manipulate the QGIS
@@ -92,7 +93,10 @@ class ZoomSigmena:
         
         
         self.first_start = None
-        self.dlg.help_button.clicked.connect(self.help_pressed) 
+        self.dlg.help_button.clicked.connect(self.help_pressed)
+        self.dlg.pushButton_limpiar.clicked.connect(self.limpiar_pressed)
+        self.dlg.checkBox_utm.toggled.connect(self.pinchado_utm)
+        self.dlg.checkBox_geo.toggled.connect(self.pinchado_geo)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -170,17 +174,33 @@ class ZoomSigmena:
     
     def help_pressed(self):
         help_file = 'file:' + os.path.dirname(__file__) + '/Ayuda_ZoomSigmena.pdf'
-        webbrowser.open_new(help_file)    
+        webbrowser.open_new(help_file)
+        
+    def limpiar_pressed(self):
+        self.dlg.XX.clear()
+        self.dlg.YY.clear()
 
+    def pinchado_utm(self):
+        global almacen
+        if self.dlg.checkBox_utm.isChecked():        
+            almacen[0]=1
+        else:
+            almacen[0]=0
+    def pinchado_geo(self):
+        global almacen
+        if self.dlg.checkBox_geo.isChecked():        
+            almacen[1]=1
+        else:
+            almacen[1]=0
 
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
+            self.iface.removeToolBarIcon(action)
             self.iface.removePluginMenu(
                 self.tr(u'&Sigmena'),
                 action)
-            self.iface.removeToolBarIcon(action)
 
 
     
@@ -193,7 +213,7 @@ class ZoomSigmena:
 
     def run(self):
        
-       
+        global almacen
         #coloco el puntero arriba del todo
         QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
    
@@ -211,8 +231,29 @@ class ZoomSigmena:
         if self.first_start == True:
             self.first_start = False
 
-           
-
+        #leo la cache
+        rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\zoomSigmena\cache.txt")
+        if os.path.isfile(rutacache) ==True:
+            filecache = open(rutacache, "r")
+            filecacheleido=filecache.readlines()
+            try:
+                import ast
+                almacen= ast.literal_eval((filecacheleido[0].replace('\n','')).replace(" [[","[[").replace("]] ","]]"))#.split(','))
+                cache_utm=int(almacen[0])
+                cache_geo=int(almacen[1])
+                cache_escala=almacen[2]
+                
+                print(cache_escala)
+                print (almacen)
+                #miscomarcas=(filecacheleido[3].replace('\n','')).strip('][').split(',') #convierto una str en una list
+                #mismunicipios=ast.literal_eval((filecacheleido[4].replace('\n','')).replace(" [[","[[").replace("]] ","]]"))#.split(',')) #convierto una str en una list
+                filecache.close()
+                
+            except:
+                print("esta no encuentra el file cache")
+            self.dlg.lineEdit_escala.setText(str(cache_escala))
+            self.dlg.checkBox_utm.setChecked(cache_utm)
+            self.dlg.checkBox_geo.setChecked(cache_geo)
         # show the dialog
         self.dlg.show()
         
@@ -245,10 +286,11 @@ class ZoomSigmena:
             # Get the coordinates and scale factor from the dialog
             x=self.dlg.XX.text()##displayText()
             y=self.dlg.YY.text()##displayText()
+            escala=self.dlg.lineEdit_escala.text()
             
             x=x.replace(',','.')
             y=y.replace(',','.')
-      
+            escala=int(escala.replace('.',''))
             src=misdatos[int(src_seleccionado)][1]
         
 
@@ -362,25 +404,34 @@ class ZoomSigmena:
             layer_settings.placement = 1
             layer_settings.xOffset = 0.0
             layer_settings.yOffset = 10.0
-            layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y",'\n','Lon: ',"xx",' Lat: ',"yy" )'''
+            mostrar=True
+            if self.dlg.checkBox_utm.isChecked() and self.dlg.checkBox_geo.isChecked(): 
+                layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y",'\n','Lon: ',"xx",' Lat: ',"yy" )'''
+                almacen=[1,1]
+                
+            else:
+                if self.dlg.checkBox_utm.isChecked():
+                    layer_settings.fieldName = '''concat('X: ',"X",' Y: ',"Y" )'''
+                    almacen=[1,0]
+                    print("caso1")
+                if self.dlg.checkBox_geo.isChecked():
+                    layer_settings.fieldName = '''concat('Lon: ',"xx",' Lat: ',"yy" )'''
+                    almacen=[0,1]
+                    print("caso2")
+                if not  self.dlg.checkBox_utm.isChecked() and not self.dlg.checkBox_geo.isChecked():
+                    mostrar=False
+                    almacen=[0,0]
+                    print("caso3")
+            print("almacen despues de etiquetar",almacen)
             layer_settings.isExpression = True
 
-
-            layer_settings.enabled = True
+            print(mostrar)
+            layer_settings.enabled = mostrar
 
             layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
             vl2.setLabelsEnabled(True)
             vl2.setLabeling(layer_settings)
             vl2.triggerRepaint()
-
-
-
-            
-
-
-            
-
-
                 
             # update layer's extent when new features have been added
             # because change of extent in provider is not propagated to the layer
@@ -398,8 +449,18 @@ class ZoomSigmena:
                 xform = QgsCoordinateTransform(crsSrc, crsDest, QgsProject.instance())
                 canvas.setExtent(xform.transform(vl2.extent()))
             
-            self.iface.mapCanvas().zoomScale(10000)
-
+            self.iface.mapCanvas().zoomScale(escala)
+            #self.limpiar_pressed()
+            almacen.append(escala)
+            #lo escribo en el txt, mavhacando lo que ya tenia
+            f=open(rutacache,"w")
+            escribir=str(almacen)
+            f.write(escribir)
+            f.close()
+            print(almacen)
             QgsProject.instance().addMapLayer(vl2)
+
+            #guarda tu ultima eleccion
+            
             
         

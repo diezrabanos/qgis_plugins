@@ -14,13 +14,13 @@ name=ZoomSigmena
 qgisMinimumVersion=3.0
 
 description=Permite hacer zoom a una coordenada dada
-version=1.0.4
+version=1.0.6
 author=F. Javier Diez Rabanos
 
 email=dierabfr@jcyl.es
 
 
-about=Permite hacer zoom a una determinada coordenada UTM o geografica introducida en los sistemas de coordenadas mas utilizados que pueden seleccionarse con un desplegable. Crea una capa temporal con el punto introducido y lo etiqueta con dicha coordenada.
+about=Permite hacer zoom a una determinada coordenada UTM o geografica introducida en los sistemas de coordenadas mas utilizados que pueden seleccionarse con un desplegable. Crea una capa temporal con el punto introducido y lo etiqueta con dicha coordenada. Permite definir la escala a la que se visuliza dicha coordenada. Tambien permite eqtiquetar la coordenada tanto el UTM como en Geograficas.
 
 tracker=http://bugs
 

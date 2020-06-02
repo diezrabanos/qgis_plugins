@@ -57,17 +57,17 @@
       <experimental>False</experimental>
       <deprecated>False</deprecated>
     </pyqgis_plugin>
-<pyqgis_plugin version="1.0.8" name="GpsDescargaCarga" plugin_id="9995">
+<pyqgis_plugin version="1.0.9" name="GpsDescargaCarga" plugin_id="9995">
       <description>Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12</description>
       <about>Descarga o carga los navegadores GPS Garmin de la serie ETREX o XL12. Lo hace en la carpeta C SIGMENA GPS con un nombre que le demos. Una vez descargado lo transforma a Etrs89 huso 30. </about>
-      <version>1.0.8</version>
+      <version>1.0.9</version>
       <trusted>True</trusted>
       <qgis_minimum_version>3.4.0</qgis_minimum_version>
       <qgis_maximum_version>3.20.0</qgis_maximum_version>
       <homepage>https://github.com/diezrabanos/qgis_plugins/</homepage>
-      <file_name>gpsDescargaCarga.1.0.8.zip</file_name>
+      <file_name>gpsDescargaCarga.1.0.9.zip</file_name>
       <author_name>F. Javier Díez Rábanos</author_name>
-      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/gpsDescargaCarga.1.0.8.zip?raw=true</download_url>
+      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/gpsDescargaCarga.1.0.9.zip?raw=true</download_url>
       <experimental>False</experimental>
       <deprecated>False</deprecated>
     </pyqgis_plugin>

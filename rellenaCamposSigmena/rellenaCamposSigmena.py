@@ -197,6 +197,10 @@ class RellenaCamposSigmena:
             misdatos = [f.name() for f in vlayer.fields()]
             columna=misdatos[int(column)-1] 
         almacen[0]=columna
+
+    def cuentaselecionados(self,vlayer):
+        elementosseleccionados = len(vlayer.selectedFeatures())
+        self.dlg.textselecionados.setText(str(elementosseleccionados))
         
 
 
@@ -278,7 +282,7 @@ class RellenaCamposSigmena:
                 self.dlg.cb1.setCurrentIndex(indice+1)
             else:
                  self.dlg.cb1.setCurrentIndex(0)
-        
+        #vlayer.selectionChanged.connect(self.cuentaselecionados(vlayer))
         """Run method that performs all the real work"""
 
         # Create the dialog with elements (after translation) and keep reference

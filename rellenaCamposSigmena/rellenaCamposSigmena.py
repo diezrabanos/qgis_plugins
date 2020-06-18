@@ -93,7 +93,7 @@ class RellenaCamposSigmena:
         
         
         self.first_start = None
-        self.dlg.help_button.clicked.connect(self.help_pressed)
+        #self.dlg.help_button.clicked.connect(self.help_pressed)
         #self.dlg.pushButton_limpiar.clicked.connect(self.limpiar_pressed)
         #self.dlg.checkBox_utm.toggled.connect(self.pinchado_utm)
         #self.dlg.checkBox_geo.toggled.connect(self.pinchado_geo)

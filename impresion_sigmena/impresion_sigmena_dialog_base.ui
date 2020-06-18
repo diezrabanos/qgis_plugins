@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SigpacDialogBase</class>
- <widget class="QDialog" name="SigpacDialogBase">
+ <class>ImpresionSigmenaDialogBase</class>
+ <widget class="QDialog" name="ImpresionSigmenaDialogBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SIGPAC</string>
+   <string>IMPRESION SIGMENA</string>
   </property>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
@@ -62,24 +62,24 @@
     <string>IMPRESION SIGMENA</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_5">
+  <widget class="QCheckBox" name="checkBoxProyecto">
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>150</y>
-     <width>84</width>
+     <y>270</y>
+     <width>121</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
-    <string>PENDIENTES</string>
+    <string>PROYECTO ACTUAL</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_3">
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>196</y>
+     <y>200</y>
      <width>131</width>
      <height>17</height>
     </rect>
@@ -92,7 +92,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>173</y>
+     <y>230</y>
      <width>43</width>
      <height>17</height>
     </rect>
@@ -101,43 +101,20 @@
     <string>MFE</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_5">
-   <property name="geometry">
-    <rect>
-     <x>40</x>
-     <y>300</y>
-     <width>86</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>mup</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>270</x>
-     <y>280</y>
-     <width>86</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>puntos de agua</string>
-   </property>
-  </widget>
   <widget class="QCheckBox" name="checkBoxOrtofoto">
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>242</y>
+     <y>140</y>
      <width>80</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
     <string>ORTOFOTO</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QRadioButton" name="radioButtonHorizontal">
@@ -173,7 +150,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>219</y>
+     <y>160</y>
      <width>41</width>
      <height>17</height>
     </rect>
@@ -195,45 +172,6 @@
     <string>PLANO VERTICAL</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_6">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>290</y>
-     <width>86</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>capas a incluir</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_7">
-   <property name="geometry">
-    <rect>
-     <x>170</x>
-     <y>290</y>
-     <width>86</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>cortafuegos</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_9">
-   <property name="geometry">
-    <rect>
-     <x>270</x>
-     <y>260</y>
-     <width>86</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>caminos y carrtereas</string>
-   </property>
-  </widget>
   <widget class="QCheckBox" name="checkBox1">
    <property name="geometry">
     <rect>
@@ -244,7 +182,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>1</string>
+    <string>NO</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox2">
@@ -257,7 +195,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>2</string>
+    <string>N</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox3">
@@ -270,7 +208,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>3</string>
+    <string>NE</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox4">
@@ -283,7 +221,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>4</string>
+    <string>O</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox5">
@@ -296,7 +234,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>5</string>
+    <string/>
    </property>
    <property name="checked">
     <bool>true</bool>
@@ -312,7 +250,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>6</string>
+    <string>E</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox7">
@@ -325,7 +263,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>7</string>
+    <string>SO</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox8">
@@ -338,7 +276,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>8</string>
+    <string>S</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox9">
@@ -351,7 +289,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>9</string>
+    <string>SE</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_10">
@@ -367,13 +305,57 @@
     <string>HOJAS A SACAR</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>144</x>
+     <y>59</y>
+     <width>100</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>100</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="text">
+    <string>Escala:1/</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="escalasComboBox">
+   <property name="geometry">
+    <rect>
+     <x>250</x>
+     <y>60</y>
+     <width>100</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>100</width>
+     <height>16777215</height>
+    </size>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>SigpacDialogBase</receiver>
+   <receiver>ImpresionSigmenaDialogBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -389,7 +371,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>SigpacDialogBase</receiver>
+   <receiver>ImpresionSigmenaDialogBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

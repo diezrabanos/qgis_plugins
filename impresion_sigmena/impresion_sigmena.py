@@ -33,7 +33,7 @@ from .resources import *
 # Import the code for the dialog and for copying the templates to local profile folder
 from .impresion_sigmena_dialog import ImpresionSigmenaDialog
 import os.path
-from qgis.core import QgsApplication, QgsProject,QgsPrintLayout,QgsUnitTypes,QgsLayoutSize,QgsLayoutItemMap,QgsLayoutItemLabel,QgsLayoutExporter,QgsLayoutItemScaleBar,QgsVector
+from qgis.core import QgsApplication, QgsProject,QgsPrintLayout,QgsUnitTypes,QgsLayoutSize,QgsLayoutItemMap,QgsLayoutItemLabel,QgsLayoutExporter,QgsLayoutItemScaleBar,QgsVector,QgsVectorLayer,QgsRasterLayer
 from distutils.dir_util import copy_tree
 from random import randrange as rand
 import webbrowser
@@ -327,38 +327,50 @@ class ImpresionSigmena:
         """Run method that performs all the real work"""
         # This loads the dialog with templates (again) TODO check when it's best to do this
         #self.loadTemplates()
+        escalas=["5000","10000","15000","20000","25000","30000"]
+        self.dlg.escalasComboBox.clear() 
+        for element in escalas:
+            self.dlg.escalasComboBox.addItem( element)
+        
         
         # show the dialog
         self.dlg.show()
         # Run the dialog event loop
         result = self.dlg.exec_()
         #lista de capas imprescindibles
-        mup=''
-        cortafuegos=''
-        pistas=''
-        puntosdeagua=''
-        rios=''
-        cascosurbanos=''
-        carreteras=''
-        vegeracion=''
-        ortofoto=''
-        e25=''
+        mup=r'O:/sigmena/carto/PROPIEDA/MONTES/PERTENEN/Mup_etrs89.shp'
+        consorcios=r"O:/sigmena/carto/PROPIEDA/MONTES/CONTRATO/Consorcios_etrs89.shp"
+        cortafuegos=r'O:/sigmena/carto/INCENDIO/CORTAFUE/CORTAFUEGOS_etrs89.shp'
+        pistas=r'O:/sigmena/carto/VIAS/FORESTAL/Pistas_etrs89.shp'
+        puntosdeagua=r'O:/sigmena/carto/INCENDIO/INFRAEST/42_Puntos_agua_etrs89.shp'
+        rios=r'O:/sigmena/carto/M_FISICO/HIDROGRA/42_HIDROL_E10_etrs89.shp'
+        cascosurbanos=r'O:/sigmena/carto/DIV_ADMI/GENERAL/42_cascos_ine_etrs89_.shp'
+        carreteras=r'O:/sigmena/carto/VIAS/GENERAL/42_tn_carr_cyl_red_vias.shp'
+        vegetacion=r'O:/sigmena/carto/VEGETACI/MFE/FOTOFIJA2015/42_MFE_FotoFija2015.shp'
+        ortofoto=r'R:/SIGMENA/CARTO/RASTER/ORTOFOTO/pnoa/ETRS89/2017/oi_cyl_2017_so_35_25830.ecw'
+        e25=r'R:/SIGMENA/CARTO/RASTER/ESCANEOS/E25/IGN/Georreferenciado_ETRS89/MTN25SOETRS89_E25_provincia_completa/MTN25SORIA25830.ecw'
         
-        vegetacion=''
+        
         listaortofoto=[mup,cortafuegos,pistas,carreteras,puntosdeagua,rios,cascosurbanos,ortofoto]
         listae25=[mup,cortafuegos,pistas,puntosdeagua,e25]
         listavegetacion=[mup,cortafuegos,pistas,carreteras,puntosdeagua,rios,cascosurbanos,vegetacion]
+
         
         # See if OK was pressed TODO: probably need something to happen when pressing "cancel" too.
         if result:
             print("le he dado a ok")
-            escala=25000
+            indescala=self.dlg.escalasComboBox.currentIndex()
+            escala=int(escalas[int(indescala)])
+            print(escala)
             
             # get the users input
             #recogo la zona a sacar
             
             #titel = "titulo"#self.dlg.titelFld.text()
             #subTitel = self.dlg.subTitelFld.text()
+
+            
+            
             project = QgsProject.instance()
             l = QgsPrintLayout(project)
             l.initializeDefaults()
@@ -420,16 +432,18 @@ class ImpresionSigmena:
             #podria crear una funcion desde aqui para meter las capas que interesa que se impriman.
             
             
-            def configuraplano(capas=[]):
+            def configuraplanoproyecto():
                 global newextend
                 # project.mapLayers().values():
+                """#BORRO LAS CAPAS QUE HAY EN EL PROYECTO
+                capas =QgsProject.instance().mapLayers()
+                for capa in capas:
+                    QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)"""
                 theMap.setLayers(project.mapThemeCollection().masterVisibleLayers())   # remember ANNOTATION!
                 theMap.setExtent(newextend)
                 theMap.attemptSetSceneRect(QRectF(x, y, w, h))
                 l.addItem(theMap)
                 #pongo la escala 
-                
-                
                 print("he incluido el mapa")
             # add title
             #titleFont = QFont(self.textFont, int(font_scale * 14))
@@ -442,6 +456,55 @@ class ImpresionSigmena:
             #titelLabel.adjustSizeToText()
             #l.addItem(titelLabel)
             #print("he inlcuido el titulo")
+
+            def configuraplanoorto():
+                global newextend
+                # project.mapLayers().values():
+                #BORRO LAS CAPAS QUE HAY EN EL PROYECTO
+                capas =QgsProject.instance().mapLayers()
+                for capa in capas:
+                    QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)
+                #cargo capas al proyecto
+                
+                rutaestilos=r'O:/sigmena/leyendas/qgis'
+                rlorto = QgsRasterLayer(ortofoto, "Orto")
+                rlorto.renderer().setOpacity(1.0)
+                #rlayer.loadNamedStyle(os.path.join(rutaestilos,'pendiente_10_15.qml'))
+                QgsProject.instance().addMapLayer(rlorto)
+                vlmup=QgsVectorLayer(mup ,"M.U.P.","ogr")
+                vlmup.loadNamedStyle(os.path.join(rutaestilos,'MUP.qml'))
+                QgsProject.instance().addMapLayer(vlmup)
+                vlconsorcio=QgsVectorLayer(consorcios,"Consorcios","ogr")
+                vlconsorcio.loadNamedStyle(os.path.join(rutaestilos,'consorcios.qml'))
+                QgsProject.instance().addMapLayer(vlconsorcio)
+                vlcortafuegos=QgsVectorLayer(cortafuegos,"Cortafuegos","ogr")
+                vlcortafuegos.loadNamedStyle(os.path.join(rutaestilos,'cortafuegos.qml'))
+                QgsProject.instance().addMapLayer(vlcortafuegos)
+                vlpistas=QgsVectorLayer(pistas,"Pistas","ogr")
+                vlpistas.loadNamedStyle(os.path.join(rutaestilos,'pistas.qml'))
+                QgsProject.instance().addMapLayer(vlpistas)
+                vlpuntosdeagua=QgsVectorLayer(puntosdeagua,"Puntos de agua","ogr")
+                vlpuntosdeagua.loadNamedStyle(os.path.join(rutaestilos,'ptos_agua.qml'))
+                QgsProject.instance().addMapLayer(vlpuntosdeagua)
+                vlrios=QgsVectorLayer(rios,"Rios","ogr")
+                vlrios.loadNamedStyle(os.path.join(rutaestilos,'riose10.qml'))
+                QgsProject.instance().addMapLayer(vlrios)
+                vlcascosurbanos=QgsVectorLayer(cascosurbanos,"Cascos urbanos","ogr")
+                vlcascosurbanos.loadNamedStyle(os.path.join(rutaestilos,'cascosurbanos.qml'))
+                QgsProject.instance().addMapLayer(vlcascosurbanos)
+                vlcarreteras=QgsVectorLayer(carreteras,"Carreteras","ogr")
+                vlcarreteras.loadNamedStyle(os.path.join(rutaestilos,'carreteras.qml'))
+                QgsProject.instance().addMapLayer(vlcarreteras)
+        
+                
+                
+                theMap.setLayers(project.mapThemeCollection().masterVisibleLayers())   # remember ANNOTATION!
+                theMap.setExtent(newextend)
+                theMap.attemptSetSceneRect(QRectF(x, y, w, h))
+                l.addItem(theMap)
+                #pongo la escala 
+                print("he incluido el mapa")
+            
             """
 
             # add logo
@@ -500,44 +563,118 @@ class ImpresionSigmena:
                 exporter.exportToPdf(ruta, pdf_settings)
                 webbrowser.open_new('file:'+ruta)
                 
-            moverx=w/1000*escala-500
-            movery=h/1000*escala-500
+            moverx=w/1000*escala/1.8#solape
+            movery=h/1000*escala/1.8#solape
+            #proyecto
             if self.dlg.checkBox1.isChecked():
                 moverextend(-moverx,movery)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+                
             if self.dlg.checkBox2.isChecked():
                 moverextend(0,movery)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+              
             if self.dlg.checkBox3.isChecked():
                 moverextend(moverx,movery)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+                
             if self.dlg.checkBox4.isChecked():
                 moverextend(-moverx,0)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+        
             if self.dlg.checkBox5.isChecked():
                 moverextend(0,0)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+
             if self.dlg.checkBox6.isChecked():
                 moverextend(moverx,0)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+                
             if self.dlg.checkBox7.isChecked():
                 moverextend(-moverx,-movery)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+
             if self.dlg.checkBox8.isChecked():
                 moverextend(0,-movery)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+                
+
             if self.dlg.checkBox9.isChecked():
                 moverextend(moverx,-movery)
-                configuraplano([''])
-                configuralodefuerayexporta()
+                if self.dlg.checkBoxProyecto.isChecked():
+                    configuraplanoproyecto()
+                    configuralodefuerayexporta()
+
+            #orto
+            if self.dlg.checkBox1.isChecked():
+                moverextend(-moverx,movery)
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox2.isChecked():
+                moverextend(0,movery)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox3.isChecked():
+                moverextend(moverx,movery)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox4.isChecked():
+                moverextend(-moverx,0)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox5.isChecked():
+                moverextend(0,0)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox6.isChecked():
+                moverextend(moverx,0)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox7.isChecked():
+                moverextend(-moverx,-movery)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox8.isChecked():
+                moverextend(0,-movery)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
+            if self.dlg.checkBox9.isChecked():
+                moverextend(moverx,-movery)
+
+                if self.dlg.checkBoxOrtofoto.isChecked():
+                    configuraplanoorto()
+                    configuralodefuerayexporta()
             
             
                 

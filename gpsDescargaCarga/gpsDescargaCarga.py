@@ -56,6 +56,7 @@ import math
 import time
 
 import subprocess
+import shutil
 
 
 
@@ -180,15 +181,10 @@ class GpsDescargaCarga:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
+            self.iface.removeToolBarIcon(action)
             self.iface.removePluginMenu(
                 self.tr(u'&Sigmena'),
                 action)
-            self.iface.removeToolBarIcon(action)
-        # remove the toolbar
-        #del self.toolbar        #PUEDO PROBAR A BORRAR COSAS
-        #del self.menu
-        #del self.dlg
-
 
 
 
@@ -232,7 +228,7 @@ class GpsDescargaCarga:
             nombre=self.dlg.nombrearchivo_entrada.text().replace(' ','_')##displayText()
             usuario=QgsExpressionContextUtils.globalScope().variable('user_account_name')
             puertos=["usb:","COM1","COM2","COM3","COM4","COM5","COM6","COM7"]
-            instalacion=QgsApplication.prefixPath()[:-9]
+            instalacion=QgsApplication.prefixPath()[:-14]
             
 
             iface.messageBar().pushMessage("ATENCION", "POR FAVOR, ESPERE", duration=10)
@@ -259,15 +255,19 @@ class GpsDescargaCarga:
             
                 path = r'C:/sigmena/gps/'+nombre+'.gpx'
                 ruta=path
+                print (ruta)
                 for puerto in puertos:
                     for abreviatura in abreviaturas:
                         #comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe"'+' '+ abreviatura +' -i garmin -f '+ puerto +' -o gpx -F ' + ruta
-                        comando='"'+instalacion+'bin/gpsbabel.exe"'+' '+ abreviatura +' -i garmin -f '+ puerto +' -o gpx -F ' + ruta
+                        
+                        comando='"'+instalacion+'/bin/gpsbabel.exe"'+' '+ abreviatura +' -i garmin -f '+ puerto +' -o gpx -F ' + ruta
+                        print (comando)
                         #print (comando)
                         result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         output,error = result.communicate()
-                        #print (output)
-                        #print (error)
+                        print("en 1")
+                        print (output)
+                        print (error)
 
 
                 
@@ -306,8 +306,10 @@ class GpsDescargaCarga:
                 
 
                 if vl2.wkbType()== 1 or vl2.wkbType()== 4:    
-                #tendria que mirar si tiene src, si no lo tiene ponerle el del proyecto
-                #vectorLyr.setCrs(mycrs,True)
+                    #tendria que mirar si tiene src, si no lo tiene ponerle el del proyecto
+                    #vectorLyr.setCrs(mycrs,True)
+                    #deberia enviar solo los seleccionados
+                    #deberia selecionar la columna con el nombre
                     params=  {'INPUT':shapefile,'TARGET_CRS':QgsCoordinateReferenceSystem('EPSG:4326'),'OUTPUT':str(shapefile[:-4])+"_wgs84.shp"}
                     processing.run("native:reprojectlayer",params)
                     
@@ -320,7 +322,8 @@ class GpsDescargaCarga:
                     #iface.addVectorLayer(str(shapefile[:-4])+"_wgs84.shp", str(nombre[0])+"_wgs84", "ogr")
                     if os.path.exists(str(shapefile[:-4])+".gpx"):
                         os.remove(str(shapefile[:-4])+".gpx")
-                    comando="ogr2ogr -f GPX "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"# -sql SELECT nombre AS name"#ogr2ogr -f GPX output.gpx input.gpx waypoints routes tracks"
+                    comando='"'+instalacion+'/bin/ogr2ogr.exe" -f GPX '+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"# -sql SELECT nombre AS name"#ogr2ogr -f GPX output.gpx input.gpx waypoints routes tracks"
+                    print(comando)
                     os.system(comando)
 
                     ruta =str(shapefile[:-4])+".gpx"
@@ -330,11 +333,18 @@ class GpsDescargaCarga:
                     
                     for puerto in puertos:
                         #comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe" -w -i gpx -f '+ruta+' -o garmin -F ' + puerto
-                        comando='"'+instalacion+'bin/gpsbabel.exe" -w -i gpx -f '+ruta+' -o garmin -F ' + puerto
+                        comando='"'+instalacion+'/bin/gpsbabel.exe" -w -i gpx -f '+ruta+' -o garmin -F ' + puerto
                         result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         output,error = result.communicate()
-                        #print (output)
-                        #print (error)
+                        print (output)
+                        print (error)
+                    rutagps =r"D:\Garmin\GPX"#deberia intentar en varias rutasd, e , f, g, h si existen.
+                    if os.path.isdir(rutagps): 
+                        try:
+                            shutil.copy2(ruta, rutagps)
+                        except:
+                            pass
+                        
 
             if self.dlg.checkBox_5.isChecked():
                 print("subir archivo linea")
@@ -395,7 +405,7 @@ class GpsDescargaCarga:
                     #iface.addVectorLayer(shapefile, nombre [0], "ogr")
 
 
-                    comando="ogr2ogr.exe -f GPX "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"+" -dsco GPX_USE_EXTENSIONS=YES -lco FORCE_GPX_TRACK=YES"
+                    comando='"'+instalacion+'/bin/ogr2ogr.exe" -f GPX '+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"+" -dsco GPX_USE_EXTENSIONS=YES -lco FORCE_GPX_TRACK=YES"
                     #comando="ogr2ogr -f GPX GPX_USE_EXTENSIONS=YES GPX_USE_EXTENSIONS=YES "+str(shapefile[:-4])+".gpx "+str(shapefile[:-4])+"_wgs84.shp"# -sql SELECT nombre AS name"#ogr2ogr -f GPX output.gpx input.gpx waypoints routes tracks"
                     os.system(comando)
 
@@ -404,11 +414,19 @@ class GpsDescargaCarga:
                     #os.system(comando+" "+ ruta)
                     
                     for puerto in puertos:
-                        comando='"C:/Program Files/QGIS 3.10/bin/gpsbabel.exe" -t -i gpx -f '+ruta+' -o garmin -F ' + puerto
+                        comando='"'+instalacion+'/bin/gpsbabel.exe" -t -i gpx -f '+ruta+' -o garmin -F ' + puerto
                         result = subprocess.Popen(comando, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         output,error = result.communicate()
-                        #print (output)
-                        #print (error)
+                        print (output)
+                        print (error)
+                    rutagps =r"D:\Garmin\GPX"
+                    if os.path.isdir(rutagps): 
+                        try:
+                            shutil.copy2(ruta, rutagps)
+                        except:
+                            pass
+                    else:
+                        pass
                     
 
 

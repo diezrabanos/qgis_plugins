@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QFileInfo, Qt,QRectF
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon,QColor,QFont
 from PyQt5.QtWidgets import QAction
 # The following two imports are probably a bit overkill...
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -33,7 +33,7 @@ from .resources import *
 # Import the code for the dialog and for copying the templates to local profile folder
 from .impresion_sigmena_dialog import ImpresionSigmenaDialog
 import os.path
-from qgis.core import QgsApplication, QgsProject,QgsPrintLayout,QgsUnitTypes,QgsLayoutSize,QgsLayoutItemMap,QgsLayoutItemLabel,QgsLayoutExporter,QgsLayoutItemScaleBar,QgsVector,QgsVectorLayer,QgsRasterLayer
+from qgis.core import QgsApplication, QgsProject,QgsPrintLayout,QgsUnitTypes,QgsLayoutSize,QgsLayoutItemMap,QgsLayoutItemLabel,QgsLayoutExporter,QgsLayoutItemScaleBar,QgsVector,QgsVectorLayer,QgsRasterLayer,QgsLayoutItemMapGrid,QgsLayoutItemLegend,QgsLayoutPoint,QgsLegendStyle
 from distutils.dir_util import copy_tree
 from random import randrange as rand
 import webbrowser
@@ -331,6 +331,7 @@ class ImpresionSigmena:
         self.dlg.escalasComboBox.clear() 
         for element in escalas:
             self.dlg.escalasComboBox.addItem( element)
+        self.dlg.escalasComboBox.setCurrentIndex(2)
         
         
         # show the dialog
@@ -358,6 +359,7 @@ class ImpresionSigmena:
         
         # See if OK was pressed TODO: probably need something to happen when pressing "cancel" too.
         if result:
+
             print("le he dado a ok")
             indescala=self.dlg.escalasComboBox.currentIndex()
             escala=int(escalas[int(indescala)])
@@ -409,6 +411,7 @@ class ImpresionSigmena:
             x, y = lm, tm
             w, h = paperSize[0] -  2 * lm, paperSize[1] - bm
             print("ya he definido el tamaño de papel")
+            print(paperSize[0] , paperSize[1])
             theMap = QgsLayoutItemMap(l)
             theMap.updateBoundingRect()
             theMap.setRect(QRectF(x, y, w, h)) 
@@ -416,17 +419,50 @@ class ImpresionSigmena:
             theMap.setFrameEnabled(True)
             #podria crear una funcion para cambiar la extension
             extendoriginal=self.iface.mapCanvas().extent()
-            theMap.setScale(escala)
-            
+
+            #meto los elementos que tengo que modificar despues, como la fecha, 
+            #add date
+            d = time.localtime()
+            dString = "%d-%d-%d (%d:%d)" % (d[2],  d[1],  d[0],d[3],d[4])
+            dateLabel = QgsLayoutItemLabel(l)
+            dateLabel.setText(dString)
+            dateLabel.adjustSizeToText()
+            dateStringWidth = dateLabel.sizeForText().width()
+            dateLabel.setPos(paperSize[0] - lm - dateStringWidth -5, (paperSize[1] - bm) + tm + 5)
+            print(paperSize[0] - lm - dateStringWidth -5, (paperSize[1] - bm) + tm + 5)
+            l.addItem(dateLabel)
+             # add scalebar
+
+            """scaleBar = QgsLayoutItemScaleBar(l)
+            scaleBar.setLinkedMap(theMap)
+            scaleBar.applyDefaultSettings()
+            scaleBar.applyDefaultSize()
+            # scaleBar.setStyle('Line Ticks Down') 
+            scaleBar.setNumberOfSegmentsLeft(0)
+            scaleBar.setNumberOfSegments (3)
+            scaleBar.update()
+            scaleBar.setPos(lm + 10, tm + (paperSize[1] - bm) + tm + 5 )
+            l.addItem(scaleBar)"""
+            escaleLabel= QgsLayoutItemLabel(l)
+            escaleLabel.setText("Escala 1:" + str(escala))
+            escaleLabel.adjustSizeToText()
+            escaleStringWidth = escaleLabel.sizeForText().width()
+            escaleLabel.setPos(paperSize[0] - lm - dateStringWidth -5, (paperSize[1] - bm) + tm + 10)#(paperSize[0] - lm - escaleStringWidth -5, (paperSize[1] - bm) + tm + 5)
+            print((paperSize[0] - lm - escaleStringWidth -5, (paperSize[1] - bm) + tm + 10))
+            l.addItem(escaleLabel)
+            print(lm + 10, tm + (paperSize[1] - bm) + tm + 5 )
+
+
+                  
 
                                 
 
 
             def moverextend(xx,yy):
                 global newextend
-                print(extendoriginal)
+                #print(extendoriginal)
                 newextend=extendoriginal+QgsVector(xx,yy)
-                print(newextend)
+                #print(newextend)
                 return newextend
             
             #podria crear una funcion desde aqui para meter las capas que interesa que se impriman.
@@ -443,7 +479,9 @@ class ImpresionSigmena:
                 theMap.setExtent(newextend)
                 theMap.attemptSetSceneRect(QRectF(x, y, w, h))
                 l.addItem(theMap)
-                #pongo la escala 
+                #pongo la escala
+                print(escala)
+                theMap.setScale(escala)
                 print("he incluido el mapa")
             # add title
             #titleFont = QFont(self.textFont, int(font_scale * 14))
@@ -477,6 +515,9 @@ class ImpresionSigmena:
                 vlconsorcio=QgsVectorLayer(consorcios,"Consorcios","ogr")
                 vlconsorcio.loadNamedStyle(os.path.join(rutaestilos,'consorcios.qml'))
                 QgsProject.instance().addMapLayer(vlconsorcio)
+                vlcarreteras=QgsVectorLayer(carreteras,"Carreteras","ogr")
+                vlcarreteras.loadNamedStyle(os.path.join(rutaestilos,'carreteras.qml'))
+                QgsProject.instance().addMapLayer(vlcarreteras)
                 vlcortafuegos=QgsVectorLayer(cortafuegos,"Cortafuegos","ogr")
                 vlcortafuegos.loadNamedStyle(os.path.join(rutaestilos,'cortafuegos.qml'))
                 QgsProject.instance().addMapLayer(vlcortafuegos)
@@ -492,9 +533,7 @@ class ImpresionSigmena:
                 vlcascosurbanos=QgsVectorLayer(cascosurbanos,"Cascos urbanos","ogr")
                 vlcascosurbanos.loadNamedStyle(os.path.join(rutaestilos,'cascosurbanos.qml'))
                 QgsProject.instance().addMapLayer(vlcascosurbanos)
-                vlcarreteras=QgsVectorLayer(carreteras,"Carreteras","ogr")
-                vlcarreteras.loadNamedStyle(os.path.join(rutaestilos,'carreteras.qml'))
-                QgsProject.instance().addMapLayer(vlcarreteras)
+                
         
                 
                 
@@ -502,9 +541,338 @@ class ImpresionSigmena:
                 theMap.setExtent(newextend)
                 theMap.attemptSetSceneRect(QRectF(x, y, w, h))
                 l.addItem(theMap)
-                #pongo la escala 
+                #pongo la escala
+                print(escala)
+                theMap.setScale(escala)
                 print("he incluido el mapa")
-            
+
+                #METO LA LEYENDA
+                legend = QgsLayoutItemLegend(l)
+                #legend.setTitle("Leyenda")
+                
+                legend.setLinkedMap(theMap) # pass a QgsLayoutItemMap object
+                #incluye todos los visibles
+                legend.setLegendFilterByMapEnabled(True)
+                legend.setColumnCount(7)
+                legend.setBackgroundColor(QColor("white"))
+                # Set split to true to finish legend horizontal distribution
+                legend.setSplitLayer(False)
+                #todas las visibles de otra forma
+                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #print (lyrs_to_add2)
+                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras"]
+                legend.setAutoUpdateModel(False)
+                group = legend.model().rootGroup()
+                group.clear()
+                for la in lyrs_to_add:
+                    if la.name() in lyrs_to_add2:
+                        subgroup = group.addGroup(la.name())
+                        checked = la.checkedLayers()
+                        for c in checked:
+                            #subgroup.addLayer(c)
+                            group.addLayer(c)
+                        
+                l.addItem(legend)
+                
+                legend.setStyleFont(QgsLegendStyle.Title, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.Subgroup, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.SymbolLabel, QFont("Arial", 7, QFont.StyleNormal))
+
+                #legend.rstyle(QgsComposerLegendStyle.Symbol).setMargin(QgsComposerLegendStyle.Top, 0)
+
+
+                legend.setSymbolHeight(2)
+                
+                legend.setBoxSpace(0)
+                legend.adjustBoxSize()
+                
+                legend.attemptMove(QgsLayoutPoint(3, paperSize[1]/10-2.6, QgsUnitTypes.LayoutCentimeters))
+                #legend.attemptResize(QgsLayoutSize(2.8, 2.2, QgsUnitTypes.LayoutCentimeters))
+                legend.refresh()
+                
+                l.addLayoutItem(legend)
+
+            def configuraplanoe25():
+                global newextend
+                # project.mapLayers().values():
+                #BORRO LAS CAPAS QUE HAY EN EL PROYECTO
+                capas =QgsProject.instance().mapLayers()
+                for capa in capas:
+                    QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)
+                #cargo capas al proyecto
+                
+                rutaestilos=r'O:/sigmena/leyendas/qgis'
+                rle25 = QgsRasterLayer(e25, "E25")
+                rle25.renderer().setOpacity(1.0)
+                #rlayer.loadNamedStyle(os.path.join(rutaestilos,'pendiente_10_15.qml'))
+                QgsProject.instance().addMapLayer(rle25)
+                vlmup=QgsVectorLayer(mup ,"M.U.P.","ogr")
+                vlmup.loadNamedStyle(os.path.join(rutaestilos,'MUP.qml'))
+                QgsProject.instance().addMapLayer(vlmup)
+                vlconsorcio=QgsVectorLayer(consorcios,"Consorcios","ogr")
+                vlconsorcio.loadNamedStyle(os.path.join(rutaestilos,'consorcios.qml'))
+                QgsProject.instance().addMapLayer(vlconsorcio)
+                vlcortafuegos=QgsVectorLayer(cortafuegos,"Cortafuegos","ogr")
+                vlcortafuegos.loadNamedStyle(os.path.join(rutaestilos,'cortafuegos.qml'))
+                QgsProject.instance().addMapLayer(vlcortafuegos)
+                vlpistas=QgsVectorLayer(pistas,"Pistas","ogr")
+                vlpistas.loadNamedStyle(os.path.join(rutaestilos,'pistas.qml'))
+                QgsProject.instance().addMapLayer(vlpistas)
+                vlpuntosdeagua=QgsVectorLayer(puntosdeagua,"Puntos de agua","ogr")
+                vlpuntosdeagua.loadNamedStyle(os.path.join(rutaestilos,'ptos_agua.qml'))
+                QgsProject.instance().addMapLayer(vlpuntosdeagua)
+                
+        
+                
+                
+                theMap.setLayers(project.mapThemeCollection().masterVisibleLayers())   # remember ANNOTATION!
+                theMap.setExtent(newextend)
+                theMap.attemptSetSceneRect(QRectF(x, y, w, h))
+                l.addItem(theMap)
+                #pongo la escala
+                print(escala)
+                theMap.setScale(escala)
+                print("he incluido el mapa")
+
+                #METO LA LEYENDA
+                legend = QgsLayoutItemLegend(l)
+                #legend.setTitle("Leyenda")
+                
+                legend.setLinkedMap(theMap) # pass a QgsLayoutItemMap object
+                #incluye todos los visibles
+                legend.setLegendFilterByMapEnabled(True)
+                legend.setColumnCount(7)
+                legend.setBackgroundColor(QColor("white"))
+                # Set split to true to finish legend horizontal distribution
+                legend.setSplitLayer(False)
+                #todas las visibles de otra forma
+                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #print (lyrs_to_add2)
+                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras"]
+                legend.setAutoUpdateModel(False)
+                group = legend.model().rootGroup()
+                group.clear()
+                for la in lyrs_to_add:
+                    if la.name() in lyrs_to_add2:
+                        subgroup = group.addGroup(la.name())
+                        checked = la.checkedLayers()
+                        for c in checked:
+                            #subgroup.addLayer(c)
+                            group.addLayer(c)
+                        
+                l.addItem(legend)
+                
+                legend.setStyleFont(QgsLegendStyle.Title, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.Subgroup, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.SymbolLabel, QFont("Arial", 7, QFont.StyleNormal))
+
+                #legend.rstyle(QgsComposerLegendStyle.Symbol).setMargin(QgsComposerLegendStyle.Top, 0)
+
+
+                legend.setSymbolHeight(2)
+                
+                legend.setBoxSpace(0)
+                legend.adjustBoxSize()
+                
+                legend.attemptMove(QgsLayoutPoint(3, paperSize[1]/10-2.6, QgsUnitTypes.LayoutCentimeters))
+                #legend.attemptResize(QgsLayoutSize(2.8, 2.2, QgsUnitTypes.LayoutCentimeters))
+                legend.refresh()
+                
+                l.addLayoutItem(legend)
+
+            def configuraplanoortoe25():
+                global newextend
+                # project.mapLayers().values():
+                #BORRO LAS CAPAS QUE HAY EN EL PROYECTO
+                capas =QgsProject.instance().mapLayers()
+                for capa in capas:
+                    QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)
+                #cargo capas al proyecto
+                
+                rutaestilos=r'O:/sigmena/leyendas/qgis'
+                rle25 = QgsRasterLayer(e25, "E25")
+                rle25.renderer().setOpacity(1.0)
+                QgsProject.instance().addMapLayer(rle25)
+                rlorto = QgsRasterLayer(ortofoto, "Orto")
+                rlorto.renderer().setOpacity(0.65)
+                QgsProject.instance().addMapLayer(rlorto)
+                vlmup=QgsVectorLayer(mup ,"M.U.P.","ogr")
+                vlmup.loadNamedStyle(os.path.join(rutaestilos,'MUP.qml'))
+                QgsProject.instance().addMapLayer(vlmup)
+                vlconsorcio=QgsVectorLayer(consorcios,"Consorcios","ogr")
+                vlconsorcio.loadNamedStyle(os.path.join(rutaestilos,'consorcios.qml'))
+                QgsProject.instance().addMapLayer(vlconsorcio)
+                vlcortafuegos=QgsVectorLayer(cortafuegos,"Cortafuegos","ogr")
+                vlcortafuegos.loadNamedStyle(os.path.join(rutaestilos,'cortafuegos.qml'))
+                QgsProject.instance().addMapLayer(vlcortafuegos)
+                vlpistas=QgsVectorLayer(pistas,"Pistas","ogr")
+                vlpistas.loadNamedStyle(os.path.join(rutaestilos,'pistas.qml'))
+                QgsProject.instance().addMapLayer(vlpistas)
+                vlpuntosdeagua=QgsVectorLayer(puntosdeagua,"Puntos de agua","ogr")
+                vlpuntosdeagua.loadNamedStyle(os.path.join(rutaestilos,'ptos_agua.qml'))
+                QgsProject.instance().addMapLayer(vlpuntosdeagua)
+                
+        
+                
+                
+                theMap.setLayers(project.mapThemeCollection().masterVisibleLayers())   # remember ANNOTATION!
+                theMap.setExtent(newextend)
+                theMap.attemptSetSceneRect(QRectF(x, y, w, h))
+                l.addItem(theMap)
+                #pongo la escala
+                print(escala)
+                theMap.setScale(escala)
+                print("he incluido el mapa")
+
+                #METO LA LEYENDA
+                legend = QgsLayoutItemLegend(l)
+                #legend.setTitle("Leyenda")
+                print("empiezo con la leyenda")
+                legend.setLinkedMap(theMap) # pass a QgsLayoutItemMap object
+                #incluye todos los visibles
+                legend.setLegendFilterByMapEnabled(True)
+                legend.setColumnCount(7)
+                legend.setBackgroundColor(QColor("white"))
+                print("sigo con la leyenda")
+                # Set split to true to finish legend horizontal distribution
+                legend.setSplitLayer(False)
+                #todas las visibles de otra forma
+                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #print (lyrs_to_add2)
+                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua"]
+                legend.setAutoUpdateModel(False)
+                group = legend.model().rootGroup()
+                group.clear()
+                for la in lyrs_to_add:
+                    if la.name() in lyrs_to_add2:
+                        subgroup = group.addGroup(la.name())
+                        checked = la.checkedLayers()
+                        for c in checked:
+                            #subgroup.addLayer(c)
+                            group.addLayer(c)
+                        
+                l.addItem(legend)
+                
+                legend.setStyleFont(QgsLegendStyle.Title, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.Subgroup, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.SymbolLabel, QFont("Arial", 7, QFont.StyleNormal))
+
+                #legend.rstyle(QgsComposerLegendStyle.Symbol).setMargin(QgsComposerLegendStyle.Top, 0)
+
+
+                legend.setSymbolHeight(2)
+                
+                legend.setBoxSpace(0)
+                legend.adjustBoxSize()
+                print("acabo con la leyenda")
+                legend.attemptMove(QgsLayoutPoint(3, paperSize[1]/10-2.6, QgsUnitTypes.LayoutCentimeters))
+                #legend.attemptResize(QgsLayoutSize(2.8, 2.2, QgsUnitTypes.LayoutCentimeters))
+                legend.refresh()
+                
+                l.addLayoutItem(legend)
+            def configuraplanovetacion():
+                global newextend
+                # project.mapLayers().values():
+                #BORRO LAS CAPAS QUE HAY EN EL PROYECTO
+                capas =QgsProject.instance().mapLayers()
+                for capa in capas:
+                    QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)
+                #cargo capas al proyecto
+                
+                rutaestilos=r'O:/sigmena/leyendas/qgis'
+                #rlorto = QgsRasterLayer(ortofoto, "Orto")
+                #rlorto.renderer().setOpacity(1.0)
+                #rlayer.loadNamedStyle(os.path.join(rutaestilos,'pendiente_10_15.qml'))
+                #QgsProject.instance().addMapLayer(rlorto)
+                vlvegetacion=QgsVectorLayer(vegetacion ,"MFE","ogr")
+                vlvegetacion.loadNamedStyle(os.path.join(rutaestilos,'FOTOFIJA2015_LEYEND_MFE.qml'))
+                QgsProject.instance().addMapLayer(vlvegetacion)
+                vlmup=QgsVectorLayer(mup ,"M.U.P.","ogr")
+                vlmup.loadNamedStyle(os.path.join(rutaestilos,'MUP.qml'))
+                QgsProject.instance().addMapLayer(vlmup)
+                vlconsorcio=QgsVectorLayer(consorcios,"Consorcios","ogr")
+                vlconsorcio.loadNamedStyle(os.path.join(rutaestilos,'consorcios.qml'))
+                QgsProject.instance().addMapLayer(vlconsorcio)
+                vlcarreteras=QgsVectorLayer(carreteras,"Carreteras","ogr")
+                vlcarreteras.loadNamedStyle(os.path.join(rutaestilos,'carreteras.qml'))
+                QgsProject.instance().addMapLayer(vlcarreteras)
+                vlcortafuegos=QgsVectorLayer(cortafuegos,"Cortafuegos","ogr")
+                vlcortafuegos.loadNamedStyle(os.path.join(rutaestilos,'cortafuegos.qml'))
+                QgsProject.instance().addMapLayer(vlcortafuegos)
+                vlpistas=QgsVectorLayer(pistas,"Pistas","ogr")
+                vlpistas.loadNamedStyle(os.path.join(rutaestilos,'pistas.qml'))
+                QgsProject.instance().addMapLayer(vlpistas)
+                vlpuntosdeagua=QgsVectorLayer(puntosdeagua,"Puntos de agua","ogr")
+                vlpuntosdeagua.loadNamedStyle(os.path.join(rutaestilos,'ptos_agua.qml'))
+                QgsProject.instance().addMapLayer(vlpuntosdeagua)
+                vlrios=QgsVectorLayer(rios,"Rios","ogr")
+                vlrios.loadNamedStyle(os.path.join(rutaestilos,'riose10.qml'))
+                QgsProject.instance().addMapLayer(vlrios)
+                vlcascosurbanos=QgsVectorLayer(cascosurbanos,"Cascos urbanos","ogr")
+                vlcascosurbanos.loadNamedStyle(os.path.join(rutaestilos,'cascosurbanos.qml'))
+                QgsProject.instance().addMapLayer(vlcascosurbanos)
+                
+        
+                
+                
+                theMap.setLayers(project.mapThemeCollection().masterVisibleLayers())   # remember ANNOTATION!
+                theMap.setExtent(newextend)
+                theMap.attemptSetSceneRect(QRectF(x, y, w, h))
+                l.addItem(theMap)
+                #pongo la escala
+                print(escala)
+                theMap.setScale(escala)
+                print("he incluido el mapa")
+
+                #METO LA LEYENDA
+                legend = QgsLayoutItemLegend(l)
+                #legend.setTitle("Leyenda")
+                
+                legend.setLinkedMap(theMap) # pass a QgsLayoutItemMap object
+                #incluye todos los visibles
+                legend.setLegendFilterByMapEnabled(True)
+                legend.setColumnCount(7)
+                legend.setBackgroundColor(QColor("white"))
+                # Set split to true to finish legend horizontal distribution
+                legend.setSplitLayer(False)
+                #todas las visibles de otra forma
+                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
+                #print (lyrs_to_add2)
+                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras","MFE"]
+                legend.setAutoUpdateModel(False)
+                group = legend.model().rootGroup()
+                group.clear()
+                for la in lyrs_to_add:
+                    if la.name() in lyrs_to_add2:
+                        subgroup = group.addGroup(la.name())
+                        checked = la.checkedLayers()
+                        for c in checked:
+                            #subgroup.addLayer(c)
+                            group.addLayer(c)
+                        
+                l.addItem(legend)
+                
+                legend.setStyleFont(QgsLegendStyle.Title, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.Subgroup, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.SymbolLabel, QFont("Arial", 7, QFont.StyleNormal))
+
+                #legend.rstyle(QgsComposerLegendStyle.Symbol).setMargin(QgsComposerLegendStyle.Top, 0)
+
+
+                legend.setSymbolHeight(2)
+                
+                legend.setBoxSpace(0)
+                legend.adjustBoxSize()
+                
+                legend.attemptMove(QgsLayoutPoint(3, paperSize[1]/10-2.6, QgsUnitTypes.LayoutCentimeters))
+                #legend.attemptResize(QgsLayoutSize(2.8, 2.2, QgsUnitTypes.LayoutCentimeters))
+                legend.refresh()
+                
+                l.addLayoutItem(legend)
             """
 
             # add logo
@@ -523,36 +891,51 @@ class ImpresionSigmena:
                         self.logoImagePath, 
                         Qgis.Warning)
             """
-            def configuralodefuerayexporta():
-                
-                #add date
-                dateLabel = QgsLayoutItemLabel(l)
-                d = time.localtime()
-                print (d)
-                dString = "%d-%d-%d (%d:%d)" % (d[2],  d[1],  d[0],d[3],d[4])
-                
-                dateLabel.setText(dString)
-                dateLabel.adjustSizeToText()
-                dateStringWidth = dateLabel.sizeForText().width()
-                dateLabel.setPos(paperSize[0] - lm - dateStringWidth -5, (paperSize[1] - bm) + tm + 5)
-                l.addItem(dateLabel)
+            
+            def configuralodefuerayexporta(texto):
+                """#add date
+                for i in l.items():  
+                    if isinstance(i, QgsLayoutItemLabel) and i.id() == "dateLabel":
+                        print (i.id())
+                        
+                        i.setText(dString)
+                        
+"""
 
-                # add scalebar
-
-                scaleBar = QgsLayoutItemScaleBar(l)
-                scaleBar.setLinkedMap(theMap)
-                scaleBar.applyDefaultSettings()
-                scaleBar.applyDefaultSize()
-                # scaleBar.setStyle('Line Ticks Down') 
-                scaleBar.setNumberOfSegmentsLeft(0)
-                scaleBar.setNumberOfSegments (3)
-                scaleBar.update()
-                scaleBar.setPos(lm + 10, tm + (paperSize[1] - bm) + tm + 5 )
-                l.addItem(scaleBar)
-                print(lm + 10, tm + (paperSize[1] - bm) + tm + 5 )
-
-                
+                #aqui habria que refrescar la barra de escala
+                #scaleBar.update()
                 #seria bueno anadir un grid
+                grid_interval=escala/10
+                theMap.grid().setEnabled(True)
+                theMap.grid().setStyle(1)
+                theMap.grid().setIntervalX(grid_interval)  
+                theMap.grid().setIntervalY(grid_interval)  
+                theMap.grid().setAnnotationEnabled(True) 
+                #theMap.grid().setGridLineColor(Color(0,0,0)black)  
+                theMap.grid().setGridLineWidth(0.5)
+                theMap.grid().setAnnotationPrecision(0)  
+                theMap.grid().setAnnotationFrameDistance(1)  
+                #theMap.grid().setAnnotationFontColor(QColor(0, 0, 0)) 
+                theMap.grid().setAnnotationDisplay(QgsLayoutItemMapGrid.HideAll, QgsLayoutItemMapGrid.Right)
+                theMap.grid().setAnnotationDisplay(QgsLayoutItemMapGrid.HideAll, QgsLayoutItemMapGrid.Top)
+                theMap.grid().setAnnotationPosition(QgsLayoutItemMapGrid.OutsideMapFrame, QgsLayoutItemMapGrid.Bottom)
+                theMap.grid().setAnnotationDirection(QgsLayoutItemMapGrid.Horizontal, QgsLayoutItemMapGrid.Bottom)
+                theMap.grid().setAnnotationPosition(QgsLayoutItemMapGrid.OutsideMapFrame, QgsLayoutItemMapGrid.Left)
+                theMap.grid().setAnnotationDirection(QgsLayoutItemMapGrid.Vertical, QgsLayoutItemMapGrid.Left)
+               
+                #pongo que mapa es
+                hojaLabel= QgsLayoutItemLabel(l)
+                hojaLabel.setText(texto)
+                #hojaLabel.setFrameEnabled(True)
+                hojaLabel.setBackgroundColor(QColor("white"))
+                hojaLabel.setBackgroundEnabled(True)
+
+                
+                
+                hojaLabel.adjustSizeToText()
+                hojaStringWidth = escaleLabel.sizeForText().width()
+                hojaLabel.setPos(5, 5)#(paperSize[0] - lm - escaleStringWidth -5, (paperSize[1] - bm) + tm + 5)
+                l.addItem(hojaLabel)
                 
                 # export pdf
                 exporter =  QgsLayoutExporter(l)
@@ -563,122 +946,286 @@ class ImpresionSigmena:
                 exporter.exportToPdf(ruta, pdf_settings)
                 webbrowser.open_new('file:'+ruta)
                 
-            moverx=w/1000*escala/1.8#solape
-            movery=h/1000*escala/1.8#solape
+                
+            moverx=w/1000*escala/1.2#solape
+            movery=h/1000*escala/1.2#solape
             #proyecto
+            
             if self.dlg.checkBox1.isChecked():
                 moverextend(-moverx,movery)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("NW")
                 
             if self.dlg.checkBox2.isChecked():
                 moverextend(0,movery)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  N  ")
               
             if self.dlg.checkBox3.isChecked():
                 moverextend(moverx,movery)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("NE")
                 
             if self.dlg.checkBox4.isChecked():
                 moverextend(-moverx,0)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  W  ")
         
             if self.dlg.checkBox5.isChecked():
                 moverextend(0,0)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("      ")
 
             if self.dlg.checkBox6.isChecked():
                 moverextend(moverx,0)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  E  ")
                 
             if self.dlg.checkBox7.isChecked():
                 moverextend(-moverx,-movery)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("SW")
 
             if self.dlg.checkBox8.isChecked():
                 moverextend(0,-movery)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  S  ")
                 
 
             if self.dlg.checkBox9.isChecked():
                 moverextend(moverx,-movery)
                 if self.dlg.checkBoxProyecto.isChecked():
                     configuraplanoproyecto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("SE")
 
             #orto
             if self.dlg.checkBox1.isChecked():
                 moverextend(-moverx,movery)
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("NW")
             if self.dlg.checkBox2.isChecked():
                 moverextend(0,movery)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  N  ")
             if self.dlg.checkBox3.isChecked():
                 moverextend(moverx,movery)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("NE")
             if self.dlg.checkBox4.isChecked():
                 moverextend(-moverx,0)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  W  ")
             if self.dlg.checkBox5.isChecked():
                 moverextend(0,0)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("      ")
             if self.dlg.checkBox6.isChecked():
                 moverextend(moverx,0)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  E  ")
             if self.dlg.checkBox7.isChecked():
                 moverextend(-moverx,-movery)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("SW")
             if self.dlg.checkBox8.isChecked():
                 moverextend(0,-movery)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("  S  ")
             if self.dlg.checkBox9.isChecked():
                 moverextend(moverx,-movery)
 
                 if self.dlg.checkBoxOrtofoto.isChecked():
                     configuraplanoorto()
-                    configuralodefuerayexporta()
+                    configuralodefuerayexporta("SE")
+
+            #e25
+            if self.dlg.checkBox1.isChecked():
+                moverextend(-moverx,movery)
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("NW")
+            if self.dlg.checkBox2.isChecked():
+                moverextend(0,movery)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("  N  ")
+            if self.dlg.checkBox3.isChecked():
+                moverextend(moverx,movery)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("NE")
+            if self.dlg.checkBox4.isChecked():
+                moverextend(-moverx,0)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("  W  ")
+            if self.dlg.checkBox5.isChecked():
+                moverextend(0,0)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("       ")
+            if self.dlg.checkBox6.isChecked():
+                moverextend(moverx,0)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("  E  ")
+            if self.dlg.checkBox7.isChecked():
+                moverextend(-moverx,-movery)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("SW")
+            if self.dlg.checkBox8.isChecked():
+                moverextend(0,-movery)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("  S  ")
+            if self.dlg.checkBox9.isChecked():
+                moverextend(moverx,-movery)
+
+                if self.dlg.checkBox_IGN.isChecked():
+                    configuraplanoe25()
+                    configuralodefuerayexporta("SE")            
             
-            
-                
-                
+            #orto y e25
+            if self.dlg.checkBox1.isChecked():
+                moverextend(-moverx,movery)
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("NW")
+            if self.dlg.checkBox2.isChecked():
+                moverextend(0,movery)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("  N  ")
+            if self.dlg.checkBox3.isChecked():
+                moverextend(moverx,movery)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("NE")
+            if self.dlg.checkBox4.isChecked():
+                moverextend(-moverx,0)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("  W  ")
+            if self.dlg.checkBox5.isChecked():
+                moverextend(0,0)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("       ")
+            if self.dlg.checkBox6.isChecked():
+                moverextend(moverx,0)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("  E  ")
+            if self.dlg.checkBox7.isChecked():
+                moverextend(-moverx,-movery)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("SW")
+            if self.dlg.checkBox8.isChecked():
+                moverextend(0,-movery)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("  S  ")
+            if self.dlg.checkBox9.isChecked():
+                moverextend(moverx,-movery)
+
+                if self.dlg.checkBoxOrtoign.isChecked():
+                    configuraplanoortoe25()
+                    configuralodefuerayexporta("SE")            
+                            
+            #vegetacion
+            if self.dlg.checkBox1.isChecked():
+                moverextend(-moverx,movery)
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("NW")
+            if self.dlg.checkBox2.isChecked():
+                moverextend(0,movery)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("  N  ")
+            if self.dlg.checkBox3.isChecked():
+                moverextend(moverx,movery)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("NE")
+            if self.dlg.checkBox4.isChecked():
+                moverextend(-moverx,0)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("  W  ")
+            if self.dlg.checkBox5.isChecked():
+                moverextend(0,0)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("       ")
+            if self.dlg.checkBox6.isChecked():
+                moverextend(moverx,0)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("  E  ")
+            if self.dlg.checkBox7.isChecked():
+                moverextend(-moverx,-movery)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("SW")
+            if self.dlg.checkBox8.isChecked():
+                moverextend(0,-movery)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("  S  ")
+            if self.dlg.checkBox9.isChecked():
+                moverextend(moverx,-movery)
+
+                if self.dlg.checkBoxMFE.isChecked():
+                    configuraplanovetacion()
+                    configuralodefuerayexporta("SE")            
+                                 
                 
 
 

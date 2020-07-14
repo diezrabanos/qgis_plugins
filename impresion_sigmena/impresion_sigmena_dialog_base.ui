@@ -75,7 +75,7 @@
     <string>PROYECTO ACTUAL</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_3">
+  <widget class="QCheckBox" name="checkBoxOrtoign">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -88,7 +88,7 @@
     <string>ORTOFOTO +  IGN</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_4">
+  <widget class="QCheckBox" name="checkBoxMFE">
    <property name="geometry">
     <rect>
      <x>30</x>

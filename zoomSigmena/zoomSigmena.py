@@ -218,7 +218,7 @@ class ZoomSigmena:
         QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
    
         #genero una lista con los sistemas de referencia
-        misdatos=[["Etrs89 Zona30 (25830)","25830"],["Etrs89 Zona29 (25829)","25829"],["ED50 Zona30 (23030)","23030"],["ED50_Zona29 (23029)","23029"],["WGS84 geograficas (4326)","4326"] ]
+        misdatos=[["Etrs89 Zona30 (25830)","25830"],["Etrs89 Zona29 (25829)","25829"],["ED50 Zona30 (23030)","23030"],["ED50_Zona29 (23029)","23029"],["WGS84 geograficas sexagesimales(4326)","4326"], ["WGS84 geograficas centesimales(4326)","4258"]]
         self.dlg.comboBox_src.clear() 
         for element in misdatos:
             self.dlg.comboBox_src.addItem( element[0])
@@ -310,13 +310,34 @@ class ZoomSigmena:
 
                 x=float(lon)
                 y=float(lat)
-
+                print(x)
+                print (y)
                 huso=30
                 destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
                 origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 UTM_X,UTM_Y = pyproj.transform(origenProj, destinoProj, lon,lat)
 
+            if src=="4258":
+                print("por el camino adecuado")
+                lat=float(y)
+                lonn= float(x)
+                lon=-1.0 * lonn
+                
+                print(lat)
+                print(lon)
 
+                
+
+      
+                huso=30
+                destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                UTM_X,UTM_Y = pyproj.transform(origenProj, destinoProj, lon,lat)
+                print(UTM_X)
+                print(UTM_Y)
+                x=lon
+                y=lat
+                
 
             #creo una capa temporal con las coordenadas
             
@@ -326,16 +347,22 @@ class ZoomSigmena:
             
             vl2.startEditing()
             # add fields
+
             pr2.addAttributes([
                             QgsField("x",  QVariant.Double),
                             QgsField("y", QVariant.Double),
                             QgsField("xx",  QVariant.String),
-                            QgsField("yy", QVariant.String)])
+                            QgsField("yy", QVariant.String),
+                              QgsField("xxx",  QVariant.Double),
+                            QgsField("yyy", QVariant.Double)])
             vl2.updateFields() 
             # tell the vector layer to fetch changes from the provider
             
             #$add a feature
             fet = QgsFeature()
+            print("punto")
+            print(x)
+            print(y)
             fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
             if src=="25830":
                 huso=30
@@ -379,8 +406,23 @@ class ZoomSigmena:
                 y=int(UTM_Y)
                 xx=longtext
                 yy=latext
-            fet.setAttributes([ float(x),float(y),str(xx),str(yy)])
+                huso=30
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
+                destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
+                xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
+            #para que lo pase a utms en pantalla
+            if src=="4258":
+                x=int(UTM_X)
+                y=int(UTM_Y)
+                xx=(deg_to_dms(lon,'lon'))
+                yy=(deg_to_dms(lat))
+                xxx=lon
+                yyy=lat
+            fet.setAttributes([ float(x),float(y),str(xx),str(yy),float(xxx),float(yyy)])
             pr2.addFeatures([fet])
+
+            
+            
             
             
            

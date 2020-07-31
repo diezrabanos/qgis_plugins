@@ -404,20 +404,23 @@ class ZoomSigmena:
             if src=="4326":
                 x=int(UTM_X)
                 y=int(UTM_Y)
-                xx=longtext
-                yy=latext
+                #xx=longtext
+                #yy=latext
                 huso=30
                 origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
                 destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
+                xx=(deg_to_dms(xxx,'lon'))
+                yy=(deg_to_dms(yyy)) 
             #para que lo pase a utms en pantalla
             if src=="4258":
                 x=int(UTM_X)
                 y=int(UTM_Y)
-                xx=(deg_to_dms(lon,'lon'))
-                yy=(deg_to_dms(lat))
+
                 xxx=lon
                 yyy=lat
+                xx=(deg_to_dms(xxx,'lon'))
+                yy=(deg_to_dms(yyy))
             fet.setAttributes([ float(x),float(y),str(xx),str(yy),float(xxx),float(yyy)])
             pr2.addFeatures([fet])
 

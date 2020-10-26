@@ -1,5 +1,5 @@
 42
 True
-Vinuesa
+Almazan
 [Almazan,Almarza,Agreda,Bayubas de Abajo,Burgo de Osma,Covaleda,Gomara,Navaleno,Soria,San Pedro Manrique,San Leonardo de Yague,Vinuesa]
-[['Montenegro de Cameros', 42, '42197'], ['Vinuesa', 42, '42340']]
+[['Adradas', 42, '42005'], ['Alcubilla de las Peñas', 42, '42015'], ['Alentisque', 42, '42026'], ['Almaluez', 42, '42029'], ['Almazán', 42, '42032'], ['Alpanseque', 42, '42035'], ['Arcos de Jalón', 42, '42039'], ['Baraona', 42, '42047'], ['Barca', 42, '42048'], ['Borjabad', 42, '42064'], ['Cañamaque', 42, '42081'], ['Centenera de Andaluz', 42, '42095'], ['Coscurita', 42, '42107'], ['Cubo de la Solana', 42, '42111'], ['Escobosa de Almazán', 42, '42125'], ['Frechilla de Almazán', 42, '42132'], ['Fuentelmonge', 42, '42142'], ['Maján', 42, '42179'], ['Matamala de Almazán', 42, '42183'], ['Medinaceli', 42, '42187'], ['Miño de Medinaceli', 42, '42190'], ['Momblona', 42, '42194'], ['Monteagudo de las Vicarías', 42, '42195'], ['Morón de Almazán', 42, '42201'], ['Nepas', 42, '42210'], ['Nolay', 42, '42213'], ['Santa María de Huerta', 42, '42268'], ['Soliedra', 42, '42275'], ['Taroda', 42, '42289'], ['Velilla de los Ajos', 42, '42320'], ['Viana de Duero', 42, '42325'], ['Villasayas', 42, '42337'], ['Yelo', 42, '42344']]

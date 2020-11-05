@@ -63,9 +63,29 @@ import random
 from PyQt5.QtCore import Qt
 from qgis.gui import QgsMapTool
 
+from qgis.PyQt.QtCore import pyqtSignal, Qt
+from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
+from qgis.core import QgsWkbTypes, QgsPointXY, QgsApplication
+
+class CoordinateCaptureMapTool(QgsMapToolEmitPoint):
+    mouseClickedsenal = pyqtSignal(QgsPointXY)
+
+    def __init__(self, canvas):
+        super(CoordinateCaptureMapTool, self).__init__(canvas)
+        self.mapCanvas = canvas
+        self.setCursor(QgsApplication.getThemeCursor(QgsApplication.Cursor.CrossHair))
+        
+    def canvasPressEvent(self, e):
+        if e.button() == Qt.LeftButton:
+            originalPoint = QgsPointXY(self.mapCanvas.getCoordinateTransform().toMapCoordinates(e.x(), e.y()))
+            self.mouseClickedsenal.emit(originalPoint)
+            print("emitido desde el canvaspressevent")
+
+            
 
 
-class SendPointToolCoordinates(QgsMapTool):
+
+class SendPointToolCoordinates(QgsMapTool): #old
     """ devuelve la coordenada en la que se ha hecho click en el mapa.
     """
     
@@ -213,7 +233,11 @@ class Sigpac:
         self.dlg2.pushButton_select_path1.clicked.connect(self.select_file1)
         self.dlg2.pushButton_select_path2.clicked.connect(self.select_file2)
 
-        self.dlg.pushButton_clikenmapa.clicked.connect(self.hacerclickenmapa_pressed) #boton para hacer click en le mapa
+        self.dlg.pushButton_clikenmapa.clicked.connect(self.startCapturing) 
+
+        self.mapTool = CoordinateCaptureMapTool(self.iface.mapCanvas())
+        self.mapTool.mouseClickedsenal.connect(self.mouseClicked)
+        
 
         
         
@@ -362,6 +386,167 @@ class Sigpac:
         print ("ahora deberia cambiar el cursor por uno que recoja la coordenada cuando cliquee")
         layer, canvas = iface.activeLayer(), iface.mapCanvas()
 
+        #send_point_tool_coordinates = SendPointToolCoordinates(canvas,layer)
+        self.dockwidget.captureButton.clicked.connect(self.startCapturing)
+        #cuando haga click en el mapa, evento, se guardara la coordenada
+        #canvas.setMapTool(send_point_tool_coordinates)#.resultado())
+         
+
+        
+        self.dlg.close()
+        #leo la x y la y que acabo de guardar
+        usuario=QgsApplication.qgisSettingsDirPath()
+        fileclick=os.path.join(usuario,r"python\plugins\sigpac\clik.txt")
+        archivo = open(fileclick, "r")
+        #print(archivo.readline(0))
+        x=float(archivo.readline()[:-1])#float(archivo.readline(0))
+        print("x",x)
+        y=float(archivo.readline())#float(archivo.readlines(1))
+        print("y",y)
+        """for linea in archivo.readlines():
+            print linea"""
+
+        #esta funcion deberia estar en el click event.
+        """
+        #a partir de aqui lo copio pego como si hubiera escrito la coordenada en el combobox.
+        #creo una capa temporal con las coordenadas
+        # create layer
+        vl2 = QgsVectorLayer("Point?crs=epsg:25830", "Punto", "memory")
+        pr2 = vl2.dataProvider()
+        
+        vl2.startEditing()
+        # add fields
+        pr2.addAttributes([
+                        QgsField("x",  QVariant.Double),
+                        QgsField("y", QVariant.Double)])
+        vl2.updateFields() 
+        # tell the vector layer to fetch changes from the provider
+        
+        #$add a feature
+        fet = QgsFeature()
+        fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
+        fet.setAttributes([ float(x),float( y)])
+        pr2.addFeatures([fet])
+        
+        
+       
+        #cambio la simbologia
+        symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'blue','size': '3',})
+        vl2.renderer().setSymbol(symbol)
+
+        # update layer's extent when new features have been added
+        # because change of extent in provider is not propagated to the layer
+        vl2.updateExtents()
+        vl2.commitChanges()
+        vl2.updateExtents()
+        canvas = self.iface.mapCanvas()
+        canvas.setExtent(vl2.extent())
+
+
+        #QgsProject.instance().addMapLayer(vl)
+        QgsProject.instance().addMapLayer(vl2)
+        layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac, "municipio", 'ogr')
+
+        processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+        sellectionado = layerbase.selectedFeatureIds()
+        #QgsProject.instance().addMapLayers([layerbase])
+        mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+        #cuando se el municipio lo cargo y seleciono el punto de nuevo
+        caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+str(mun)+".shp")
+        layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
+        #seleciono de nuevo por la localizacion sobre esta capa del municipio
+        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+        sellectionado2 = layer.selectedFeatureIds()
+
+        
+
+
+        
+        pol = str(layer.getFeature(sellectionado2[0])["C_POLIGONO"])
+        par = str(layer.getFeature(sellectionado2[0])["C_PARCELA"])"""
+    def startCapturing(self):
+        self.iface.mapCanvas().setMapTool(self.mapTool)
+        self.dlg.close()
+        
+    def mouseClicked(self, point: QgsPointXY):
+        #recibe el evento emitido por la senal
+        self.update(point)
+
+    def update(self, point: QgsPointXY):
+        #userCrsPoint = self.transform.transform(point)
+        #self.dockwidget.userCrsEdit.setText('{0:.{2}f},{1:.{2}f}'.format(userCrsPoint.x(), userCrsPoint.y(), self.userCrsDisplayPrecision))
+        
+        #self.dockwidget.canvasCrsEdit.setText('{0:.{2}f},{1:.{2}f}'.format(point.x(),point.y(),self.canvasCrsDisplayPrecision))
+        print('{0:.{2}f},{1:.{2}f}'.format(point.x(),point.y(),2))
+        x=point.x()
+        y=point.y()
+        
+        #a partir de aqui lo copio pego como si hubiera escrito la coordenada en el combobox.
+        #creo una capa temporal con las coordenadas
+        # create layer
+        vl2 = QgsVectorLayer("Point?crs=epsg:25830", "Punto", "memory")
+        pr2 = vl2.dataProvider()
+        
+        vl2.startEditing()
+        # add fields
+        pr2.addAttributes([
+                        QgsField("x",  QVariant.Double),
+                        QgsField("y", QVariant.Double)])
+        vl2.updateFields() 
+        # tell the vector layer to fetch changes from the provider
+        
+        #$add a feature
+        fet = QgsFeature()
+        fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
+        fet.setAttributes([ float(x),float( y)])
+        pr2.addFeatures([fet])
+        
+        
+       
+        #cambio la simbologia
+        symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'blue','size': '3',})
+        vl2.renderer().setSymbol(symbol)
+
+        # update layer's extent when new features have been added
+        # because change of extent in provider is not propagated to the layer
+        vl2.updateExtents()
+        vl2.commitChanges()
+        vl2.updateExtents()
+        canvas = self.iface.mapCanvas()
+        canvas.setExtent(vl2.extent())
+
+
+        #QgsProject.instance().addMapLayer(vl)
+        QgsProject.instance().addMapLayer(vl2)
+        layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac, "municipio", 'ogr')
+
+        processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+        sellectionado = layerbase.selectedFeatureIds()
+        #QgsProject.instance().addMapLayers([layerbase])
+        mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+        #cuando se el municipio lo cargo y seleciono el punto de nuevo
+        caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+str(mun)+".shp")
+        layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
+        #seleciono de nuevo por la localizacion sobre esta capa del municipio
+        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+        sellectionado2 = layer.selectedFeatureIds()
+
+        
+
+
+        
+        pol = str(layer.getFeature(sellectionado2[0])["C_POLIGONO"])
+        par = str(layer.getFeature(sellectionado2[0])["C_PARCELA"])
+     
+
+        #aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela 
+
+        #aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela   ################################################
+        
+    def hacerclickenmapa_pressed_1(self):#old
+        print ("ahora deberia cambiar el cursor por uno que recoja la coordenada cuando cliquee")
+        layer, canvas = iface.activeLayer(), iface.mapCanvas()
+
         send_point_tool_coordinates = SendPointToolCoordinates(canvas,layer)
         #cuando haga click en el mapa, evento, se guardara la coordenada
         canvas.setMapTool(send_point_tool_coordinates)#.resultado())
@@ -441,6 +626,8 @@ class Sigpac:
 
         #aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela   """
         
+                
+          
                 
           
 

@@ -68,9 +68,11 @@ from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.core import QgsWkbTypes, QgsPointXY, QgsApplication
 
 class CoordinateCaptureMapTool(QgsMapToolEmitPoint):
+    
     mouseClickedsenal = pyqtSignal(QgsPointXY)
 
     def __init__(self, canvas):
+        print("cambio el cusor y empiezo a escuchar")
         super(CoordinateCaptureMapTool, self).__init__(canvas)
         self.mapCanvas = canvas
         self.setCursor(QgsApplication.getThemeCursor(QgsApplication.Cursor.CrossHair))
@@ -80,6 +82,11 @@ class CoordinateCaptureMapTool(QgsMapToolEmitPoint):
             originalPoint = QgsPointXY(self.mapCanvas.getCoordinateTransform().toMapCoordinates(e.x(), e.y()))
             self.mouseClickedsenal.emit(originalPoint)
             print("emitido desde el canvaspressevent")
+            
+        
+    """def deactivate(self):
+        #self.rubberBand.reset(QgsWkbTypes.LineGeometry)
+        super(CoordinateCaptureMapTool, self).deactivate()"""
 
             
 
@@ -470,9 +477,13 @@ class Sigpac:
         
     def mouseClicked(self, point: QgsPointXY):
         #recibe el evento emitido por la senal
+        
         self.update(point)
+        #self.mapTool.deactivate()
+        
 
     def update(self, point: QgsPointXY):
+
         #userCrsPoint = self.transform.transform(point)
         #self.dockwidget.userCrsEdit.setText('{0:.{2}f},{1:.{2}f}'.format(userCrsPoint.x(), userCrsPoint.y(), self.userCrsDisplayPrecision))
         
@@ -500,12 +511,20 @@ class Sigpac:
         fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
         fet.setAttributes([ float(x),float( y)])
         pr2.addFeatures([fet])
-        
+
+        #hago un bufer al rededor del punto con la distancia leida del cuadro de dialogo
+        distancia=500
+        parametros={ 'DISSOLVE' : False, 'DISTANCE' : distancia, 'END_CAP_STYLE' : 0, 'INPUT' : vl2, 'JOIN_STYLE' : 0, 'MITER_LIMIT' : 2, 'OUTPUT' : 'TEMPORARY_OUTPUT', 'SEGMENTS' : 5 }
+        mibufer=processing.run('native:buffer',parametros)
+        capabufer=mibufer['OUTPUT']
+        #QgsProject.instance().addMapLayer(capabufer)
         
        
         #cambio la simbologia
         symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'blue','size': '3',})
         vl2.renderer().setSymbol(symbol)
+
+        
 
         # update layer's extent when new features have been added
         # because change of extent in provider is not propagated to the layer
@@ -513,23 +532,154 @@ class Sigpac:
         vl2.commitChanges()
         vl2.updateExtents()
         canvas = self.iface.mapCanvas()
-        canvas.setExtent(vl2.extent())
+        #canvas.setExtent(vl2.extent())
 
 
         #QgsProject.instance().addMapLayer(vl)
-        QgsProject.instance().addMapLayer(vl2)
+        #QgsProject.instance().addMapLayer(vl2)
         layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac, "municipio", 'ogr')
-
+        #VOY A CAPTURAR EL MUNICIPIO DONDE DAE EL PUNTO
         processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
         sellectionado = layerbase.selectedFeatureIds()
         #QgsProject.instance().addMapLayers([layerbase])
         mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+        print (mun)
         #cuando se el municipio lo cargo y seleciono el punto de nuevo
         caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+str(mun)+".shp")
         layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
         #seleciono de nuevo por la localizacion sobre esta capa del municipio
-        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capabufer,'METHOD':0})
         sellectionado2 = layer.selectedFeatureIds()
+
+        lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory: Sigpac_Click" })['OUTPUT']
+
+        #cuenta elementos
+        elementos=len(list(lyr9.getFeatures()))
+        sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
+        renderer=QgsSingleSymbolRenderer(sym1)
+        #etiqueto
+        layer_settings  = QgsPalLayerSettings()
+        text_format = QgsTextFormat()
+        text_format.setFont(QFont("Arial", 12))
+        text_format.setSize(12)
+        text_format.setColor(QColor("Blue"))
+        #le meto un buffer a la etiqueta
+        buffer_settings = QgsTextBufferSettings()
+        buffer_settings.setEnabled(True)
+        buffer_settings.setSize(1)
+        buffer_settings.setColor(QColor("white"))
+
+        text_format.setBuffer(buffer_settings)
+        layer_settings.setFormat(text_format)
+        if elementos==0:
+            iface.messageBar().pushMessage("SIGPAC","Has hecho click fuera de la provincia", qgisCore.Qgis.Info,5)
+            
+            #QgsProject.instance().removeMapLayer(layer)
+            #canvas.freeze(False)  
+       
+        if elementos>1 and self.dlg.mycheckBox.isChecked() :
+            
+            layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+            #hacer un dissolve y llamar a la capa de salida igual
+            #archivo2=os.environ['TMP']+r"/"+str(random.random())+".shp"
+           
+            #processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : archivo3, 'OUTPUT' : archivo2 })
+            lyr9=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_click" })['OUTPUT']
+        
+            layer_settings.isExpression = True
+            layer_settings.enabled = True
+            layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+            #lyr9=QgsVectorLayer(archivo2,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+            lyr9.setLabelsEnabled(True)
+            lyr9.setLabeling(layer_settings)
+            lyr9.triggerRepaint()
+            lyr9.setRenderer(renderer)
+            QgsProject.instance().addMapLayer(lyr9)
+            #QgsProject.instance().removeMapLayer(layer)
+            #canvas.freeze(False)
+            lyr9.updateExtents()
+            lyr9.commitChanges()
+            lyr9.updateExtents()
+            #canvas.setExtent(lyr9.extent())
+
+                    
+                    
+        if elementos>1 and self.dlg.mycheckBox.isChecked()==False :
+           
+            layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
+            layer_settings.isExpression = True
+            layer_settings.enabled = True
+            layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+            lyr9.setLabelsEnabled(True)
+            lyr9.setLabeling(layer_settings)
+            lyr9.triggerRepaint()
+            lyr9.setRenderer(renderer)
+            QgsProject.instance().addMapLayer(lyr9)
+            #QgsProject.instance().removeMapLayer(layer)
+            #canvas.freeze(False)
+            lyr9.updateExtents()
+            lyr9.commitChanges()
+            lyr9.updateExtents()
+            #canvas.setExtent(lyr9.extent())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+        
+
+        """sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
+        renderer=QgsSingleSymbolRenderer(sym1)
+        #etiqueto
+        layer_settings  = QgsPalLayerSettings()
+        text_format = QgsTextFormat()
+        text_format.setFont(QFont("Arial", 12))
+        text_format.setSize(12)
+        text_format.setColor(QColor("Blue"))
+        #le meto un buffer a la etiqueta
+        buffer_settings = QgsTextBufferSettings()
+        buffer_settings.setEnabled(True)
+        buffer_settings.setSize(1)
+        buffer_settings.setColor(QColor("white"))
+
+        text_format.setBuffer(buffer_settings)
+        layer_settings.setFormat(text_format)
+
+
+
+        layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''            
+        layer_settings.isExpression = True
+        layer_settings.enabled = True
+        layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+        lyr9.setLabelsEnabled(True)
+        lyr9.setLabeling(layer_settings)
+        lyr9.triggerRepaint()
+        lyr9.setRenderer(renderer)
+        QgsProject.instance().addMapLayer(lyr9)
+        #QgsProject.instance().removeMapLayer(layer)
+        #canvas.freeze(False)
+        lyr9.updateExtents()
+        lyr9.commitChanges()
+        lyr9.updateExtents()
+        #canvas.setExtent(lyr9.extent())
 
         
 
@@ -537,6 +687,10 @@ class Sigpac:
         
         pol = str(layer.getFeature(sellectionado2[0])["C_POLIGONO"])
         par = str(layer.getFeature(sellectionado2[0])["C_PARCELA"])
+        #QgsProject.instance().addMapLayers([layer])"""
+        print("se supone que he hecho lo que tenia que hacer")
+
+        canvas.unsetMapTool(self.mapTool)
      
 
         #aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela 

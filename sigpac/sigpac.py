@@ -503,8 +503,8 @@ class Sigpac:
         pr2.addFeatures([fet])
 
         #hago un bufer al rededor del punto con la distancia leida del cuadro de dialogo
-        distancia=500
-        parametros={ 'DISSOLVE' : False, 'DISTANCE' : distancia, 'END_CAP_STYLE' : 0, 'INPUT' : vl2, 'JOIN_STYLE' : 0, 'MITER_LIMIT' : 2, 'OUTPUT' : 'TEMPORARY_OUTPUT', 'SEGMENTS' : 5 }
+        radio=int(self.dlg.lineedit_radio.text())
+        parametros={ 'DISSOLVE' : False, 'DISTANCE' : radio, 'END_CAP_STYLE' : 0, 'INPUT' : vl2, 'JOIN_STYLE' : 0, 'MITER_LIMIT' : 2, 'OUTPUT' : 'TEMPORARY_OUTPUT', 'SEGMENTS' : 5 }
         mibufer=processing.run('native:buffer',parametros)
         capabufer=mibufer['OUTPUT']
         #QgsProject.instance().addMapLayer(capabufer)

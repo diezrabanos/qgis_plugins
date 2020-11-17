@@ -54,6 +54,8 @@ import time
 import pyproj
 import webbrowser
 
+import xlrd
+
 
 
 
@@ -92,7 +94,13 @@ class Tierra:
         
         
         self.first_start = None
-        self.dlg.button_file.clicked.connect(self.button_file_pressed) 
+        self.dlg.button_file.clicked.connect(self.button_file_pressed)
+
+        #defino las variables de la clase
+        self.ruta=""
+        self.indicescolumnas=[]
+        self.numerofilas=0
+        
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -166,33 +174,40 @@ class Tierra:
         # will be set False in run()
         self.first_start = True
         
-
+    
     
     def help_pressed(self):
         help_file = 'file:' + os.path.dirname(__file__) + '/Ayuda_Tierra.pdf'
         webbrowser.open_new(help_file)
         
     def button_file_pressed(self):
-        ruta=self.dlg.lineEdit_ruta.text()##displayText()
-        print(ruta)
-        def leeexcel(ruta):
-            import xlrd
+        #self.ruta=self.dlg.lineEdit_ruta.text()##displayText()
+        self.ruta=QFileDialog.getOpenFileName(QFileDialog(), "Seleciona el archivo excel con los datos del SIGPAC", filter="xls(*.xls);;xlsx(*.xlsx)")[0]
+        print(self.ruta)
+        #leo todas las columnas del excel para buscar los encabezados
+        def leecabecezaexcel(ruta):
+            
             libroentrada=xlrd.open_workbook(ruta)
             hojaentrada=libroentrada.sheet_by_index(0)
-
+            
+            self.numerofilas=hojaentrada.nrows
             print(hojaentrada.nrows)
             print(hojaentrada.ncols)
-
-            print(hojaentrada.cell_value(1,0))
+            
+            #print(hojaentrada.cell_value(1,0))
 
 
             fila1=[]
-            for x in range(1,hojaentrada.ncols):
-                fila1.append(hojaentrada.cell_value(0,x))
+            for y in range(1,hojaentrada.ncols):
+                fila1.append(hojaentrada.cell_value(0,y))
             return fila1
 
         #leo las cabeceras
-        fila1=leeexcel(ruta)
+        fila1=leecabecezaexcel(self.ruta)
+
+       
+
+            
 
 
         #relleno los combos
@@ -234,6 +249,10 @@ class Tierra:
             self.dlg.comboBox_par.setCurrentIndex(indexpar)
         if indexrec >= 0:
             self.dlg.comboBox_rec.setCurrentIndex(indexrec)
+        self.indicescolumnas=[indexpro,indexmun,indexagr,indexzon,indexpol,indexpar,indexrec]
+        print (self.indicescolumnas)
+
+        
 
 
 
@@ -299,12 +318,90 @@ class Tierra:
         
         
         if result:
-
+            
+            indexpro=self.dlg.comboBox_pro.currentIndex()
+            indexmun=self.dlg.comboBox_mun.currentIndex()
+            indexzon=self.dlg.comboBox_zon.currentIndex()
+            indexagr=self.dlg.comboBox_agr.currentIndex()
+            indexpol=self.dlg.comboBox_pol.currentIndex()
+            indexpar=self.dlg.comboBox_par.currentIndex()
+            indexrec=self.dlg.comboBox_rec.currentIndex()
+            self.indicescolumnas=[indexpro,indexmun,indexagr,indexzon,indexpol,indexpar,indexrec]
+            print(self.indicescolumnas)
+            
+            
+            
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             print("ok")
+             #leo del excel las columnas con informacion valiosa y lo convierto en una lista
+            def leefilaexcel(ruta,indicescolumnas,fila):
+                libroentrada=xlrd.open_workbook(ruta)
+                hojaentrada=libroentrada.sheet_by_index(0)
+                datosfila=[]
+                for y in indicescolumnas:
+                    datosfila.append(int(hojaentrada.cell_value(fila,y+1)))
+                return datosfila
             
+            def seleccionaelementosigpac(datosfila):
+                rutacarpetarecintos=r"O:/sigmena/carto/SIGPAC/Sigpac_2020/Recintos/"
+                rutacapadesalida="c:/work/micapatierra.shp"
+                layersalida = QgsVectorLayer(rutacapadesalida, "CapaTierra", 'ogr')
+                pr = layersalida.dataProvider()
+                mun=str(datosfila[0]*1000+datosfila[1])
+                agr=str(datosfila[2])
+                zon=str(datosfila[3])
+                pol=str(datosfila[4])
+                par=str(datosfila[5])
+                rec=str(datosfila[6])
                 
+                caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+mun+".shp")
+                print(caparecintos)
+                layer = QgsVectorLayer(caparecintos, mun, 'ogr')
+                #QgsProject.instance().addMapLayers([layer])
+                layer.selectByExpression("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par),QgsVectorLayer.SetSelection)
+                #selection = layer.selectByExpression("\"C_POLIGONO\" = {} ".format(pol)+" AND \"C_PARCELA\" = {}".format(par),QgsVectorLayer.SetSelection)
+                
+                print("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par))
+                selection = layer.selectedFeatures()
+                
+
+                #creo la nueva capa con la seleccion
+                #QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(), "ESRI Shapefile", onlySelected=True) para guardar los seleccionados como shape
+                #lyr9=QgsVectorLayer(output_path,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr") para crear un shape si despues queremos guardarlo en el
+                #lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT'] para guardalo en una capa temporal.
+
+
+
+                #deberia copiar lo seleccionado y guardarlo en la capa de destino. de momento supongo que tienen la misma estructura
+                #primero copiar los atributos de la capa de origen, todos
+                #despues copiar el feature de la capa de origen
+                #ultimo pegar la feature a la capa de destino y finalmente los atributos.
+
+                for feature in selection:
+                    attrs = feature.attributes()
+                    #si no quisiera todos puedo hacerlo asipor indice
+                    #idx = layer.fieldNameIndex('name')
+                    #print(feature.attributes()[idx])
+                    #o por nombre
+                    #name = f.attribute('NAME')
+                    geom = feature.geometry()
+                    newfet = QgsFeature()
+                    newfet.setGeometry(geom)
+                    layersalida.updateExtents()
+                    newfet.setAttributes(attrs)
+                    layersalida.updateFields()
+                    pr.addFeatures([newfet])
+
+
+
+
+            
+            for n in range(1,self.numerofilas):
+                datosfila=leefilaexcel(self.ruta,self.indicescolumnas,n)
+                print(datosfila)
+                seleccionaelementosigpac(datosfila)
+                    
             """
             
             def deg_to_dms(deg, type='lat'):

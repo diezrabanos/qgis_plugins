@@ -54,6 +54,8 @@ import time
 import pyproj
 import webbrowser
 
+import xlrd 
+
 
 
 
@@ -274,14 +276,35 @@ class Licenciamupcaza:
             rutacapademanchas=r"R:\SIGMENA\prueba\2020\11\20/mismanchas.shp"
             columnafecha='Fecha_caz'
             columnamatricula='P_Matricul'
-            rutacapademontes="R:\SIGMENA\prueba\2020\11\20\mismontes_prueba.shp"
-            rutatablalicencias="R:\SIGMENA\prueba\2020\11\20\mitablalicencias.xlsx"
+            rutacapademontes=r"R:\SIGMENA\prueba\2020\11\20\mismontes_prueba.shp"
+            rutatablalicencias=r"R:\SIGMENA\prueba\2020\11\20\mitablalicencias.xlsx"
             hojalicencias='hojacaza'
             columnamontes='columnaetiqueta'
             diasaconsiderar=7#supongo que querran hacerlo variable
 
+
+            #leo la tabla excel PARA VER que montes han pagado___________________________________________________________________________________
+
+            listado_montes_pagado=[]
+            #Abrimos el fichero excel
+            documento_excel = xlrd.open_workbook(rutatablalicencias)
+            hoja_de_interes = documento_excel.sheet_by_index(0)
+            #Leemos el numero de filas y columnas de la hoja de libros
+            filas = hoja_de_interes.nrows
+            columnas = hoja_de_interes.ncols
+            print("el excel tiene " + str(filas) + " filas y " + str(columnas) + " columnas")
+            for i in range(1, hoja_de_interes.nrows): #Ignoramos la primera fila, que indica los campos
+                #for j in range(libros.ncols):
+                linea=float(repr(hoja_de_interes.cell_value(i,1)))#columna que tiene la etiqueta de los montes, con indice cero
+                
+                listado_montes_pagado.append(linea)
+            print("listado_montes_pagado")
+            print(listado_montes_pagado)
+
             #leo la capa de manchas
             vlmanchas=QgsVectorLayer(rutacapademanchas ,"Manchas","ogr")
+            #y la de montes
+            vlmontes=QgsVectorLayer(rutacapademontes ,"Montes","ogr")
             #miro las fechas
             from datetime import date
             import datetime
@@ -296,22 +319,55 @@ class Licenciamupcaza:
             selection = vlmanchas.selectedFeatures()
             QgsProject.instance().addMapLayer(vlmanchas)
             listadecotosaestudiar=[]
+
+            #seleciono los montes que tocan con todas las manchas
+            processing.run('qgis:selectbylocation',{ 'INPUT' : vlmontes, 'INTERSECT' : vlmanchas, 'METHOD' : 0, 'PREDICATE' : [0] })
+            selection_montes = vlmontes.selectedFeatures()
+
+            
+
+
+            listademontesaestudiar=[]
             for feature in selection:
                 #attrs = feature.attributes()
                 #si no quisiera todos puedo hacerlo asipor indice
                 #idx = layer.fieldNameIndex('name')
                 #print(feature.attributes()[idx])
                 #o por nombre
-                matricula = feature.attribute(columnamatricula)
-                listadecotosaestudiar.append(matricula)
+                geom_1 = feature.geometry()
+                for fea in selection_montes:
+                    geom_montes = fea.geometry()
+                    #tengo que ver cuales de esas manchas interseccionan con montes de up.
+                    if geom_1.intersects(geom_montes) is True:
+                        geom3 = geom_1.intersection(geom_montes)#deberia calcular esta superficie de geom3 para ver si es despreciable
+                        #saco las columnas
+                        n_mon=fea["Etiqueta"]#etiqueta es la columna de la capa de montes con el nombre de los montes
+                        matricula = feature.attribute(columnamatricula)
+                        #veo si esta en la lista de los que han pagado
+                        if float(n_mon) not in listado_montes_pagado:
+                            print(str(n_mon)+" no ha pagado")
+                        listadecotosaestudiar.append(matricula)
+                        listademontesaestudiar.append(n_mon)
+
+                
+                
                 #geom = feature.geometry()
                 #podia sacar la superficie de interseccion para descartar los muy despreciables. de momento paso.
             print(listadecotosaestudiar)
+            print(listademontesaestudiar)
 
 
-            #leo la tabla excel
-            tabla = QgsVectorLayer(rutatablalicencias, 'tabla licencias', 'ogr')
-            print(tabla.fields()[0])
+           
+
+            #for element in listademontesaestudiar:
+             #   if element not in listado_montes_pagado:
+                    
+
+
+
+
+            
+
 
 
 

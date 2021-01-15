@@ -319,7 +319,19 @@ class Lidarcombustibles:
             salida2 = os.path.join(carpeta,"groundfilter_"+tronco+".dtm")
             salida6 = os.path.join(carpeta,"groundfilter_"+tronco+".las")
             salida3 = os.path.join(carpeta,"metric.csv")
+            salida3a = os.path.join(carpeta,"metric_arbolado.csv")
+            salida3b = os.path.join(carpeta,"metric_arbustivo.csv")
+            salida3c = os.path.join(carpeta,"metric_arbus_arbol.csv")
             salida4 = os.path.join(carpeta,tronco+"_height_grid.asc")
+            salida4a = os.path.join(carpeta,tronco+"_alturamedia_todo.asc")
+            salida4b = os.path.join(carpeta,tronco+"_fcc_matorral.asc")
+            salida4c = os.path.join(carpeta,tronco+"_alturamedia_matorral.asc")
+            salida4d = os.path.join(carpeta,tronco+"_fcc_arbolado.asc")
+            salida4e = os.path.join(carpeta,tronco+"_alturamedia_arbolado.asc")
+            salida4f = os.path.join(carpeta,tronco+"_P10_arbolado.asc")
+            salida4g = os.path.join(carpeta,tronco+"_cv_arbolado.asc")
+            salida4h = os.path.join(carpeta,tronco+"_P25_arbolado.asc")
+            salida4i = os.path.join(carpeta,tronco+"_P90_arbolado.asc")
             salida5 = os.path.join(carpeta,tronco+"_cover_grid.asc")
             salida7 = os.path.join(carpeta,tronco+"_height.txt")
             salida8 = os.path.join(carpeta,tronco+"_height_grid_original.asc")
@@ -334,32 +346,42 @@ class Lidarcombustibles:
             parametros1_0 = "" #"/median:3 /wparam:2.5 /aparam:4 /bparam:4"
             parametros_surfacecreate= str(parametro_tamanocelda)+" M M 0 0 0 0"
             parametro_h_corte="0.3"
-            parametros3_1 = "/minht:"+str(parametro_h_corte)+" /nointensity" 
+            parametros3_1 = "/minht:"+str(parametro_h_corte)+" /nointensity"
+            parametros3_1a = "/minht:2 /outlier:1,30 /nointensity"
+            parametros3_1b = "/minht:0.5 /outlier:1,2 /nointensity"
+            parametros3_1c = "/minht:0.5 /outlier:1,30 /nointensity"
+            parametro_limite_inferior_1=parametro_h_corte
+            parametro_limite_inferior_2=0.5
+            parametro_limite_inferior_3=2
+            parametro_limite_inferior_4=4
             parametros3_2 = str(parametro_h_corte)+" "+str(parametro_tamanocelda)
-            paramertos_limite_inferior_1=parametro_h_corte
-            paramertos_limite_inferior_2=0.6
-            paramertos_limite_inferior_3=2
-            paramertos_limite_inferior_4=4
+            parametros3_2a = str(parametro_limite_inferior_3)+" "+str(parametro_tamanocelda)
+            parametros3_2b = str(parametro_limite_inferior_2)+" "+str(parametro_tamanocelda)
+            parametros3_2c = str(parametro_limite_inferior_2)+" "+str(parametro_tamanocelda)
             parametros_cover1="/upper:0.6"
             parametros_cover2="/upper:2"
             parametros_cover3="/upper:4"
             parametros_cover4="/upper:30"
         
             parametros4 = 7
-            parametros5 = 49
+            parametros_fcc = 49
             parametros6 = "/raster"
             parametro7 = 2
             parametros101 = 999 #percentil del 10 por ciento
             parametros100 = 27 #percentil del 20 por ciento
             parametros102 = 999 #percentil del 15 por ciento
-            parametros104 = 37 #percentil del 95 por ciendto
+            parametrosP95 = 37 #percentil del 95 por ciendto
+            parametros_alturamedia= 8 #altura media
             
             entrada0 = os.path.join(carpeta,las)
             entrada1 = os.path.join(carpeta,las) 
             entrada2 = os.path.join(carpeta,"groundfilter_"+tronco+".las")
             entrada_groundfile = salida2
             entrada3_2 = entrada1
-            entrada4 = os.path.join(carpeta,"metric_all_returns_elevation_stats_"+tronco+".csv")
+            entrada4_all = os.path.join(carpeta,"metric_all_returns_elevation_stats_"+tronco+".csv")
+            entrada4a_arbl = os.path.join(carpeta,"metric_arbolado_elevation_stats_"+tronco+".csv")
+            entrada4b_arbu = os.path.join(carpeta,"metric_arbustivo_elevation_stats_"+tronco+".csv")
+            entrada4c_arbu_arbl = os.path.join(carpeta,"metric_arbus_arbol_elevation_stats_"+tronco+".csv")
             entrada6 = salida2
             print("voy a empezar el try")
             #try:  ## va con el except de antes de Run method that performs all the real work. Volverlo a poner en cuanto sea posible. Ahora falla en el stringtolayer por el qfile info.   ojojojojojoj
@@ -380,8 +402,26 @@ class Lidarcombustibles:
             os.rename(carpeta+"/metric_all_returns_elevation_stats.csv", carpeta+"/metric_all_returns_elevation_stats_"+tronco+".csv")
             os.rename(carpeta+"/metric_all_returns_elevation_stats_ascii_header.txt", carpeta+"/metric_all_returns_elevation_stats_"+tronco+"_ascii_header.txt")
 
+            #tengo que hacer lo mismo para distintos cortes.
+            total3a = funcion_gridmetric+" "+str(parametros3_1a)+" "+entrada_groundfile+" "+str(parametros3_2a)+" "+salida3a+" "+ entrada3_2
+            os.system(total3a)
+            os.rename(carpeta+"/metric_arbolado_all_returns_elevation_stats.csv", carpeta+"/metric_arbolado_elevation_stats_"+tronco+".csv")
+            os.rename(carpeta+"/metric_arbolado_all_returns_elevation_stats_ascii_header.txt", carpeta+"/metric_arbolado_elevation_stats_"+tronco+"_ascii_header.txt")
+            #Gridmetrics /minht:2 /outlier:1,30 C:\TFMSILVIA\MDE\MDE.dtm 2 5 C:\TFMSILVIA\CSV\estadisticos_2a30.csv C:\TFMSILVIA\LAZ\lista.txt #arbolado de 2 a 30, arbolado
+            total3b = funcion_gridmetric+" "+str(parametros3_1b)+" "+entrada_groundfile+" "+str(parametros3_2b)+" "+salida3b+" "+ entrada3_2
+            os.system(total3b)
+            os.rename(carpeta+"/metric_arbustivo_all_returns_elevation_stats.csv", carpeta+"/metric_arbustivo_elevation_stats_"+tronco+".csv")
+            os.rename(carpeta+"/metric_arbustivo_all_returns_elevation_stats_ascii_header.txt", carpeta+"/metric_arbustivo_elevation_stats_"+tronco+"_ascii_header.txt")
+            #Gridmetrics /minht:0.5 /outlier:1,2 C:\TFMSILVIA\MDE\MDE.dtm 0.5 5 C:\TFMSILVIA\CSV\estadisticos_05a2.csv C:\TFMSILVIA\LAZ\lista.txt #matorral de 0.5 a 2
+            total3c = funcion_gridmetric+" "+str(parametros3_1c)+" "+entrada_groundfile+" "+str(parametros3_2c)+" "+salida3c+" "+ entrada3_2
+            os.system(total3c)
+            os.rename(carpeta+"/metric_arbus_arbol_all_returns_elevation_stats.csv", carpeta+"/metric_arbus_arbol_elevation_stats_"+tronco+".csv")
+            os.rename(carpeta+"/metric_arbus_arbol_all_returns_elevation_stats_ascii_header.txt", carpeta+"/metric_arbus_arbol_elevation_stats_"+tronco+"_ascii_header.txt")
+            #Gridmetrics /minht:0.5 /outlier:1,30 C:\TFMSILVIA\MDE\MDE.dtm 0.5 5 C:\TFMSILVIA\CSV\estadisticos_05a30.csv C:\TFMSILVIA\LAZ\lista.txt #matorral+arbolado 0,5 30
+
+            #esto del cover, creo que voy a pasar de ello
             #saco los fcc en distintos estratos 1
-            total_cover1 = funcion_cover+" "+str(parametros_cover1)+" "+entrada_groundfile+" "+salida_coverfile1+ " "+   str(paramertos_limite_inferior_1)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
+            total_cover1 = funcion_cover+" "+str(parametros_cover1)+" "+entrada_groundfile+" "+salida_coverfile1+ " "+   str(parametro_limite_inferior_1)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
             print(total_cover1)
             os.system(total_cover1)
             #genera un tif del dtm de fcc entre 2 alturas determinadas 1
@@ -389,7 +429,7 @@ class Lidarcombustibles:
             os.system(total_covertif1)
             
             #saco los fcc en distintos estratos 2
-            total_cover2 = funcion_cover+" "+str(parametros_cover2)+" "+entrada_groundfile+" "+salida_coverfile2+ " "+   str(paramertos_limite_inferior_2)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
+            total_cover2 = funcion_cover+" "+str(parametros_cover2)+" "+entrada_groundfile+" "+salida_coverfile2+ " "+   str(parametro_limite_inferior_2)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
             print(total_cover2)
             os.system(total_cover2)
             #genera un tif del dtm de fcc entre 2 alturas determinadas 2
@@ -397,14 +437,14 @@ class Lidarcombustibles:
             os.system(total_covertif2)
             
             #saco los fcc en distintos estratos 3
-            total_cover3 = funcion_cover+" "+str(parametros_cover3)+" "+entrada_groundfile+" "+salida_coverfile3+ " "+   str(paramertos_limite_inferior_3)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
+            total_cover3 = funcion_cover+" "+str(parametros_cover3)+" "+entrada_groundfile+" "+salida_coverfile3+ " "+   str(parametro_limite_inferior_3)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
             print(total_cover3)
             os.system(total_cover3)
             #genera un tif del dtm de fcc entre 2 alturas determinadas 3
             total_covertif3 = funcion_dtm2ascii+" "+salida_coverfile3
             os.system(total_covertif3)
             #saco los fcc en distintos estratos 4
-            total_cover4 = funcion_cover+" "+str(parametros_cover4)+" "+entrada_groundfile+" "+salida_coverfile4+ " "+   str(paramertos_limite_inferior_4)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
+            total_cover4 = funcion_cover+" "+str(parametros_cover4)+" "+entrada_groundfile+" "+salida_coverfile4+ " "+   str(parametro_limite_inferior_4)+" " +str(parametro_tamanocelda)+  " m m 1 30 0 0 "          + entrada3_2
             print(total_cover4)
             os.system(total_cover4)
             #genera un tif del dtm de fcc entre 2 alturas determinadas 4
@@ -413,16 +453,47 @@ class Lidarcombustibles:
 
             
 
-            #paso4 genera un grid del csv anterior  de alturas
-            total4 = funcion_csv2grid+" "+entrada4+" "+str(parametros104)+" "+ salida4
+            #paso4 genera un grid del csv anterior  de alturas p95
+            total4 = funcion_csv2grid+" "+entrada4_all+" "+str(parametrosP95)+" "+ salida4
             os.system(total4)
+            total4a = funcion_csv2grid+" "+entrada4a_arbl+" "+str(parametros_alturamedia)+" "+ salida4a
+            os.system(total4a)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_05a30_all_returns_elevation_stats.csv 8 C:\TFMSILVIA\RASTER\alturamedia_todo.asc
+            total4b = funcion_csv2grid+" "+entrada4b_arbu+" "+str(parametros_fcc)+" "+ salida4b
+            os.system(total4b)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_05a2_all_returns_elevation_stats.csv 49 C:\TFMSILVIA\RASTER\FCC_.asc
+            total4c = funcion_csv2grid+" "+entrada4c_arbu_arbl+" "+str(parametros_alturamedia)+" "+ salida4c
+            os.system(total4c)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_05a2_all_returns_elevation_stats.csv 8 C:\TFMSILVIA\RASTER\alturamedia_matorral.asc
+            
+            total4d = funcion_csv2grid+" "+entrada4a_arbl+" "+str(parametros_fcc)+" "+ salida4d
+            os.system(total4d)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_2a30_all_returns_elevation_stats.csv 49 C:\TFMSILVIA\RASTER\FCC_arbolado.asc.
+            total4e = funcion_csv2grid+" "+entrada4a_arbl+" "+str(parametros_alturamedia)+" "+ salida4e
+            os.system(total4e)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_2a30_all_returns_elevation_stats.csv 8 C:\TFMSILVIA\RASTER\alturamediarbolado.asc
+            total4f = funcion_csv2grid+" "+entrada4a_arbl+" "+str(26)+" "+ salida4f
+            os.system(total4f)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_2a30_all_returns_elevation_stats.csv 26 C:\TFMSILVIA\RASTER\P10_arbolado.asc
+            total4g = funcion_csv2grid+" "+entrada4a_arbl+" "+str(12)+" "+ salida4g
+            os.system(total4g)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_2a30_all_returns_elevation_stats.csv 12 C:\TFMSILVIA\RASTER\CV_arbolado.asc
+            total4h = funcion_csv2grid+" "+entrada4a_arbl+" "+str(28)+" "+ salida4h
+            os.system(total4h)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_2a30_all_returns_elevation_stats.csv 28 C:\TFMSILVIA\RASTER\P25_arbolado.asc
+            total4i = funcion_csv2grid+" "+entrada4a_arbl+" "+str(36)+" "+ salida4i
+            os.system(total4i)
+            #Csv2grid C:\TFMSILVIA\CSV\estadisticos_2a30_all_returns_elevation_stats.csv 36 C:\TFMSILVIA\RASTER\P90_arbolado.asc
+
+            #Ln (Canopy bulk density): - 4.3 + (3.2*CV) + (0.02*P10) + (0.13*P25) + (-0.12*P90) + (2.4*FCC)
+            #Canopy bulk density = Ln(cbd) ^ 2.71828
           
             #paso100 percentil20
-            total100 = funcion_csv2grid+" "+entrada4+" "+str(parametros100)+" "+ salida100
+            total100 = funcion_csv2grid+" "+entrada4_all+" "+str(parametros100)+" "+ salida100
             os.system(total100)
 
             #paso5 genera un grid del csv anterior de fcc
-            total5 = funcion_csv2grid+" "+entrada4+" "+str(parametros5)+" "+ salida5
+            total5 = funcion_csv2grid+" "+entrada4_all+" "+str(parametros_fcc)+" "+ salida5
             os.system(total5)
             
             #paso6 convierto en ascii 

@@ -273,10 +273,10 @@ class Licenciamupcaza:
             #finalmente para cada mancha en las proximas fechas ver cuales no han pagado.
 
             #definovariables
-            rutacapademanchas=r"R:\SIGMENA\prueba\2020\11\20/mismanchas.shp"
+            rutacapademanchas=r"O:/sigmena/usuarios/caza_y_pesca/manchas 2020-2021/Manchas_2020-2021.shp"#r"R:/SIGMENA/prueba/2021/01/15/manchas.shp"
             columnafecha='Fecha_caz'
             columnamatricula='P_Matricul'
-            rutacapademontes=r"R:\SIGMENA\prueba\2020\11\20\mismontes_prueba.shp"
+            rutacapademontes=r"O:/sigmena/carto/PROPIEDA/MONTES/PERTENEN/catalogo/42_mup_catalogo_ex_etrs89.shp"
             rutatablalicencias=r"R:\SIGMENA\prueba\2020\11\20\mitablalicencias.xlsx"
             hojalicencias='hojacaza'
             columnamontes='columnaetiqueta'
@@ -303,6 +303,9 @@ class Licenciamupcaza:
 
             #leo la capa de manchas
             vlmanchas=QgsVectorLayer(rutacapademanchas ,"Manchas","ogr")
+            #y la reparo
+            proceso1=processing.run("native:fixgeometries",{ 'INPUT' : rutacapademanchas, 'OUTPUT' : 'TEMPORARY_OUTPUT' })
+            vlmanchas=proceso1['OUTPUT']
             #y la de montes
             vlmontes=QgsVectorLayer(rutacapademontes ,"Montes","ogr")
             #miro las fechas
@@ -314,7 +317,7 @@ class Licenciamupcaza:
             fechalimite=today+datetime.timedelta(days=diasaconsiderar)
             print("fecha limite=", fechalimite)
 
-            #selecciono las manchas que tengo que estudiar        
+            #selecciono las manchas que tengo que estudiar por fecha        
             vlmanchas.selectByExpression("\"{}\"".format(columnafecha)+" >= '{}' ".format(hoy)+" AND \"{}\"".format(columnafecha)+" <= '{}' ".format(fechalimite),QgsVectorLayer.SetSelection)
             selection = vlmanchas.selectedFeatures()
             QgsProject.instance().addMapLayer(vlmanchas)
@@ -331,7 +334,7 @@ class Licenciamupcaza:
             for feature in selection:
                 #attrs = feature.attributes()
                 #si no quisiera todos puedo hacerlo asipor indice
-                #idx = layer.fieldNameIndex('name')
+                idx = feature.fieldNameIndex('P_Matricul')
                 #print(feature.attributes()[idx])
                 #o por nombre
                 geom_1 = feature.geometry()
@@ -340,12 +343,15 @@ class Licenciamupcaza:
                     #tengo que ver cuales de esas manchas interseccionan con montes de up.
                     if geom_1.intersects(geom_montes) is True:
                         geom3 = geom_1.intersection(geom_montes)#deberia calcular esta superficie de geom3 para ver si es despreciable
+                        
+                        area_ratio = 100.0*geom3.area() / geom_1.area()
+                        
                         #saco las columnas
                         n_mon=fea["Etiqueta"]#etiqueta es la columna de la capa de montes con el nombre de los montes
                         matricula = feature.attribute(columnamatricula)
                         #veo si esta en la lista de los que han pagado
                         if float(n_mon) not in listado_montes_pagado:
-                            print(str(n_mon)+" no ha pagado")
+                            print(" El "+ str(round(area_ratio,2))+" % de la mancha del Coto "+feature.attributes()[idx]+" se encuentra en el MUP "+str(n_mon) +" que no ha pagado")
                         listadecotosaestudiar.append(matricula)
                         listademontesaestudiar.append(n_mon)
 
@@ -624,3 +630,4 @@ class Licenciamupcaza:
             
             """
         
+

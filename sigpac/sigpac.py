@@ -574,8 +574,28 @@ class Sigpac:
             #archivo2=os.environ['TMP']+r"/"+str(random.random())+".shp"
            
             #processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : archivo3, 'OUTPUT' : archivo2 })
-            lyr9=processing.run("native:dissolve",{ 'FIELD' : ['C_PROVINCI','C_MUNICIPI','C_AGREGADO','C_ZONA','C_POLIGONO','C_PARCELA'], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_click" })['OUTPUT']
-        
+            lyr8=processing.run("native:dissolve",{ 'FIELD' : ['C_PROVINCI','C_MUNICIPI','C_AGREGADO','C_ZONA','C_POLIGONO','C_PARCELA'], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_click" })['OUTPUT']
+            lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_click"  })['OUTPUT']
+
+            #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
+            lyr9.startEditing()
+
+            fields = lyr9.fields()
+            idx = fields.indexFromName('SUP_SIGPAC')
+                
+            if idx == -1:
+                myField = QgsField( 'SUP_SIGPAC', QVariant.Double )
+                lyr9.dataProvider().addAttributes([myField])
+                lyr9.updateFields()
+                
+
+            for f in lyr9.getFeatures():
+                f.setAttribute(f.fieldNameIndex('SUP_SIGPAC'), f.geometry().area()/10000 )
+                #f[idx] = '"$area"*1000'
+                lyr9.updateFeature( f )
+
+            lyr9.commitChanges()
+
             layer_settings.isExpression = True
             layer_settings.enabled = True
             layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
@@ -1093,7 +1113,8 @@ class Sigpac:
 
 
     
- 
+    
+       
 
    
     def configurar(self):
@@ -1138,6 +1159,8 @@ class Sigpac:
         print("0 inicio el run")
         print ("leo la cache.........................................................................................................")
         print("construyo el almecen que es una lista, se nutre de los datos de la cache, postseriormente modificados si pinchas en un combo o boton")
+
+
         
         rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
         if os.path.isfile(rutacache) ==True:
@@ -1458,8 +1481,29 @@ class Sigpac:
                 #archivo2=os.environ['TMP']+r"/"+str(random.random())+".shp"
                
                 #processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : archivo3, 'OUTPUT' : archivo2 })
-                lyr9=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
-            
+                lyr8=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
+                lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
+
+                #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
+                lyr9.startEditing()
+
+                fields = lyr9.fields()
+                idx = fields.indexFromName('SUP_SIGPAC')
+                    
+                if idx == -1:
+                    myField = QgsField( 'SUP_SIGPAC', QVariant.Double )
+                    lyr9.dataProvider().addAttributes([myField])
+                    lyr9.updateFields()
+                    
+
+                for f in lyr9.getFeatures():
+                    f.setAttribute(f.fieldNameIndex('SUP_SIGPAC'), f.geometry().area()/10000 )
+                    #f[idx] = '"$area"*1000'
+                    lyr9.updateFeature( f )
+
+                lyr9.commitChanges()
+
+                
                 layer_settings.isExpression = True
                 layer_settings.enabled = True
                 layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
@@ -1541,7 +1585,28 @@ class Sigpac:
                 layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
                 #hacer un dissolve y llamar a la capa de salida igual
     
-                lyr9=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par)  })['OUTPUT']
+                lyr8=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par)  })['OUTPUT']
+                lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par)  })['OUTPUT']
+
+                #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
+                lyr9.startEditing()
+
+                fields = lyr9.fields()
+                idx = fields.indexFromName('SUP_SIGPAC')
+                    
+                if idx == -1:
+                    myField = QgsField( 'SUP_SIGPAC', QVariant.Double )
+                    lyr9.dataProvider().addAttributes([myField])
+                    lyr9.updateFields()
+                    
+
+                for f in lyr9.getFeatures():
+                    f.setAttribute(f.fieldNameIndex('SUP_SIGPAC'), f.geometry().area()/10000 )
+                    #f[idx] = '"$area"*1000'
+                    lyr9.updateFeature( f )
+
+                lyr9.commitChanges()
+                
                 layer_settings.isExpression = True
                 layer_settings.enabled = True
                 layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)

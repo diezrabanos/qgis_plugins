@@ -175,22 +175,6 @@
     <string/>
    </property>
   </widget>
-  <widget class="QCheckBox" name="mycheckBox">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>480</y>
-     <width>211</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>DISOLVER RECINTOS</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_9">
    <property name="geometry">
     <rect>
@@ -325,7 +309,7 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>160</x>
+     <x>130</x>
      <y>20</y>
      <width>411</width>
      <height>16</height>
@@ -381,15 +365,17 @@
    <property name="geometry">
     <rect>
      <x>450</x>
-     <y>460</y>
+     <y>450</y>
      <width>171</width>
      <height>81</height>
     </rect>
    </property>
    <property name="text">
-    <string> Si esta checheado,
- el resultado son las parcelas.
- En caso contrario muestra recintos.</string>
+    <string>Carga recintos o parcelas en 
+función de lo que tengamos 
+selecionado tanto para la busqueda 
+por polígono y parcela como 
+coordenadas o click en el mapa</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_13">
@@ -444,7 +430,7 @@
    <property name="geometry">
     <rect>
      <x>440</x>
-     <y>470</y>
+     <y>450</y>
      <width>211</width>
      <height>20</height>
     </rect>
@@ -674,7 +660,7 @@
      <x>450</x>
      <y>380</y>
      <width>201</width>
-     <height>111</height>
+     <height>91</height>
     </rect>
    </property>
    <property name="text">
@@ -684,12 +670,40 @@ en el radio definido de la zona en la que
 se haga CLICk en el mapa.</string>
    </property>
   </widget>
+  <widget class="QRadioButton" name="radioButtonParcelas">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>480</y>
+     <width>107</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cargar Parcelas</string>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="radioButtonRecintos">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>480</y>
+     <width>124</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Cargar Recintos</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <tabstops>
   <tabstop>MUN</tabstop>
   <tabstop>POL</tabstop>
   <tabstop>PAR</tabstop>
-  <tabstop>mycheckBox</tabstop>
   <tabstop>ruta_archivo</tabstop>
   <tabstop>pushButton_select_path</tabstop>
   <tabstop>XX</tabstop>

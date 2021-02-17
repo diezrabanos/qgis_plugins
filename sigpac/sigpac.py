@@ -179,6 +179,8 @@ class Sigpac:
     def __init__(self, iface):
         global almacen
         global almacen0
+        global recintosselecionados
+        recintosselecionados=True
         almacen=["",False,"",[],[],0]
         almacen0=["",False,"",[],[]]
         # Save reference to the QGIS interface
@@ -241,6 +243,9 @@ class Sigpac:
 
         self.mapTool = CoordinateCaptureMapTool(self.iface.mapCanvas())
         self.mapTool.mouseClickedsenal.connect(self.mouseClicked)
+
+        self.dlg.radioButtonRecintos.toggled.connect(self.funcionrecintos)
+        self.dlg.radioButtonParcelas.toggled.connect(self.funcionparcelas)
         
 
         
@@ -473,7 +478,7 @@ class Sigpac:
         
 
     def update(self, point: QgsPointXY):
-
+        global recintosselecionados
         #userCrsPoint = self.transform.transform(point)
         #self.dockwidget.userCrsEdit.setText('{0:.{2}f},{1:.{2}f}'.format(userCrsPoint.x(), userCrsPoint.y(), self.userCrsDisplayPrecision))
         
@@ -567,7 +572,7 @@ class Sigpac:
             #QgsProject.instance().removeMapLayer(layer)
             #canvas.freeze(False)  
        
-        if elementos>1 and self.dlg.mycheckBox.isChecked() :
+        if elementos>1 and recintosselecionados==False :
             
             layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
             #hacer un dissolve y llamar a la capa de salida igual
@@ -614,7 +619,7 @@ class Sigpac:
 
                     
                     
-        if elementos>1 and self.dlg.mycheckBox.isChecked()==False :
+        if elementos>1 and recintosselecionados==True :
            
             layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
             layer_settings.isExpression = True
@@ -1137,6 +1142,20 @@ class Sigpac:
             self.iface.removePluginMenu(
                 self.tr(u'&Sigmena'),
                 action)
+
+
+    def funcionrecintos(self):
+        global recintosselecionados
+        if self.dlg.radioButtonRecintos.isChecked()==True:
+            recintosselecionados=True
+            print ("Quiero sacar recintos")
+            
+    def funcionparcelas(self):
+        global recintosselecionados
+        if self.dlg.radioButtonParcelas.isChecked()==True:
+            recintosselecionados=False
+            print ("Quiero sacar parcelas")
+            
     
 
 
@@ -1474,7 +1493,7 @@ class Sigpac:
                 lyr9.commitChanges()
                 lyr9.updateExtents()
                 canvas.setExtent(lyr9.extent())
-            if elementos>1 and self.dlg.mycheckBox.isChecked() and archivo == "" :
+            if elementos>1 and recintosselecionados==False and archivo == "" :
                 
                 layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
                 #hacer un dissolve y llamar a la capa de salida igual
@@ -1522,7 +1541,7 @@ class Sigpac:
 
                         
                         
-            if elementos>1 and self.dlg.mycheckBox.isChecked()==False and archivo == "":
+            if elementos>1 and recintosselecionados==True and archivo == "":
                
                 layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
                 layer_settings.isExpression = True
@@ -1540,7 +1559,7 @@ class Sigpac:
                 lyr9.updateExtents()
                 canvas.setExtent(lyr9.extent())
 
-            if elementos>1 and self.dlg.mycheckBox.isChecked()==False and archivo is not "":
+            if elementos>1 and recintosselecionados==True and archivo is not "":
                 
                 layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
                 layer_settings.isExpression = True
@@ -1580,7 +1599,7 @@ class Sigpac:
                 lyr8.updateExtents()
                 canvas.setExtent(lyr8.extent())
 
-            if elementos>1 and self.dlg.mycheckBox.isChecked() and archivo is not "":
+            if elementos>1 and recintosselecionados==False and archivo is not "":
                 
                 layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
                 #hacer un dissolve y llamar a la capa de salida igual

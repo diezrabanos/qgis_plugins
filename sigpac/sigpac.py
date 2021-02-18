@@ -180,7 +180,7 @@ class Sigpac:
         global almacen
         global almacen0
         global recintosselecionados
-        recintosselecionados=True
+        
         almacen=["",False,"",[],[],0]
         almacen0=["",False,"",[],[]]
         # Save reference to the QGIS interface
@@ -218,6 +218,8 @@ class Sigpac:
             usarcomarca=True
         else:
             usarcomarca=False
+        #hago lo mismo con el usar recintos o parcelas
+        recintosselecionados=bool()
         
         self.first_start = None
         self.dlg.pushButton_select_path.clicked.connect(self.select_file)
@@ -1191,7 +1193,17 @@ class Sigpac:
                 micomarca= (filecacheleido[2].replace('\n',''))
                 miscomarcas=(filecacheleido[3].replace('\n','')).strip('][').split(',') #convierto una str en una list
                 mismunicipios=ast.literal_eval((filecacheleido[4].replace('\n','')).replace(" [[","[[").replace("]] ","]]"))#.split(',')) #convierto una str en una list
+                misrecintos=(filecacheleido[5].replace('\n',''))
+                if misrecintos=="False":
+                    recintosselecionados==False
+                    self.dlg.radioButtonParcelas.setChecked(True)
+                else:
+                    recintosselecionados==True
+                    self.dlg.radioButtonRecintos.setChecked(True)
+                print("la seleccion de recintos, leida de la cache es ",recintosselecionados, "linea 1199")
+                self.dlg.radioButtonRecintos.setChecked (recintosselecionados)
                 filecache.close()
+                
             except:
                 print("esta no encuentra el file cache")
                 
@@ -1362,9 +1374,10 @@ class Sigpac:
             rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
             #lo escribo en el txt, mavhacando lo que ya tenia
             f=open(rutacache,"w")
-            escribir=str(pro)+"\n"+str(usarcomarca)+"\n"+comarca+"\n"+str(comarcas).replace("'","").replace(", ",",")+"\n"+str(municipios)+"\n"
+            escribir=str(pro)+"\n"+str(usarcomarca)+"\n"+comarca+"\n"+str(comarcas).replace("'","").replace(", ",",")+"\n"+str(municipios)+"\n"+str(recintosselecionados)+"\n"
             f.write(escribir)
             f.close()
+            print("he escrito en la cache ",str(recintosselecionados)," linea 1375")
 
             QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
             

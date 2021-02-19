@@ -1,6 +1,6 @@
 42
 True
-Gomara
+Vinuesa
 [Almazan,Almarza,Agreda,Bayubas de Abajo,Burgo de Osma,Covaleda,Gomara,Navaleno,Soria,San Pedro Manrique,San Leonardo de Yague,Vinuesa]
-[['Alconaba', 42, '42012'], ['Aldealafuente', 42, '42018'], ['Aldealpozo', 42, '42020'], ['Aldealseñor', 42, '42021'], ['Aldehuela de Periáñez', 42, '42024'], ['Aliud', 42, '42027'], ['Almajano', 42, '42028'], ['Almazul', 42, '42033'], ['Almenar de Soria', 42, '42034'], ['Arancón', 42, '42038'], ['Bliecos', 42, '42059'], ['Borobia', 42, '42065'], ['Buberos', 42, '42068'], ['Cabrejas del Campo', 42, '42072'], ['Candilichera', 42, '42079'], ['Carabantes', 42, '42082'], ['Cihuela', 42, '42099'], ['Ciria', 42, '42100'], ['Cirujales del Río', 42, '42102'], ['Deza', 42, '42121'], ['Gómara', 42, '42152'], ['Losilla (La)', 42, '42175'], ['Narros', 42, '42207'], ['Noviercas', 42, '42216'], ['Pinilla del Campo', 42, '42228'], ['Portillo de Soria', 42, '42232'], ['Quiñonería', 42, '42241'], ['Renieblas', 42, '42249'], ['Reznos', 42, '42252'], ['Serón de Nágima', 42, '42274'], ['Tejado', 42, '42290'], ['Torlengua', 42, '42292'], ['Torrubia de Soria', 42, '42298'], ['Velilla de la Sierra', 42, '42319'], ['Villaseca de Arciel', 42, '42338']]
+[['Montenegro de Cameros', 42, '42197'], ['Vinuesa', 42, '42340']]
 False

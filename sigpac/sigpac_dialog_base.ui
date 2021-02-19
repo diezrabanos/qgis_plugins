@@ -494,7 +494,7 @@ coordenadas o click en el mapa</string>
   <widget class="QPushButton" name="pushButton_configurar">
    <property name="geometry">
     <rect>
-     <x>480</x>
+     <x>450</x>
      <y>60</y>
      <width>131</width>
      <height>23</height>
@@ -697,6 +697,19 @@ se haga CLICk en el mapa.</string>
    </property>
    <property name="checked">
     <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="help_button">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>60</y>
+     <width>41</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ayuda</string>
    </property>
   </widget>
  </widget>

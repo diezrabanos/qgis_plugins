@@ -64,6 +64,8 @@ from qgis.PyQt.QtCore import pyqtSignal, Qt
 from qgis.gui import QgsMapToolEmitPoint, QgsRubberBand
 from qgis.core import QgsWkbTypes, QgsPointXY, QgsApplication
 
+import webbrowser
+
 class CoordinateCaptureMapTool(QgsMapToolEmitPoint):
     
     mouseClickedsenal = pyqtSignal(QgsPointXY)
@@ -248,6 +250,7 @@ class Sigpac:
 
         self.dlg.radioButtonRecintos.toggled.connect(self.funcionrecintos)
         self.dlg.radioButtonParcelas.toggled.connect(self.funcionparcelas)
+        self.dlg.help_button.clicked.connect(self.help_pressed)
         
 
         
@@ -342,6 +345,11 @@ class Sigpac:
             fileconfig.close()
             rutaarchivomunicipiossigpac=""
             rutacarpetarecintos=""
+
+
+    def help_pressed(self):
+        help_file = 'file:O:/sigmena/utilidad/PROGRAMA/QGIS/Complementos/Manual/Manual_Sigpac_SIGMENA.htm'
+        webbrowser.open_new(help_file)
         
     
     def select_file(self): 

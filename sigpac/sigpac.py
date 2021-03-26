@@ -107,7 +107,7 @@ class SendPointToolCoordinates(QgsMapTool): #old
         
 
 
-    def canvasReleaseEvent(self, event):
+    """def canvasReleaseEvent(self, event):
         import os
 
         usuario=QgsApplication.qgisSettingsDirPath()
@@ -160,7 +160,7 @@ class SendPointToolCoordinates(QgsMapTool): #old
 
 
         #QgsProject.instance().addMapLayer(vl)
-        QgsProject.instance().addMapLayer(vl2)
+        QgsProject.instance().addMapLayer(vl2)"""
 
 
 
@@ -550,13 +550,13 @@ class Sigpac:
         mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
         print (mun)
         #cuando se el municipio lo cargo y seleciono el punto de nuevo
-        caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+str(mun)+".shp")
+        caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+str(mun)+".shp")
         layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
         #seleciono de nuevo por la localizacion sobre esta capa del municipio
         processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capabufer,'METHOD':0})
         sellectionado2 = layer.selectedFeatureIds()
 
-        lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory: Sigpac_Click" })['OUTPUT']
+        lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory: Sigpac_Click_recintos" })['OUTPUT']
 
         #cuenta elementos
         elementos=len(list(lyr9.getFeatures()))
@@ -589,8 +589,8 @@ class Sigpac:
             #archivo2=os.environ['TMP']+r"/"+str(random.random())+".shp"
            
             #processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : archivo3, 'OUTPUT' : archivo2 })
-            lyr8=processing.run("native:dissolve",{ 'FIELD' : ['C_PROVINCI','C_MUNICIPI','C_AGREGADO','C_ZONA','C_POLIGONO','C_PARCELA'], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_click" })['OUTPUT']
-            lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_click"  })['OUTPUT']
+            lyr8=processing.run("native:dissolve",{ 'FIELD' : ['C_PROVINCI','C_MUNICIPI','C_AGREGADO','C_ZONA','C_POLIGONO','C_PARCELA'], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_click_parcelas" })['OUTPUT']
+            lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_click_parcelas"  })['OUTPUT']
 
             #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
             lyr9.startEditing()
@@ -1437,7 +1437,7 @@ class Sigpac:
                 #QgsProject.instance().addMapLayers([layerbase])
                 mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
                 #cuando se el municipio lo cargo y seleciono el punto de nuevo
-                caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+str(mun)+".shp")
+                caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+str(mun)+".shp")
                 layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
                 #seleciono de nuevo por la localizacion sobre esta capa del municipio
                 processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
@@ -1456,7 +1456,7 @@ class Sigpac:
                 
 
 
-            caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+mun+".shp")
+            caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+mun+".shp")
             layer = QgsVectorLayer(caparecintos, mun, 'ogr')
             #QgsProject.instance().addMapLayers([layer])
 

@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
@@ -12,7 +11,6 @@ Saca un informe en pdf con el cruce de capas
         copyright            : (C) 2019 by Javier Diez Rabanos
         email                : dierabfr@jcyl.es
  ***************************************************************************/
-
 /***************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -41,7 +39,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes,QgsApplication,QgsFillSymbol,QgsSingleSymbolRenderer,QgsLayoutExporter,QgsLayout,QgsLayoutSize,QgsUnitTypes, QgsTextBufferSettings,QgsRasterLayer,QgsSymbolLayerRegistry,QgsLayoutItemLegend,QgsLayoutPoint,QgsLayoutItemLabel,QgsLayoutItemTextTable,QgsLayoutTableColumn,QgsLayoutFrame,QgsProcessingAlgorithm,QgsLayoutItemHtml,QgsLayoutMeasurement,QgsUnitTypes,QgsPrintLayout,QgsReadWriteContext,QgsLayoutItemPage,QgsLayoutItemMapGrid
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsWkbTypes,QgsApplication,QgsFillSymbol,QgsSingleSymbolRenderer,QgsLayoutExporter,QgsLayout,QgsLayoutSize,QgsUnitTypes, QgsTextBufferSettings,QgsRasterLayer,QgsSymbolLayerRegistry,QgsLayoutItemLegend,QgsLayoutPoint,QgsLayoutItemLabel,QgsLayoutItemTextTable,QgsLayoutTableColumn,QgsLayoutFrame,QgsProcessingAlgorithm,QgsLayoutItemHtml,QgsLayoutMeasurement,QgsUnitTypes,QgsPrintLayout,QgsReadWriteContext,QgsLayoutItemPage,QgsLayoutItemMapGrid,QgsRectangle
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 #from PyQt5.QtWidgets import QMessageBox
@@ -127,12 +125,9 @@ class Informes:
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
-
         We implement this ourselves since we do not inherit QObject.
-
         :param message: String for translation.
         :type message: str, QString
-
         :returns: Translated version of message.
         :rtype: QString
         """
@@ -246,7 +241,7 @@ class Informes:
         global ruta1
         """seleciono el shp con la ruta"""
         #self.dlg.carpetalaz.clear()
-        ruta = QFileDialog.getOpenFileName(self.dlg, "Ruta en formato shapefile", "R:/SIGMENA/prueba/2020/03/12/Numancia4x4", "shp(*.shp)")#QFileDialog.getExistingDirectory(self.dlg , "Selecciona ruta")
+        ruta = QFileDialog.getOpenFileName(self.dlg, "Ruta en formato shapefile", "O:/sigmena/carto/USO_PUBL/ITINERAR/Rutas_Todoterreno/2021", "shp(*.shp)")#QFileDialog.getExistingDirectory(self.dlg , "Selecciona ruta")
         ruta=str(ruta[0])
         print(ruta)
         self.dlg.lineEdit_ruta.setText(ruta)
@@ -585,14 +580,14 @@ class Informes:
             #etiqueto
             layer_settings  = QgsPalLayerSettings()
             text_format = QgsTextFormat()
-            text_format.setFont(QFont("Arial", 8))
-            text_format.setSize(8)
-            text_format.setColor(QColor("Black"))
+            text_format.setFont(QFont("Arial", 9))
+            text_format.setSize(9)
+            text_format.setColor(QColor("Green"))
             #le meto un buffer a la etiqueta
            
             layer_settings.setFormat(text_format)
-            layer_settings.fieldName = "NOMBRE"
-            #layer_settings.fieldName = '''concat("NOMBRE",' ')'''            
+            #layer_settings.fieldName = "NOMBRE"
+            layer_settings.fieldName = '''concat("NOMBRE" , '\n' ,  "ANCHO_M"  , ' m.')'''            
             layer_settings.isExpression = True
             layer_settings.enabled = True
             layer_settings.placement = 2
@@ -730,14 +725,14 @@ class Informes:
             #etiqueto
             layer_settings  = QgsPalLayerSettings()
             text_format = QgsTextFormat()
-            text_format.setFont(QFont("Arial", 8))
-            text_format.setSize(8)
-            text_format.setColor(QColor("Black"))
+            text_format.setFont(QFont("Arial", 9))
+            text_format.setSize(9)
+            text_format.setColor(QColor("Green"))
             #le meto un buffer a la etiqueta
            
             layer_settings.setFormat(text_format)
-            layer_settings.fieldName = "NOMBRE"
-            #layer_settings.fieldName = '''concat("NOMBRE",' ')'''            
+            #layer_settings.fieldName = "NOMBRE"
+            layer_settings.fieldName = '''concat("NOMBRE" , '\n' ,  "ANCHO_M"  , ' m.')'''            
             layer_settings.isExpression = True
             layer_settings.enabled = True
             layer_settings.placement = 2
@@ -783,7 +778,6 @@ class Informes:
         #iface.mapCanvas().scale()
         #
         iface.mapCanvas().refresh()
-
         #zoomRectangle = QgsRectangle(pos[0]-offset, pos[1]-offset,pos[0]+offset,pos[1]+offset)
         #self.canvas.setExtent(zoomRectangle)
         #self.canvas.refresh()
@@ -819,12 +813,9 @@ class Informes:
         # Load template from file
         p = QgsProject()
         l = QgsLayout(p)
-
         with open(tmpfile) as f:
             template_content = f.read()
-
         # it return a QgsComposerView
-
         doc1 = QDomDocument()
         doc1.setContent(template_content)
         ele = doc1.documentElement()
@@ -870,7 +861,7 @@ class Informes:
                 
         lay.addItem(legend)
         legend.adjustBoxSize()
-        legend.attemptMove(QgsLayoutPoint(25.5, 8, QgsUnitTypes.LayoutCentimeters))
+        legend.attemptMove(QgsLayoutPoint(25.5, 9, QgsUnitTypes.LayoutCentimeters))
         #legend.attemptResize(QgsLayoutSize(2.8, 2.2, QgsUnitTypes.LayoutCentimeters))
         legend.refresh()
         
@@ -894,7 +885,7 @@ class Informes:
         layout_html.addFrame(html_frame)
         layout_html.setContentMode(QgsLayoutItemHtml.ManualHtml)#background-color: white ;
         estilo="<style> table { font-size: 12px; background-color:white; border-collapse: collapse;}tr {border: 0px solid black;bgcolor :white;}td {white-space: nowrap; padding: 0px;bgcolor :white;}td.bold {font-weight: bold;}td.gap {background-color:white;padding:1px;}</style>"      
-        htmlcode = '<TABLE><CAPTION>LIMITACIONES</CAPTION><TR><TD>'+resultadocambiocultivo[0]+'</TD><TD>M.U.P.</TD></TR><TR><TD>'+resultadocambiocultivo[1]+'</TD><TD>Consorcios</TD></TR><TR><TD>'+resultadocambiocultivo[2]+'</TD><TD>V.V.P.P.</TD></TR><TR><TD>'+resultadocambiocultivo[3]+'</TD><TD>R.E.N.</TD></TR><TR><TD>'+resultadocambiocultivo[4]+'</TD><TD>Z.E.C.</TD></TR><TR><TD>'+resultadocambiocultivo[5]+'</TD><TD>Z.E.P.A.</TD></TR><TR><TD>'+resultadocambiocultivo[6]+'</TD><TD>Z. Alondra</TD></TR><TR><TD>'+resultadocambiocultivo[7]+'</TD><TD>Yacimientos</TD></TR><TR><TD>'+resultadocambiocultivo[8]+'</TD><TD>Pendiente</TD></TR></TABLE>'
+        htmlcode = '<TABLE><CAPTION>LIMITACIONES</CAPTION><TR><TD>'+resultadocambiocultivo[0]+'</TD><TD>M.U.P.</TD></TR><TR><TD>'+resultadocambiocultivo[1]+'</TD><TD>Consorcios</TD></TR><TR><TD>'+resultadocambiocultivo[2]+'</TD><TD>V.V.P.P.</TD></TR><TR><TD>'+resultadocambiocultivo[3]+'</TD><TD>R.E.N.</TD></TR><TR><TD>'+resultadocambiocultivo[4]+'</TD><TD>Z.E.C.</TD></TR><TR><TD>'+resultadocambiocultivo[5]+'</TD><TD>Z.E.P.A.</TD></TR><TR><TD>'+resultadocambiocultivo[6]+'</TD><TD>Z. Alondra</TD></TR><TR><TD>'+resultadocambiocultivo[7]+'</TD><TD>Yacimientos</TD></TR><TR><TD>'+resultadocambiocultivo[8]+'</TD><TD>Pendiente</TD></TR><TR><TD>&#9745;</TD><TD>No cultivado</TD></TR></TABLE>'
        
         layout_html.setHtml(estilo+" "+str(htmlcode))
         layout_html.loadHtml()
@@ -943,7 +934,7 @@ class Informes:
         iface.mapCanvas().setExtent(extension)
         mapItem.zoomToExtent(extension)#(iface.mapCanvas().extent())
         #activo el grid
-        mapItem.grid().setEnabled(True)
+        mapItem.grid().setEnabled(False)
 
 
 
@@ -1004,7 +995,7 @@ class Informes:
         mapItem = layout.referenceMap()
         mapItem.zoomToExtent(iface.mapCanvas().extent())
         
-        listaanos=[1956,1977,1997,1999,2000,2001,2002,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017]
+        listaanos=[1956,1977,1997,1999,2000,2001,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017]
 
         # cargo el wms de la ortofoto y genero el png
         imagenes=[]
@@ -1263,6 +1254,7 @@ class Informes:
         global ruta1
         projectInstance = QgsProject.instance()
         layoutmanager = projectInstance.layoutManager()
+        #print(layoutmanager.layouts()) 
         layout = layoutmanager.layoutByName(plantilla)
         mapItem = layout.referenceMap()
 
@@ -1355,6 +1347,7 @@ class Informes:
     def plantillaamapa(self,plantilla,Titulo,tablamups,tablaconsorcios,tablavvpps):
         projectInstance = QgsProject.instance()
         layoutmanager = projectInstance.layoutManager()
+        print(projectLayoutManager.layouts())
         layout = layoutmanager.layoutByName("A3_H") #Layout name
         mapItem = layout.referenceMap()
         #meto la leyenda
@@ -1439,17 +1432,13 @@ class Informes:
         global tablamontes
         global tablaconsorcios
         global tablavvpps
-
         
-
         c = canvas.Canvas(carpetasalida+"/salida.pdf", pagesize=landscape(A3))  # alternatively use bottomup=False
         width, height = A3
         #meto la imagen
         #img_data1=Image(imagen,height-20, width-20)#250*mm,250*mm)#los numeross son opcionales para determinar el tamaño
         ##img_data1.wrapOn(c, 200*mm,200*mm)
         #img_data1.drawOn(c,3*mm,5 * mm)
-
-
         
         #pdfmetrics.registerFont(TTFont('Verdana','Verdana.ttf'))
         #c.setFont('Verdana',8)
@@ -1467,7 +1456,6 @@ class Informes:
         t.setStyle(tstyle)
         t.wrapOn(c, width, height)
         t.drawOn(c, int(x1)*mm, int(y1)*mm)#10,5
-
         #tabla de consorcios
         data = tablaconsorcios
         print (data)
@@ -1475,7 +1463,6 @@ class Informes:
         t2.setStyle(tstyle)
         t2.wrapOn(c, width, height)
         t2.drawOn(c, int(x2)*mm, int(y2)*mm)#10,250
-
         #tabla de vvpp
         data = tablavvpps
         print (data)
@@ -1483,16 +1470,13 @@ class Informes:
         t3.setStyle(tstyle)
         t3.wrapOn(c, width, height)
         t3.drawOn(c, int(x3)*mm, int(y3)*mm)    #250,5    
-
         #aqui mete un texto
         styles = getSampleStyleSheet()    
         #ptext = "This is an example."
         #p = Paragraph(ptext, style=styles["Normal"])
         #p.wrapOn(c, 50*mm, 50*mm)  # size of 'textbox' for linebreaks etc.
         #p.drawOn(c, 0*mm, 0*mm)    # position of text / where to draw
-
         
-
         c.save()
         """
 
@@ -2487,7 +2471,7 @@ class Informes:
                 canvas.freeze(True)
 
 
-                caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+mun+".shp")
+                caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+mun+".shp")
                 layer = QgsVectorLayer(caparecintos, mun, 'ogr')
                 #QgsProject.instance().addMapLayers([layer])
 
@@ -2689,6 +2673,7 @@ class Informes:
 
                 
                 pass
+            #serie ortos
             if index==2:
                 global muni
                 global poli
@@ -2716,6 +2701,17 @@ class Informes:
                 par=self.dlg.PAR_3.text()##displayText()
                 ano1=int(self.dlg.text_ano1.text())##displayText()
                 ano2=int(self.dlg.text_ano2.text())##displayText()
+                text_ventana1=self.dlg.text_ventana.text()##displayText()
+             
+                if text_ventana1 == '':
+                    pass
+                else:
+                    ventana_list=text_ventana1.split(",")
+                    ventana=[]
+                    for element in ventana_list:
+                        ventana.append(int(element))
+                    print(ventana)
+                
                 poli=pol
                 parc=par
                              
@@ -2745,7 +2741,7 @@ class Informes:
                 #canvas.freeze(True)
 
 
-                caparecintos=os.path.join(rutacarpetarecintos,"RECFE20_"+mun+".shp")
+                caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+mun+".shp")
                 layer = QgsVectorLayer(caparecintos, mun, 'ogr')
                 #QgsProject.instance().addMapLayers([layer])
 
@@ -2803,6 +2799,16 @@ class Informes:
                     lyr9.commitChanges()
                     lyr9.updateExtents()
                     canvas.setExtent(lyr9.extent())
+
+                    #aqui podria configurar si meto cuatro esquinas que me haga ese zoom................................................................................................................OJOOJOJOJOJOJOJOJOJOJOJOJO
+                    #no funciona
+                    if text_ventana1 == '':
+                        pass
+                    else:
+                        zoomRectangle = QgsRectangle(ventana[0], ventana[1],ventana[2],ventana[3])
+                        canvas.setExtent(zoomRectangle)
+                        canvas.refresh()
+                               
                 
 
                             
@@ -2824,6 +2830,17 @@ class Informes:
                     lyr9.commitChanges()
                     lyr9.updateExtents()
                     canvas.setExtent(lyr9.extent())
+
+
+                    #aqui podria configurar si meto cuatro esquinas que me haga ese zoom................................................................................................................OJOOJOJOJOJOJOJOJOJOJOJOJO
+                    #no funciona
+                    if text_ventana1 == '':
+                        pass
+                    else:
+                        zoomRectangle = QgsRectangle(ventana[0], ventana[1],ventana[2],ventana[3])
+                        canvas.setExtent(zoomRectangle)
+                        canvas.refresh()
+                               
 
                 if elementos>1  and archivo is not "":
                     
@@ -2865,6 +2882,16 @@ class Informes:
                     lyr8.updateExtents()
                     canvas.setExtent(lyr8.extent())
 
+                    #aqui podria configurar si meto cuatro esquinas que me haga ese zoom................................................................................................................OJOOJOJOJOJOJOJOJOJOJOJOJO
+                    #no funciona
+                    if text_ventana1 == '':
+                        pass
+                    else:
+                        zoomRectangle = QgsRectangle(ventana[0], ventana[1],ventana[2],ventana[3])
+                        canvas.setExtent(zoomRectangle)
+                        canvas.refresh()
+                               
+
                 
                 if elementos==1 and archivo is not "":
                     
@@ -2902,8 +2929,20 @@ class Informes:
                     lyr8.commitChanges()
                     lyr8.updateExtents()
                     canvas.setExtent(lyr8.extent())
+
+
+
+                    #aqui podria configurar si meto cuatro esquinas que me haga ese zoom................................................................................................................OJOOJOJOJOJOJOJOJOJOJOJOJO
+                    #no funciona
+                    if text_ventana1 == '':
+                        pass
+                    else:
+                        zoomRectangle = QgsRectangle(ventana[0], ventana[1],ventana[2],ventana[3])
+                        canvas.setExtent(zoomRectangle)
+                        canvas.refresh()
                                
 
+                
                 
                 self.hagomapa3(ano1,ano2, muni,poli,parc)
                 canvas.freeze(False)
@@ -3030,5 +3069,4 @@ class Informes:
                     mapItem.zoomToExtent(extent)#(iface.mapCanvas().extent())
                     #mapItem.setExtent(iface.mapCanvas().extent())   cambia la forma del mapa
                     iface.openLayoutDesigner(layout)
-                
-                
+                                

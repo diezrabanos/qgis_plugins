@@ -49,7 +49,7 @@
       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabruta">
       <attribute name="title">
@@ -522,7 +522,7 @@
        <property name="geometry">
         <rect>
          <x>130</x>
-         <y>290</y>
+         <y>330</y>
          <width>59</width>
          <height>20</height>
         </rect>
@@ -535,20 +535,20 @@
        <property name="geometry">
         <rect>
          <x>300</x>
-         <y>290</y>
+         <y>330</y>
          <width>59</width>
          <height>20</height>
         </rect>
        </property>
        <property name="text">
-        <string>2015</string>
+        <string>2017</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_29">
        <property name="geometry">
         <rect>
          <x>60</x>
-         <y>290</y>
+         <y>330</y>
          <width>61</width>
          <height>16</height>
         </rect>
@@ -561,13 +561,52 @@
        <property name="geometry">
         <rect>
          <x>230</x>
-         <y>290</y>
+         <y>330</y>
          <width>61</width>
          <height>16</height>
         </rect>
        </property>
        <property name="text">
         <string>Año Final</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="text_ventana">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>290</y>
+         <width>251</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_32">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>290</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>VENTANA ZOOM</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_33">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>270</y>
+         <width>191</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>500000,4600000,501000,4601000</string>
        </property>
       </widget>
      </widget>

@@ -13,7 +13,7 @@ name=Informes
 qgisMinimumVersion=3.0
 
 description=Hace un informe en pdf con el cruce de capas.
-version=1.0.0
+version=1.0.1
 author=F. Javier Diez Rabanos
 
 email=dierabfr@jcyl.es

@@ -1,4 +1,4 @@
-O:/sigmena/carto/SIGPAC/Sigpac_2020/MUNICIPIOS_20.shp
-O:/sigmena/carto/SIGPAC/Sigpac_2020/Recintos
+O:/sigmena/carto/SIGPAC/Sigpac_2021/42_MUNICIPIOS_21.shp
+O:/sigmena/carto/SIGPAC/Sigpac_2021/Recintos
 
 

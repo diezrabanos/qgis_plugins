@@ -276,6 +276,17 @@ class GpsDescargaCarga:
                     vectorLyr =QgsVectorLayer(path+"?type="+name, name, "gpx")
                     QgsVectorFileWriter.writeAsVectorFormat(vectorLyr,str(path[:-4])+"_"+name,"utf-8",dest_crs,"ESRI Shapefile")
                     iface.addVectorLayer(str(path[:-4])+"_"+name+".shp", str(nombre)+"_"+name, "ogr")
+                rutasgps=["D:/Garmin/GPX",r"E:/Garmin/GPX",r"F:/Garmin/GPX",r"H:/Garmin/GPX",r"C:/Garmin/GPX"]
+                for rutagps in rutasgps:
+                    if os.path.isdir(rutagps): 
+                        try:
+                            import glob
+                            listaarchivosengps=glob.glob(rutagps+"*.gpx")
+                            for arch in listaarchivosengps:
+                                shutil.copy2(arch, ruta)
+                        except:
+                            pass
+                
 #empieza la carga
             
             
@@ -338,12 +349,14 @@ class GpsDescargaCarga:
                         output,error = result.communicate()
                         print (output)
                         print (error)
-                    rutagps =r"D:\Garmin\GPX"#deberia intentar en varias rutasd, e , f, g, h si existen.
-                    if os.path.isdir(rutagps): 
-                        try:
-                            shutil.copy2(ruta, rutagps)
-                        except:
-                            pass
+                    #rutagps =r"D:\Garmin\GPX"#deberia intentar en varias rutasd, e , f, g, h si existen.
+                    rutasgps=["D:/Garmin/GPX",r"E:/Garmin/GPX",r"F:/Garmin/GPX",r"H:/Garmin/GPX",r"C:/Garmin/GPX"]
+                    for rutagps in rutasgps:
+                        if os.path.isdir(rutagps): 
+                            try:
+                                shutil.copy2(ruta, rutagps)
+                            except:
+                                pass
                         
 
             if self.dlg.checkBox_5.isChecked():
@@ -419,15 +432,17 @@ class GpsDescargaCarga:
                         output,error = result.communicate()
                         print (output)
                         print (error)
-                    rutagps =r"D:\Garmin\GPX"
-                    if os.path.isdir(rutagps): 
-                        try:
-                            shutil.copy2(ruta, rutagps)
-                        except:
+                    #rutagps =r"D:\Garmin\GPX"
+                    rutasgps=["D:/Garmin/GPX","E:/Garmin/GPX","F:/Garmin/GPX","H:/Garmin/GPX","C:/Garmin/GPX"]
+                    for rutagps in rutasgps:
+                        if os.path.isdir(rutagps): 
+                            try:
+                                shutil.copy2(ruta, rutagps)
+                            except:
+                                pass
+                        else:
                             pass
-                    else:
-                        pass
-                    
+                        
 
 
 

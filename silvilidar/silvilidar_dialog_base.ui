@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SilvilidarDialogBase</class>
- <widget class="QDialog" name="SilvilidarDialogBase">
+ <class>SilvilidarDialog</class>
+ <widget class="QDialog" name="SilvilidarDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -52,7 +52,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Lidar/)</string>
+    <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Silvilidar/)</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_select_path">
@@ -104,7 +104,7 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">Text-align:left;</string>
+    <string notr="true">Text-align:center;</string>
    </property>
    <property name="text">
     <string>AYUDA SILVILIDAR</string>
@@ -120,7 +120,7 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">Text-align:left;</string>
+    <string notr="true">Text-align:center;</string>
    </property>
    <property name="text">
     <string>PERSONALIZAR DATOS DE SALIDA</string>
@@ -136,7 +136,7 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">Text-align:left;</string>
+    <string notr="true">Text-align:center;</string>
    </property>
    <property name="text">
     <string>CONFIGURACIÓN DE PARAMETROS</string>
@@ -152,7 +152,7 @@
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">Text-align:left;</string>
+    <string notr="true">Text-align:center;</string>
    </property>
    <property name="text">
     <string>PROYECTAR DATOS LIDAR</string>
@@ -295,7 +295,7 @@ cada tesela en el arbol de decisión.</string>
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>SilvilidarDialogBase</receiver>
+   <receiver>SilvilidarDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -311,7 +311,7 @@ cada tesela en el arbol de decisión.</string>
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>SilvilidarDialogBase</receiver>
+   <receiver>SilvilidarDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

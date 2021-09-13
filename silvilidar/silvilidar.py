@@ -80,15 +80,15 @@ class Silvilidar:
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
+        self.locale = QSettings().value('locale/userLocale')[0:2]
+        self.locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'Silvilidar_{}.qm'.format(locale))
-
-        if os.path.exists(locale_path):
+            'Silvilidar_{}.qm'.format(self.locale))
+        
+        if os.path.exists(self.locale_path):
             self.translator = QTranslator()
-            self.translator.load(locale_path)
+            self.translator.load(self.locale_path)
 
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
@@ -229,7 +229,7 @@ class Silvilidar:
         """seleciono la carpeta con los datos de entrada"""
 
         #self.dlg.carpetalaz.clear()
-        carpeta = QFileDialog.getExistingDirectory(self.dlg , "Selecciona carpeta")
+        carpeta = QFileDialog.getExistingDirectory(self.dlg , self.tr(u"Selecciona carpeta"))
         self.dlg.carpetalaz.setText(carpeta)
         print(carpeta)
         
@@ -256,8 +256,10 @@ class Silvilidar:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginMenu(                self.tr(u'&Silvilidar'),                action)
             self.iface.removeToolBarIcon(action)
+            self.iface.removePluginMenu(
+                self.tr(u'&Sigmena'),
+                action)
 
 
 
@@ -324,8 +326,11 @@ class Silvilidar:
             parametros1 = 10
             parametros1_0 = "" #"/median:3 /wparam:2.5 /aparam:4 /bparam:4"
             parametros2= "10 M M 0 0 0 0"
-            parametros3_1 = "/minht:2 /nointensity" 
-            parametros3_2 = "0.5 10"
+            
+            #parametros3_1 = "/minht:2 /nointensity"
+            #hcorte2="2"#parametro a variar en la gui con la altura minima de corte por abajo
+            parametros3_1 = "/minht:{hcorte} /nointensity".format(hcorte = hcorte2)
+            parametros3_2 = hcorte2+" 10"#"0.5 10"
             parametros4 = 7
             parametros5 = 49
             parametros6 = "/raster"
@@ -753,7 +758,14 @@ class Silvilidar:
             calculo('(fccp@1 > '+str(fccbaja)+')*(hmp@1 > '+str(hclaras2)+')*(rcp@1 >= '+str(rcclaras)+')*112', 'C24')
             
             #primera aproximacion al volumen                         
-            calculo('((((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) > 10 ) * 10 + ((((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) < 10 ) * (((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) ', 'V')    
+            #calculo('((((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) > 10 ) * 10 + ((((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) < 10 ) * (((11.2958099433282 * hmp@1 * fccp@1 / 100 ) + (1.01082625996345 * hbcp@1 * hbcp@1 ))/100) ', 'V')
+            #choperas, villar del rio reg
+            #calculo('((((21.4317914 * hbcp@1 ) + (20.60721872 * lcp@1 )+(0.2518519 * rcp@1  )+(0.2518519 * fccp@1  )-187.189000655894))>0 ) * ((21.4317914 * hbcp@1 ) + (20.60721872 * lcp@1 )+(0.2518519 * rcp@1  )+(0.2518519 * fccp@1  )-187.189000655894)  / 100 ', 'V')    
+            #calculo('((((20.53178064 * hbcp@1 ) + (19.99289198 * lcp@1 )+(0 * rcp@1  )+(0.33353309 * fccp@1  )-173.66440197319645))>0 ) * ((20.53178064 * hbcp@1 ) + (19.99289198 * lcp@1 )+(0 * rcp@1  )+(0.33353309 * fccp@1  )-173.66440197319645)  / 100 ', 'V')    
+            calculo('((((0.12252633 * hbcp@1 ) + (20.95164119 * hmp@1 )+(0 * rcp@1  )+(0.21333922 * fccp@1  )-177.824382869595))>0 ) * ((0.12252633 * hbcp@1 ) + (20.95164119 * hmp@1 )+(0 * rcp@1  )+(0.21333922 * fccp@1  )-177.824382869595)  / 100 ', 'V')    
+
+
+
             StringToRaster(os.path.join(carpeta,troncoresumido+'_V.tif'),"vol")
             
             horaepiezacalculotiposdemasa= time.time()
@@ -922,6 +934,7 @@ class Silvilidar:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+            print(self.tr(u'EMPEZAMOS'))
             # Do something useful here - delete the line containing pass and
             # substitute with your code.
             #print ("lo imprime si le doy a aceptar en el dialogo")
@@ -929,6 +942,7 @@ class Silvilidar:
             #la carpeta la he cogido al pulsar el boton de la carpeta
 
              #meto aqui variables que luego deberan estar en la cajita   OJO
+            hcorte2=self.dlg2.hcorte2.text()
             crecimiento= self.dlg3.crecimiento.text()##displayText()
             fccbaja=self.dlg2.fccbaja.text()##displayText()
             fccterrazas=self.dlg2.fccterrazas.text()##displayText()
@@ -945,7 +959,8 @@ class Silvilidar:
             rcextremo=self.dlg2.rcextremo.text()#displayText()
             longitudcopaminima=self.dlg2.longitudcopaminima.text()##displayText()
             crecimientofcc=self.dlg3.crecimientofcc.text()##displayText()
-            """crecimiento= 1.5
+            """hcorte2= 2
+            crecimiento= 1.5
             fccbaja=20.0
             fccterrazas=57.5
             fccmedia=46.0

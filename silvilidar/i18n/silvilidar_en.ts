@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="en">
+<context>
+    <name>ProjectDialogBase</name>
+    <message>
+        <location filename="../project_dialog_base.ui" line="49"/>
+        <source>PROYECCIÓN DE DATOS</source>
+        <translation>DATA UPDATE</translation>
+    </message>
+    <message>
+        <location filename="../project_dialog_base.ui" line="122"/>
+        <source>Incremento en f.c.c.................................</source>
+        <translation>Canopy cover increase.................................</translation>
+    </message>
+    <message>
+        <location filename="../project_dialog_base.ui" line="174"/>
+        <source>Incremento en altura................................</source>
+        <translation>Height increase.................................</translation>
+    </message>
+    <message>
+        <location filename="../project_dialog_base.ui" line="105"/>
+        <source>Incremento considerado en altura
+para cada celda desde la fecha
+del vuelo LiDAR.
+Sólo se aplica en celdas con altura
+mayor de 5 m.</source>
+        <translation>Tree height increase assessed
+since the LIDAR flight. 
+Only grids with tree height over five 
+meters are considered.</translation>
+    </message>
+    <message>
+        <location filename="../project_dialog_base.ui" line="75"/>
+        <source>Incremento en unidades porcentuales
+de la fracción de cabida cubierta desde la
+fecha del vuelo LiDAR.
+Está relacionado con el parametro
+anterior pero puede cambiarse libremente.</source>
+        <translation>Percentage canopy cover increase
+assessed since the LIDAR flight.</translation>
+    </message>
+</context>
+<context>
+    <name>SalidaDialog</name>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="49"/>
+        <source>CAPAS DE SALIDA</source>
+        <translation>OUTCOMING LAYERS</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="75"/>
+        <source>Estas capas se crean siempre
+por lo que su carga solo ralentiza
+la visualización
+</source>
+        <translation>This layers are are always created</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="104"/>
+        <source>Crear el agregado de estas capas
+lleva alrededor de medio minuto 
+por cuadricula aunque puede ser util
+por la simplificación de la salida</source>
+        <translation>The process will delay around half 
+a minute per grid </translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="120"/>
+        <source>Agregado Claras</source>
+        <translation>Thinning agregates/polygons </translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="133"/>
+        <source>Agregado Regeneración</source>
+        <translation>Regeneration agregates/ polygons</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="146"/>
+        <source>Agregado Resalveo</source>
+        <translation>Pre-commercial thinning agregates/ polygons</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="159"/>
+        <source>Altura </source>
+        <translation>Height (m)</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="175"/>
+        <source>Fracción de Cabida Cubierta</source>
+        <translation>Canopy Cover (%)</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="188"/>
+        <source>Razón de copa</source>
+        <translation>Crown ratio (%)</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="201"/>
+        <source>Altura de la base de copa</source>
+        <translation>Heigh to crown base (m)</translation>
+    </message>
+    <message>
+        <location filename="../salida_dialog_base.ui" line="214"/>
+        <source>Longitud de copa</source>
+        <translation>Crown lenght (m)</translation>
+    </message>
+</context>
+<context>
+    <name>ConfigDialog</name>
+    <message>
+        <location filename="../config_dialog_base.ui" line="49"/>
+        <source>CONFIGURACIÓN</source>
+        <translation>CONFIGURATION</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="62"/>
+        <source>LA CLASIFICACIÓN DE LAS TESELAS DEPENDE DE ESTOS VALORES</source>
+        <translation>Polygons are classifyed according to the values:</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="621"/>
+        <source>Altura mínima del suelo ............................</source>
+        <translation>Height break .....................................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="75"/>
+        <source>Altura monte bravo .................................</source>
+        <translation>Thicket-stage height...........................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="88"/>
+        <source>Altura claras..........................................</source>
+        <translation>First thinning height.............................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="101"/>
+        <source>Altura base de copa mínima........................</source>
+        <translation>Minimal crown base height for pruning........</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="114"/>
+        <source>Altura claras 2........................................</source>
+        <translation>Second thinning height............................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="127"/>
+        <source>Altura selvícolas.....................................</source>
+        <translation>Silvicultural tree height........................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="140"/>
+        <source>Longitud copa mínima................................</source>
+        <translation>Minimal Crown lenght...........................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="153"/>
+        <source>Altura base de copa desarrollado..................</source>
+        <translation>Minimal crown base height for thinning.......</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="166"/>
+        <source>Fcc Terrazas.........................................</source>
+        <translation>Canopy cover in bench terraces..................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="179"/>
+        <source>Fcc Media..............................................</source>
+        <translation>Moderately dense canopy cover.....................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="192"/>
+        <source>Fcc Alta...............................................</source>
+        <translation>Very dense canopy cover...........................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="205"/>
+        <source>Razón de copa extrema en porcentaje..........</source>
+        <translation>Extreme crown ratio for instability.....</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="218"/>
+        <source>Altura monte bravo e................................</source>
+        <translation>Thicket-stage height (fuelwood)................</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="231"/>
+        <source>Razón de copa para claras en porcentaje.......</source>
+        <translation>Recomended crown ratio for thinning......</translation>
+    </message>
+    <message>
+        <location filename="../config_dialog_base.ui" line="244"/>
+        <source>Fcc baja...............................................</source>
+        <translation>Low canopy cover (scrub)..........................</translation>
+    </message>
+</context>
+<context>
+    <name>SilvilidarDialog</name>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="55"/>
+        <source>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Silvilidar/)</source>
+        <translation>Folder with Lidar data, LAS or LAZ (i.e. C:/Data_Silvilidar/)</translation>
+    </message>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="110"/>
+        <source>AYUDA SILVILIDAR</source>
+        <translation>SILVILIDAR HELP</translation>
+    </message>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="126"/>
+        <source>PERSONALIZAR DATOS DE SALIDA</source>
+        <translation>CUSTOMIZE OUTGOING DATA</translation>
+    </message>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="142"/>
+        <source>CONFIGURACIÓN DE PARAMETROS</source>
+        <translation>PARAMETER SETTING</translation>
+    </message>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="158"/>
+        <source>PROYECTAR DATOS LIDAR</source>
+        <translation>UPDATE LIDAR DATA</translation>
+    </message>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="171"/>
+        <source>Permite seleccionar que capas (además de
+las teselas) queremos que se visualicen en
+QGIS al finalizar el proceso.</source>
+        <translation>Allows to select layers or polygons
+to be displayed in QGIS </translation>
+    </message>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="186"/>
+        <source>Permite incrementar la altura y la fracción
+de cabida cubierta por el tiempo transcurrido
+desde la realización del vuelo LiDAR.</source>
+        <translation>Allows to increase tree hight and 
+canopy cover considering the time
+passed since LIDAR flight</translation>
+    </message>
+    <message>
+        <location filename="../silvilidar_dialog_base.ui" line="201"/>
+        <source>Permite cambiar los valores de corte
+que se tendrán en cuenta para clasificar
+cada tesela en el arbol de decisión.</source>
+        <translation>Allows to change cut-off values 
+considered in the classification tree 
+for polygons definition</translation>
+    </message>
+
+
+
+
+
+
+
+
+</context>
+<context>
+    <name>Silvilidar</name>
+    <message>
+        <location filename="../silvilidar.py" line="934"/>
+        <source>EMPEZAMOS</source>
+        <translation>IN WORK</translation>
+    </message>
+    <message>
+        <location filename="../silvilidar.py" line="232"/>
+        <source>Selecciona carpeta</source>
+    <translation>Select folder</translation>
+    </message>
+</context>
+</TS>

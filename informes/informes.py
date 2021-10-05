@@ -441,7 +441,7 @@ class Informes:
         if len(feats)>0:
             #hay que comprobar de que tipo es la capa si lineas o poligonos
             print("tipo ",layer.wkbType())
-            if layer.wkbType()==3 or layer.wkbType()==6 :
+            if layer.wkbType()==3 or layer.wkbType()==6 or layer.wkbType()==1006:
                 print("es poligono")
                 mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", "duplicated_layer", "memory")
             if layer.wkbType()==2 or layer.wkbType()==5:
@@ -668,7 +668,9 @@ class Informes:
             alondra=QgsVectorLayer(os.path.join(carpetasalida,"42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp"),"Z. Alondra","ogr")
         if resultadocambiocultivo[7]=="&#9745;":#"Si":
             yacimientos=QgsVectorLayer(os.path.join(carpetasalida,"42_VW_BIENES.shp"),"Yacimientos","ogr")
-        
+        if resultadocambiocultivo[8]=="&#9745;":#"Si":
+            print("FTA SIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII")
+            repoblaciones=QgsVectorLayer(os.path.join(carpetasalida,"FTA_SORIA_1993_2018.shp"),"F.T.A","ogr")
         
         
         
@@ -768,6 +770,10 @@ class Informes:
             simbologiayetiquetopol(yacimientos,'dense1', '255,255,255,255', 'black','1','''concat('YAC. ',"A_DENO_PPA")'''   ,"Black","grey")
         except:
             pass
+        try:
+            simbologiayetiquetopol(repoblaciones,'dense1', '255,255,255,255', 'black','1','''concat('F.T.A ','')'''   ,"Black","grey")
+        except:
+            pass
         """symbol=QgsLineSymbol.createSimple({'color': 'black', 'line_width': '1.3'})
         ruta.renderer().setSymbol(symbol)
         extent = ruta.extent()
@@ -847,7 +853,7 @@ class Informes:
         lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
         #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
         #print (lyrs_to_add2)
-        lyrs_to_add2 = ["M.U.P.","Consorcios","VVPP","R.E.N","Z.E.C","Z.E.P.A","Z.Alondra","Yacimientos","Pendiente"]
+        lyrs_to_add2 = ["M.U.P.","Consorcios","VVPP","R.E.N","Z.E.C","Z.E.P.A","Z. Alondra","Yacimientos","F.T.A.","Pendiente"]
         legend.setAutoUpdateModel(False)
         group = legend.model().rootGroup()
         group.clear()
@@ -885,7 +891,7 @@ class Informes:
         layout_html.addFrame(html_frame)
         layout_html.setContentMode(QgsLayoutItemHtml.ManualHtml)#background-color: white ;
         estilo="<style> table { font-size: 12px; background-color:white; border-collapse: collapse;}tr {border: 0px solid black;bgcolor :white;}td {white-space: nowrap; padding: 0px;bgcolor :white;}td.bold {font-weight: bold;}td.gap {background-color:white;padding:1px;}</style>"      
-        htmlcode = '<TABLE><CAPTION>LIMITACIONES</CAPTION><TR><TD>'+resultadocambiocultivo[0]+'</TD><TD>M.U.P.</TD></TR><TR><TD>'+resultadocambiocultivo[1]+'</TD><TD>Consorcios</TD></TR><TR><TD>'+resultadocambiocultivo[2]+'</TD><TD>V.V.P.P.</TD></TR><TR><TD>'+resultadocambiocultivo[3]+'</TD><TD>R.E.N.</TD></TR><TR><TD>'+resultadocambiocultivo[4]+'</TD><TD>Z.E.C.</TD></TR><TR><TD>'+resultadocambiocultivo[5]+'</TD><TD>Z.E.P.A.</TD></TR><TR><TD>'+resultadocambiocultivo[6]+'</TD><TD>Z. Alondra</TD></TR><TR><TD>'+resultadocambiocultivo[7]+'</TD><TD>Yacimientos</TD></TR><TR><TD>'+resultadocambiocultivo[8]+'</TD><TD>Pendiente</TD></TR><TR><TD>&#9745;</TD><TD>No cultivado</TD></TR></TABLE>'
+        htmlcode = '<TABLE><CAPTION>LIMITACIONES</CAPTION><TR><TD>'+resultadocambiocultivo[0]+'</TD><TD>M.U.P.</TD></TR><TR><TD>'+resultadocambiocultivo[1]+'</TD><TD>Consorcios</TD></TR><TR><TD>'+resultadocambiocultivo[2]+'</TD><TD>V.V.P.P.</TD></TR><TR><TD>'+resultadocambiocultivo[3]+'</TD><TD>R.E.N.</TD></TR><TR><TD>'+resultadocambiocultivo[4]+'</TD><TD>Z.E.C.</TD></TR><TR><TD>'+resultadocambiocultivo[5]+'</TD><TD>Z.E.P.A.</TD></TR><TR><TD>'+resultadocambiocultivo[6]+'</TD><TD>Z. Alondra</TD></TR><TR><TD>'+resultadocambiocultivo[7]+'</TD><TD>Yacimientos</TD></TR><TR><TD>'+resultadocambiocultivo[8]+'</TD><TD>F.T.A.</TD></TR><TR><TD>'+resultadocambiocultivo[9]+'</TD><TD>Pendiente</TD></TR><TR><TD>&#9745;</TD><TD>No cultivado</TD></TR></TABLE>'
        
         layout_html.setHtml(estilo+" "+str(htmlcode))
         layout_html.loadHtml()
@@ -1078,7 +1084,7 @@ class Informes:
                 z,t=100,260
                 c.drawCentredString( 100*mm, 15*mm, "- "+str(n//2+1) +" -")
                 c.setFont("Helvetica", 8)
-                c.drawString(190*mm, 15*mm, "SIGMENA")
+                #c.drawString(190*mm, 15*mm, "SIGMENA")
                 c.setFont("Helvetica", 12)
             else:
                 x,y=30,20
@@ -1094,9 +1100,9 @@ class Informes:
                 if n< nmax-1:
                     c.showPage()
             n=n+1
-        #c.drawCentredString( 100*mm, 15*mm, "- "+str(n//2+1) +" -")
-        #c.setFont("Helvetica", 8)
-        #c.drawString(190*mm, 15*mm, "SIGMENA")
+        c.drawCentredString( 100*mm, 15*mm, "- "+str(n//2+1) +" -")
+        c.setFont("Helvetica", 8)
+        c.drawString(190*mm, 15*mm, "SIGMENA")
     
         c.save()
         help_file = 'file:' + carpetasalida + '/salida.pdf'
@@ -2643,8 +2649,10 @@ class Informes:
                 alondra=r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPECIES\ESTUDIOS\CENSOS\ALONDRA RICOTI\42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp","Z. Alondra","ogr")
                 yacimientos=r"O:/sigmena/carto/OTROS/BIENPATCULT/42_VW_BIENES.shp"#QgsVectorLayer(r"O:\sigmena\carto\OTROS\BIENPATCULT\42_VW_BIENES.shp","Yacimientos","ogr")
                 pendientes=r"O:/sigmena/carto/M_FISICO/RELIEVE/PENDIENT/MDT5CYL_PEND_10_15.TIF"
+                repoblaciones=r"O:/sigmena/carto/REPOBLAC/FTA/FTA_SORIA_1993_2018.shp"
                 #carpeta de trabajo
                 carpetasalida = tempfile.mkdtemp()
+            
                 print (carpetasalida)
                 #hago los cruces
                 self.crucecambiocultivo(lyr9,mup,carpetasalida)#tengo que ver como llamar al mup, tb layer 8 o 9
@@ -2655,7 +2663,9 @@ class Informes:
                 self.crucecambiocultivo(lyr9,zepa,carpetasalida)
                 self.crucecambiocultivo(lyr9,alondra,carpetasalida)
                 self.crucecambiocultivo(lyr9,yacimientos,carpetasalida)
+                self.crucecambiocultivo(lyr9,repoblaciones,carpetasalida)
                 self.crucecambiocultivoraster(lyr9,pendientes,carpetasalida)
+                
                 print(resultadocambiocultivo)
                 
                 self.hagomapa2(resultadocambiocultivo,carpetasalida, munic,polig,parce)
@@ -2805,6 +2815,7 @@ class Informes:
                     if text_ventana1 == '':
                         pass
                     else:
+                        QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 100 )  #ojo nuevo
                         zoomRectangle = QgsRectangle(ventana[0], ventana[1],ventana[2],ventana[3])
                         canvas.setExtent(zoomRectangle)
                         canvas.refresh()
@@ -2837,6 +2848,7 @@ class Informes:
                     if text_ventana1 == '':
                         pass
                     else:
+                        QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 100 )  #ojo nuevo
                         zoomRectangle = QgsRectangle(ventana[0], ventana[1],ventana[2],ventana[3])
                         canvas.setExtent(zoomRectangle)
                         canvas.refresh()

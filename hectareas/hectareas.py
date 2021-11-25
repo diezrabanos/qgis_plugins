@@ -179,10 +179,10 @@ class Hectareas:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
+            self.iface.removeToolBarIcon(action)
             self.iface.removePluginMenu(
                 self.tr(u'&Sigmena'),
                 action)
-            self.iface.removeToolBarIcon(action)
 
 
 
@@ -196,7 +196,8 @@ class Hectareas:
     def run(self):
         print ("paso por el run")
         vl = iface.activeLayer()
-        if vl.wkbType() == QgsWkbTypes.Polygon or vl.wkbType() == QgsWkbTypes.MultiPolygon:
+        print(vl.wkbType())
+        if vl.wkbType() == QgsWkbTypes.Polygon or vl.wkbType() == QgsWkbTypes.MultiPolygon or vl.wkbType() ==1006:
             vl.startEditing()
 
             fields = vl.fields()

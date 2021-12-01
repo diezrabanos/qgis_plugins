@@ -305,7 +305,7 @@ class Solicitudes_sigmena:
 
     #empiezo el cruce de capas vectoriales con la zona de interes, hace una seleccion de los elementos, no un clip.
     def crucecapasvectoriales(self,capadetrabajo,elementofijo,carpetasalida):
-        print("entro en crucecapasvectoriales")
+        #print("entro en crucecapasvectoriales")
         
         global resultadocapas
         
@@ -313,15 +313,14 @@ class Solicitudes_sigmena:
 
         
         #carpetasalida= '/'.join(capadetrabajo.split("/")[:-1])+"/capas_intermedias"
-        sufijo=str(elementofijo.split("/")[-1])
-        print("sufijo")
-        print (sufijo)
+        #sufijo=str(elementofijo.split("/")[-1])
+        sufijo=elementofijo[1]
         salida=carpetasalida+"/"+sufijo
-        print(capadetrabajo,elementofijo)
+        #print(capadetrabajo,elementofijo)
         #habra que hacer que carge la capa de mups.
-        print("salida",salida)
+        #print("salida",salida)
         
-        layer = QgsVectorLayer(elementofijo, sufijo, "ogr")#no es necesario con el saveselectedfeatures
+        layer = QgsVectorLayer(elementofijo[0], sufijo, "ogr")#no es necesario con el saveselectedfeatures
 
         processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capadetrabajo,'METHOD':0})
         #processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})#es lo mas facil pero cambia la codifiacion
@@ -333,15 +332,15 @@ class Solicitudes_sigmena:
         
         if len(feats)>0:
             #hay que comprobar de que tipo es la capa si lineas o poligonos
-            print("tipo ",layer.wkbType())
+            #print("tipo ",layer.wkbType())
             if layer.wkbType()==3 or layer.wkbType()==6 or layer.wkbType()==1006:
-                print("es poligono")
+                #print("es poligono")
                 mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", sufijo, "memory")
             if layer.wkbType()==2 or layer.wkbType()==5:
-                print("es linea")
+                #print("es linea")
                 mem_layer = QgsVectorLayer("LineString?crs=epsg:25830", sufijo, "memory")
             if layer.wkbType()==1 or layer.wkbType()==4:
-                print("es punto")
+                #print("es punto")
                 mem_layer = QgsVectorLayer("Point?crs=epsg:25830", "sufijo", "memory")
 
             mem_layer_data = mem_layer.dataProvider()
@@ -369,6 +368,7 @@ class Solicitudes_sigmena:
             else:#capa de poligonos
                 pass
             #en cualquier caso
+            
             QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida,"utf-8",driverName="ESRI Shapefile")
             QgsProject.instance().addMapLayer(mem_layer)
             
@@ -398,63 +398,72 @@ class Solicitudes_sigmena:
         
         #listado de capas con las que trabajar, a cortar
         #CAPAS DE ESPACIOS EMAIL LOLI 20211129
-        alondra_de_dupont_ofical_area_relevancia=r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp"
-        alondra_de_dupont_nudo_medinaceli=r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/Habitat_Medinaceli_2019.shp"
-        alondra_de_dupont_censo_provincial_2020=r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/habitat_ricoti_SO_BU_2020_informe.shp"
-        alondra_de_dupont_censo_oficial_5x5_2008_2020=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Chersophilus_duponti/HISTORICO/1_PLANIFICACIÓN/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Cduponti.shp"
-        avutarda_oficial_cuadricula_5x5_2003_2020=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Otis_tarda/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Otarda.shp"
-        sison_oficial_historico_5x5_1999_2020=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Tetrax_tetrax/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Ttetrax.shp"
-        ortega_oficial_historico_cuadriculas_5x5_1999_2020_=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Palchata.shp"
-        ortega_oficial_historico_cuadriculas_5x5_1999_2020=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Porientalis.shp"
-        aguiluchos_censo=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/aguiluchos/2021/Resultados_censoAguiluchos_transectos_2021.shp"
-        aguila_perdicera_potencial=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila perdicera/areas potenciales.shp"
-        aguila_perdicera_ultimos_territorios=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila perdicera/ultimos territorios.shp"
-        aguila_real_historico=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila real/Aguila_real_historico.shp"
-        aguila_real_1x1_2018=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila real/Aguila_real_1x1_2018.shp"
-        aguilucho_cenizo_cuadriculas_censo_2017=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/Cuadrículas_censo_Aguilucho_2017.shp"
-        aguilucho_cenizo_censo_zepas_2017=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/Zepas_censo_2017_Aguiluchos.shp"
-        aguilucho_cenizo_parcelas=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/parcelas nidos cenizos.shp"
-        aguilucho_cenizo_cuadriculas_censo_parejas_rep_2017=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/Cuadriculas_censo_parejas_rep_2017.shp"
-        aguilucho_lagunero_2011=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho lagunero/Aguilucho_lagunero_2011.shp"
-        alimoche_1x1_2018=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Alimoche/Alimoche_1x1_2018.shp"
-        buitre_leonado_1x1_2018=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Buitre leonado/Buitre_leonado_1x1_2018.shp"
-        buitre_leonado_tpores_colonias_2018=r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/42_SO/42_2018_TPORES_COLONIAS_Gfulvus.shp"
-        milano_real_historico_aocres_1x1_inv=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/42_HISTORICO_AOCRES_1X1_Mmilvus_INV.shp"
-        milano_real_10x10=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2008-2010 varios/Milano_Real_UTM10.shp"
-        milano_real_tpores_dormideros=r"o:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/42_SO/42_2019_TPORES_DORMIDEROS_Mmilvus.shp"
-        milano_real_2018_tpores_dormideros_inv=r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2018/2_RESULTADOS/42_SO/42_2018_TPORES_DORMIDEROS_Mmilvus_INV.shp"
-        milano_real_2018_tpores_territorios_rep=r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/42_SO/42_2018_TPORES_TERRITORIOS_Mmilvus_REP.shp"
-        milano_real_nidos=r"O:/sigmena/usuarios/espacios_naturales/Proyectos Loli/capas/milano real/nidos_milano.shp"
-        milano_real_nidos_2013_17_tierras_altas=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2013-2017 Nidos Milano/Nidos_Milano_real_2013-17_Tierras_Altas.shp"
-        milano_real_2018=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2018/milano real 2018.shp"
-        milano_real_reproductor_2018=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2018/milano real reproductor 2018.shp"
-        milano_real_monta_10=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2018/utm milano monta 10.shp"
-        milano_real_inv_2019=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2019/MILANO REAL INV 2019.shp"
-        milano_real_rep_2019=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2019/milano real rep 2019.shp"
-        milano_real_reproductor_2020=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2020/milano real 2020 reproductor.shp"
-        milano_real_rep_2019_2020=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2020/Milano_real_repr_2019_2020.shp"
-        milano_real_campeo_2019_2020=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2020/Milano_real_campeo_2019_2020.shp"
-        halcon_peregrino_1x1_2018=r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Halcon peregrino/Halcon_peregrino_1x1_2018.shp"
+        alondra_de_dupont_ofical_area_relevancia=[r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp","alondra_de_dupont_ofical_area_relevancia"]
+        alondra_de_dupont_nudo_medinaceli=[r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/Habitat_Medinaceli_2019.shp","alondra_de_dupont_nudo_medinaceli"]
+        alondra_de_dupont_censo_provincial_2020=[r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/habitat_ricoti_SO_BU_2020_informe.shp","alondra_de_dupont_censo_provincial_2020"]
+        alondra_de_dupont_censo_oficial_5x5_2008_2020=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Chersophilus_duponti/HISTORICO/1_PLANIFICACIÓN/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Cduponti.shp","alondra_de_dupont_censo_oficial_5x5_2008_2020"]
+        avutarda_oficial_cuadricula_5x5_2003_2020=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Otis_tarda/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Otarda.shp","avutarda_oficial_cuadricula_5x5_2003_2020"]
+        sison_oficial_historico_5x5_1999_2020=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Tetrax_tetrax/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Ttetrax.shp","sison_oficial_historico_5x5_1999_2020"]
+        ortega_oficial_historico_cuadriculas_5x5_1999_2020_=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Palchata.shp","ortega_oficial_historico_cuadriculas_5x5_1999_2020_"]
+        ortega_oficial_historico_cuadriculas_5x5_1999_2020=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/HISTORICO/1_PLANIFICACION/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Porientalis.shp","ortega_oficial_historico_cuadriculas_5x5_1999_2020"]
+        aguiluchos_censo=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/aguiluchos/2021/Resultados_censoAguiluchos_transectos_2021.shp","aguiluchos_censo"]
+        aguila_perdicera_potencial=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila perdicera/areas potenciales.shp","aguila_perdicera_potencial"]
+        aguila_perdicera_ultimos_territorios=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila perdicera/ultimos territorios.shp","aguila_perdicera_ultimos_territorios"]
+        aguila_real_historico=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila real/Aguila_real_historico.shp","aguila_real_historico"]
+        aguila_real_1x1_2018=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguila real/Aguila_real_1x1_2018.shp","aguila_real_1x1_2018"]
+        aguilucho_cenizo_cuadriculas_censo_2017=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/Cuadrículas_censo_Aguilucho_2017.shp","aguilucho_cenizo_cuadriculas_censo_2017"]
+        aguilucho_cenizo_censo_zepas_2017=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/Zepas_censo_2017_Aguiluchos.shp","aguilucho_cenizo_censo_zepas_2017"]
+        aguilucho_cenizo_parcelas=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/parcelas nidos cenizos.shp","aguilucho_cenizo_parcelas"]
+        aguilucho_cenizo_cuadriculas_censo_parejas_rep_2017=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho cenizo/Cuadriculas_censo_parejas_rep_2017.shp","aguilucho_cenizo_cuadriculas_censo_parejas_rep_2017"]
+        aguilucho_lagunero_2011=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Aguilucho lagunero/Aguilucho_lagunero_2011.shp","aguilucho_lagunero_2011"]
+        alimoche_1x1_2018=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Alimoche/Alimoche_1x1_2018.shp","alimoche_1x1_2018"]
+        buitre_leonado_1x1_2018=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Buitre leonado/Buitre_leonado_1x1_2018.shp","buitre_leonado_1x1_2018"]
+        buitre_leonado_tpores_colonias_2018=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/42_SO/42_2018_TPORES_COLONIAS_Gfulvus.shp","buitre_leonado_tpores_colonias_2018"]
+        milano_real_historico_aocres_1x1_inv=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/42_HISTORICO_AOCRES_1X1_Mmilvus_INV.shp","milano_real_historico_aocres_1x1_inv"]
+        milano_real_10x10=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2008-2010 varios/Milano_Real_UTM10.shp","milano_real_10x10"]
+        milano_real_tpores_dormideros=[r"o:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/42_SO/42_2019_TPORES_DORMIDEROS_Mmilvus.shp","milano_real_tpores_dormideros"]
+        milano_real_2018_tpores_dormideros_inv=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2018/2_RESULTADOS/42_SO/42_2018_TPORES_DORMIDEROS_Mmilvus_INV.shp","milano_real_2018_tpores_dormideros_inv"]
+        milano_real_2018_tpores_territorios_rep=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/42_SO/42_2018_TPORES_TERRITORIOS_Mmilvus_REP.shp","milano_real_2018_tpores_territorios_rep"]
+        milano_real_nidos=[r"O:/sigmena/usuarios/espacios_naturales/Proyectos Loli/capas/milano real/nidos_milano.shp","milano_real_nidos"]
+        milano_real_nidos_2013_17_tierras_altas=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2013-2017 Nidos Milano/Nidos_Milano_real_2013-17_Tierras_Altas.shp","milano_real_nidos_2013_17_tierras_altas"]
+        milano_real_2018=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2018/milano real 2018.shp","milano_real_2018"]
+        milano_real_reproductor_2018=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2018/milano real reproductor 2018.shp","milano_real_reproductor_2018"]
+        milano_real_monta_10=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2018/utm milano monta 10.shp","milano_real_monta_10"]
+        milano_real_inv_2019=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2019/MILANO REAL INV 2019.shp","milano_real_inv_2019"]
+        milano_real_rep_2019=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2019/milano real rep 2019.shp","milano_real_rep_2019"]
+        milano_real_reproductor_2020=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2020/milano real 2020 reproductor.shp","milano_real_reproductor_2020"]
+        milano_real_rep_2019_2020=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2020/Milano_real_repr_2019_2020.shp","milano_real_rep_2019_2020"]
+        milano_real_campeo_2019_2020=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Milano real/2020/Milano_real_campeo_2019_2020.shp","milano_real_campeo_2019_2020"]
+        halcon_peregrino_1x1_2018=[r"O:/sigmena/usuarios/espacios_naturales/ESPECIES PROTEGIDAS/Aves Rapaces/Halcon peregrino/Halcon_peregrino_1x1_2018.shp","halcon_peregrino_1x1_2018"]
         
-        c2018_AOCRES_1X1_Achrysaetos=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Aquila_chrysaetos/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1X1_Achrysaetos.shp"
-        c2018_AOCRES_10X10_Achrysaetos=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Aquila_chrysaetos/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10X10_Achrysaetos.shp"
-        c2018_AOCRES_1x1_Gfulvus=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1x1_Gfulvus.shp"
-        c2018_AOCRES_10x10_Gfulvus=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10x10_Gfulvus.shp"
-        c2018_AOCRES_1x1_Mmilvus_REP=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1x1_Mmilvus_REP.shp"
-        c2018_AOCRES_10x10_Mmilvus_REP=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10x10_Mmilvus_REP.shp"
-        c2018_AOCRES_1X1_Npercnopterus=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Neophron_percnopterus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1X1_Npercnopterus.shp"
-        c2018_AOCRES_10X10_Npercnopterus=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Neophron_percnopterus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10X10_Npercnopterus.shp"
-        c2019_AOCRES_10x10_Mmilvus_INV=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/41_2019_AOCRES_10x10_Mmilvus_INV.shp"
-        c2019_AOCRES_1x1_Mmilvus_INV=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/41_2019_AOCRES_1x1_Mmilvus_INV.shp"
-        c2019_AOCRES_1X1_Palchata_Porientalis=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_1X1_Palchata_Porientalis.shp"
-        c2019_AOCRES_10X10_Palchata_Porientalis=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10X10_Palchata_Porientalis.shp"
-        c2019_AOCRES_1X1_Porientalis=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_1X1_Porientalis.shp"
-        c2019_AOCRES_10X10_Porientalis=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10X10_Porientalis.shp"
-        c2019_AOCRES_10x10_Mmilvus_INV=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10x10_Mmilvus_INV.shp"
-        c2019_AOCRES_1x1_Mmilvus_INV=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_1x1_Mmilvus_INV.shp"
-        c2019_AOCRES_10X10_AVEAC_INV=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ACUAT/ACUAT_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10X10_AVEAC_INV.shp"
-        c2019_HUMEDALES_AVEAC=r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ACUAT/ACUAT_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_HUMEDALES_AVEAC.shp"
+        c2018_AOCRES_1X1_Achrysaetos=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Aquila_chrysaetos/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1X1_Achrysaetos.shp","c2018_AOCRES_1X1_Achrysaetos"]
+        c2018_AOCRES_10X10_Achrysaetos=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Aquila_chrysaetos/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10X10_Achrysaetos.shp","c2018_AOCRES_10X10_Achrysaetos"]
+        c2018_AOCRES_1x1_Gfulvus=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1x1_Gfulvus.shp","c2018_AOCRES_1x1_Gfulvus"]
+        c2018_AOCRES_10x10_Gfulvus=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10x10_Gfulvus.shp","c2018_AOCRES_10x10_Gfulvus"]
+        c2018_AOCRES_1x1_Mmilvus_REP=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1x1_Mmilvus_REP.shp","c2018_AOCRES_1x1_Mmilvus_REP"]
+        c2018_AOCRES_10x10_Mmilvus_REP=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10x10_Mmilvus_REP.shp","c2018_AOCRES_10x10_Mmilvus_REP"]
+        c2018_AOCRES_1X1_Npercnopterus=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Neophron_percnopterus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_1X1_Npercnopterus.shp","c2018_AOCRES_1X1_Npercnopterus"]
+        c2018_AOCRES_10X10_Npercnopterus=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Neophron_percnopterus/2018/2_RESULTADOS/ES41_CYL/ES41_2018_AOCRES_10X10_Npercnopterus.shp","c2018_AOCRES_10X10_Npercnopterus"]
+        c2019_AOCRES_10x10_Mmilvus_INV=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/41_2019_AOCRES_10x10_Mmilvus_INV.shp","c2019_AOCRES_10x10_Mmilvus_INV"]
+        c2019_AOCRES_1x1_Mmilvus_INV=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/41_2019_AOCRES_1x1_Mmilvus_INV.shp","c2019_AOCRES_1x1_Mmilvus_INV"]
+        c2019_AOCRES_1X1_Palchata_Porientalis=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_1X1_Palchata_Porientalis.shp","c2019_AOCRES_1X1_Palchata_Porientalis"]
+        c2019_AOCRES_10X10_Palchata_Porientalis=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10X10_Palchata_Porientalis.shp","c2019_AOCRES_10X10_Palchata_Porientalis"]
+        c2019_AOCRES_1X1_Porientalis=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_1X1_Porientalis.shp","c2019_AOCRES_1X1_Porientalis"]
+        c2019_AOCRES_10X10_Porientalis=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10X10_Porientalis.shp","c2019_AOCRES_10X10_Porientalis"]
+        c2019_AOCRES_10x10_Mmilvus_INV=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10x10_Mmilvus_INV.shp","c2019_AOCRES_10x10_Mmilvus_INV"]
+        c2019_AOCRES_1x1_Mmilvus_INV=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_1x1_Mmilvus_INV.shp","c2019_AOCRES_1x1_Mmilvus_INV"]
+        c2019_AOCRES_10X10_AVEAC_INV=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ACUAT/ACUAT_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_AOCRES_10X10_AVEAC_INV.shp","c2019_AOCRES_10X10_AVEAC_INV"]
+        c2019_HUMEDALES_AVEAC=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ACUAT/ACUAT_INVER/2019/2_RESULTADOS/ES41_CYL/ES41_2019_HUMEDALES_AVEAC.shp","c2019_HUMEDALES_AVEAC"]
         
+        c2019_TPORES_ESTES_Ttetrax=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_ESTEP/Tetrax_tetrax/2019/2_RESULTADOS/42_SO/42_2019_TPORES_ESTES_Ttetrax.shp","c2019_TPORES_ESTES_Ttetrax"]
+        c2019_TPORES_EJEMPLARES_Palchata_Porientalis=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_ESTEP/Palchata_Porientalis/2019/2_RESULTADOS/42_SO/42_2019_TPORES_EJEMPLARES_Palchata_Porientalis.shp","c2019_TPORES_EJEMPLARES_Palchata_Porientalis"]
+        c2019_TPORES_EJEMPLARES_AVEAC_INV=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_ACUAT/ACUAT_INVER/2019/2_RESULTADOS/42_SO/42_2019_TPORES_EJEMPLARES_AVEAC_INV.shp","c2019_TPORES_EJEMPLARES_AVEAC_INV"]
+        c2019_TPORES_DORMIDEROS_Mmilvus=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2019/2_RESULTADOS/42_SO/42_2019_TPORES_DORMIDEROS_Mmilvus.shp","c2019_TPORES_DORMIDEROS_Mmilvus"]
+        c2018_TPORES_DORMIDEROS_Mmilvus_INV=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_INVER/2018/2_RESULTADOS/42_SO/42_2018_TPORES_DORMIDEROS_Mmilvus_INV.shp","c2018_TPORES_DORMIDEROS_Mmilvus_INV"]
+        c2018_TPORES_TERRITORIOS_Npercnopterus=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Neophron_percnopterus/2018/2_RESULTADOS/42_SO/42_2018_TPORES_TERRITORIOS_Npercnopterus.shp","c2018_TPORES_TERRITORIOS_Npercnopterus"]
+        c2018_TPORES_COLONIAS_Gfulvus=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/42_SO/42_2018_TPORES_COLONIAS_Gfulvus.shp","c2018_TPORES_COLONIAS_Gfulvus"]
+        c2018_TPORES_TERRITORIOS_Mmilvus_REP=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/42_SO/42_2018_TPORES_TERRITORIOS_Mmilvus_REP.shp","c2018_TPORES_TERRITORIOS_Mmilvus_REP"]
+        c2018_TPORES_TERRITORIOS_Achrysaetos=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Aquila_chrysaetos/2018/2_RESULTADOS/42_SO/42_2018_TPORES_TERRITORIOS_Achrysaetos.shp","c2018_TPORES_TERRITORIOS_Achrysaetos"]
 
 
         
@@ -519,9 +528,10 @@ class Solicitudes_sigmena:
             resultadocapas=[]
             
             #hago los cruces entre lyr9 que es la zona de interes y todas las demas
-            lista_de_capas_a_cruzar=[alondra_de_dupont_ofical_area_relevancia,alondra_de_dupont_nudo_medinaceli,alondra_de_dupont_censo_oficial_5x5_2008_2020,avutarda_oficial_cuadricula_5x5_2003_2020,sison_oficial_historico_5x5_1999_2020,ortega_oficial_historico_cuadriculas_5x5_1999_2020_,ortega_oficial_historico_cuadriculas_5x5_1999_2020,aguiluchos_censo,aguila_perdicera_potencial,aguila_perdicera_ultimos_territorios,aguila_real_historico,aguila_real_1x1_2018,aguilucho_cenizo_cuadriculas_censo_2017,aguilucho_cenizo_censo_zepas_2017,aguilucho_cenizo_parcelas,aguilucho_cenizo_cuadriculas_censo_parejas_rep_2017,aguilucho_lagunero_2011,alimoche_1x1_2018,buitre_leonado_1x1_2018,buitre_leonado_tpores_colonias_2018,milano_real_historico_aocres_1x1_inv,milano_real_10x10,milano_real_tpores_dormideros,milano_real_2018_tpores_dormideros_inv,milano_real_2018_tpores_territorios_rep,milano_real_nidos,milano_real_nidos_2013_17_tierras_altas,milano_real_2018,milano_real_reproductor_2018,milano_real_monta_10,milano_real_inv_2019,milano_real_rep_2019,milano_real_reproductor_2020,milano_real_rep_2019_2020,milano_real_campeo_2019_2020,halcon_peregrino_1x1_2018,c2018_AOCRES_1X1_Achrysaetos,c2018_AOCRES_10X10_Achrysaetos,c2018_AOCRES_1x1_Gfulvus, c2018_AOCRES_10x10_Gfulvus, c2018_AOCRES_1x1_Mmilvus_REP,  c2018_AOCRES_10x10_Mmilvus_REP,  c2018_AOCRES_1X1_Npercnopterus, c2018_AOCRES_10X10_Npercnopterus,c2019_AOCRES_10x10_Mmilvus_INV,c2019_AOCRES_1x1_Mmilvus_INV,c2019_AOCRES_1X1_Palchata_Porientalis,c2019_AOCRES_10X10_Palchata_Porientalis,c2019_AOCRES_1X1_Porientalis,c2019_AOCRES_10X10_Porientalis,c2019_AOCRES_10x10_Mmilvus_INV,c2019_AOCRES_1x1_Mmilvus_INV,c2019_AOCRES_10X10_AVEAC_INV,c2019_HUMEDALES_AVEAC]
+            lista_de_capas_a_cruzar=[alondra_de_dupont_ofical_area_relevancia,alondra_de_dupont_nudo_medinaceli,alondra_de_dupont_censo_oficial_5x5_2008_2020,avutarda_oficial_cuadricula_5x5_2003_2020,sison_oficial_historico_5x5_1999_2020,ortega_oficial_historico_cuadriculas_5x5_1999_2020_,ortega_oficial_historico_cuadriculas_5x5_1999_2020,aguiluchos_censo,aguila_perdicera_potencial,aguila_perdicera_ultimos_territorios,aguila_real_historico,aguila_real_1x1_2018,aguilucho_cenizo_cuadriculas_censo_2017,aguilucho_cenizo_censo_zepas_2017,aguilucho_cenizo_parcelas,aguilucho_cenizo_cuadriculas_censo_parejas_rep_2017,aguilucho_lagunero_2011,alimoche_1x1_2018,buitre_leonado_1x1_2018,buitre_leonado_tpores_colonias_2018,milano_real_historico_aocres_1x1_inv,milano_real_10x10,milano_real_tpores_dormideros,milano_real_2018_tpores_dormideros_inv,milano_real_2018_tpores_territorios_rep,milano_real_nidos,milano_real_nidos_2013_17_tierras_altas,milano_real_2018,milano_real_reproductor_2018,milano_real_monta_10,milano_real_inv_2019,milano_real_rep_2019,milano_real_reproductor_2020,milano_real_rep_2019_2020,milano_real_campeo_2019_2020,halcon_peregrino_1x1_2018,c2018_AOCRES_1X1_Achrysaetos,c2018_AOCRES_10X10_Achrysaetos,c2018_AOCRES_1x1_Gfulvus, c2018_AOCRES_10x10_Gfulvus, c2018_AOCRES_1x1_Mmilvus_REP,  c2018_AOCRES_10x10_Mmilvus_REP,  c2018_AOCRES_1X1_Npercnopterus, c2018_AOCRES_10X10_Npercnopterus,c2019_AOCRES_10x10_Mmilvus_INV,c2019_AOCRES_1x1_Mmilvus_INV,c2019_AOCRES_1X1_Palchata_Porientalis,c2019_AOCRES_10X10_Palchata_Porientalis,c2019_AOCRES_1X1_Porientalis,c2019_AOCRES_10X10_Porientalis,c2019_AOCRES_10x10_Mmilvus_INV,c2019_AOCRES_1x1_Mmilvus_INV,c2019_AOCRES_10X10_AVEAC_INV,c2019_HUMEDALES_AVEAC,c2019_TPORES_ESTES_Ttetrax,c2019_TPORES_EJEMPLARES_Palchata_Porientalis,c2019_TPORES_EJEMPLARES_AVEAC_INV,c2019_TPORES_DORMIDEROS_Mmilvus,c2018_TPORES_DORMIDEROS_Mmilvus_INV,c2018_TPORES_TERRITORIOS_Npercnopterus,c2018_TPORES_COLONIAS_Gfulvus,c2018_TPORES_TERRITORIOS_Mmilvus_REP,c2018_TPORES_TERRITORIOS_Achrysaetos]
             for elemento in lista_de_capas_a_cruzar:
                 self.crucecapasvectoriales(lyr9,elemento,carpetasalida)#tengo que ver como llamar al mup, tb layer 8 o 9
+            os.startfile(carpetasalida)
             
 
 

@@ -303,7 +303,7 @@ class Solicitudes_sigmena:
 
 
 
-    #empiezo el cruce de capas vectoriales con la zona de interes, hace una seleccion de los elementos, no un clip.
+    #empiezo el cruce de capas vectoriales con la zona de interes, hace una seleccion de los elementos, no un clip. si es de poligonos la selecciona y si es de puntos la convierte en poligonos de 1x1 y la seleciona los presentes y los guarda.
     def crucecapasvectoriales(self,capadetrabajo,elementofijo,carpetasalida):
         #print("entro en crucecapasvectoriales")
         
@@ -375,10 +375,154 @@ class Solicitudes_sigmena:
             #hasta aqui para guardar lo selecionado
 
             
-            #layer= QgsVectorLayer(salida, sufijo, "ogr")
-            #QgsProject.instance().addMapLayer(layer)
-            #layer.setProviderEncoding(u'UTF-8')
-            #layer.dataProvider().setEncoding(u'UTF-8')
+
+            
+
+            print(sufijo)
+            #deberia hacer algo para saber que de una capa el resultado ha sido positivo o negativo. UNa lista al estilo de resultadocambiodecultivo. Estudiarlo OJO
+
+    #empiezo el cruce de capas vectoriales con la zona de interes, hace una seleccion de los elementos, no un clip. solo trabajo con las de puntos y no las convierte en poligonos ni nada.Lo aplico a las de electrocuciones por ejemplo
+    def crucecapasvectoriales2(self,capadetrabajo,elementofijo,carpetasalida):
+        #print("entro en crucecapasvectoriales")
+        
+        global resultadocapas
+        
+        #global carpetasalida
+
+        
+        #carpetasalida= '/'.join(capadetrabajo.split("/")[:-1])+"/capas_intermedias"
+        #sufijo=str(elementofijo.split("/")[-1])
+        sufijo=elementofijo[1]
+        salida=carpetasalida+"/"+sufijo
+        #print(capadetrabajo,elementofijo)
+        #habra que hacer que carge la capa de mups.
+        #print("salida",salida)
+        
+        layer = QgsVectorLayer(elementofijo[0], sufijo, "ogr")#no es necesario con el saveselectedfeatures
+
+        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capadetrabajo,'METHOD':0})
+        #processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})#es lo mas facil pero cambia la codifiacion
+        #guardo los selecionados con la codifiacion indicada
+        selection = layer.selectedFeatures()
+        
+        feats = [feat for feat in layer.selectedFeatures()]
+        elementos=len(feats)
+        
+        if len(feats)>0:
+            #hay que comprobar de que tipo es la capa si lineas o poligonos
+            #print("tipo ",layer.wkbType())
+            if layer.wkbType()==3 or layer.wkbType()==6 or layer.wkbType()==1006:
+                #print("es poligono")
+                mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", sufijo, "memory")
+            if layer.wkbType()==2 or layer.wkbType()==5:
+                #print("es linea")
+                mem_layer = QgsVectorLayer("LineString?crs=epsg:25830", sufijo, "memory")
+            if layer.wkbType()==1 or layer.wkbType()==4:
+                #print("es punto")
+                mem_layer = QgsVectorLayer("Point?crs=epsg:25830", "sufijo", "memory")
+
+            mem_layer_data = mem_layer.dataProvider()
+            attr = layer.dataProvider().fields().toList()
+            
+            mem_layer_data.addAttributes(attr)
+            mem_layer.updateFields()
+            mem_layer_data.addFeatures(feats)
+
+            #en cualquier caso
+            
+            QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida,"utf-8",driverName="ESRI Shapefile")
+            QgsProject.instance().addMapLayer(mem_layer)
+            
+            #hasta aqui para guardar lo selecionado
+
+            
+
+            
+
+            print(sufijo)
+            #deberia hacer algo para saber que de una capa el resultado ha sido positivo o negativo. UNa lista al estilo de resultadocambiodecultivo. Estudiarlo OJO
+
+    def crucecapasvectoriales3(self,capadetrabajo,elementofijo,carpetasalida):#capa de puntos a poligonos con la inforamcion de cada punto en el poligono en el que cae
+        #print("entro en crucecapasvectoriales")
+        
+        global resultadocapas
+        
+        #global carpetasalida
+
+        
+        #carpetasalida= '/'.join(capadetrabajo.split("/")[:-1])+"/capas_intermedias"
+        #sufijo=str(elementofijo.split("/")[-1])
+        sufijo=elementofijo[1]
+        salida=carpetasalida+"/"+sufijo
+        #print(capadetrabajo,elementofijo)
+        #habra que hacer que carge la capa de mups.
+        #print("salida",salida)
+        
+        layer = QgsVectorLayer(elementofijo[0], sufijo, "ogr")#esta es la capa de entrada, de puntos en este caso
+
+        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capadetrabajo,'METHOD':0})
+        #processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})#es lo mas facil pero cambia la codifiacion
+        #guardo los selecionados con la codifiacion indicada
+        selection = layer.selectedFeatures()
+        
+        feats = [feat for feat in layer.selectedFeatures()]
+        elementos=len(feats)
+        cuadricula=QgsVectorLayer(r'O:/sigmena/carto/CUADRICU/UTM/UTM1KM/42_malla1x1.shp',"test","ogr")
+        if len(feats)>0:
+            #hay que comprobar de que tipo es la capa si lineas o poligonos
+            #print("tipo ",layer.wkbType())
+            
+            #print("es poligono") creo una capa de poligonos donde ir metiendo los atributos de la capa de puntos
+            mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", sufijo, "memory")
+            
+                        
+            temp_data = mem_layer.dataProvider()
+            pr = layer.dataProvider()
+            attr = layer.dataProvider().fields().toList()
+
+            temp_data.addAttributes(attr)
+            mem_layer.updateFields()
+
+            for f in feats:
+                print(f.id())#id de la capa de puntos
+                for a in cuadricula.getFeatures():
+                    if a.geometry().intersects(f.geometry()): 
+                        poly = QgsFeature()
+                        #print(a.geometry().asWkt())
+                        #print("toca")
+                        #print(a.id())
+                        poly.setGeometry(QgsGeometry.fromWkt(a.geometry().asWkt()))
+                        #feat.setGeometry(a.geometry())#fromWkt("POINT(7 45)")
+                        #layer.updateExtents()
+                        
+                        # get the feature's attributes
+                        attrs = f.attributes()
+                        #print(attrs)
+                        poly.setAttributes(attrs)
+                        temp_data.addFeatures([poly])
+                    else:
+                        #print("notoca")
+                        pass
+            #temp_data.addFeatures(feats)
+            #voy a borrar las columnas que no me interesan por indice
+            lista=[]
+            for columna in elementofijo[2]:
+                indice= mem_layer.fields().indexFromName(columna)
+                lista.append(indice)
+                
+                
+            res = mem_layer.dataProvider().deleteAttributes(lista)
+            mem_layer.updateFields()
+
+            #en cualquier caso
+            
+            QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida,"utf-8",driverName="ESRI Shapefile")
+            QgsProject.instance().addMapLayer(mem_layer)
+            
+            #hasta aqui para guardar lo selecionado
+
+            
+
             
 
             print(sufijo)
@@ -397,8 +541,9 @@ class Solicitudes_sigmena:
         QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
         
         #listado de capas con las que trabajar, a cortar
-        #CAPAS DE ESPACIOS EMAIL LOLI 20211129
-        alondra_de_dupont_ofical_area_relevancia=[r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp","alondra_de_dupont_ofical_area_relevancia"]
+        #CAPAS DE ESPACIOS EMAIL LOLI 20211129, las he pasado a un txt en la misma carpeta. Habria que hacer que se pudiese selecionar desde la configuracion.
+        #estas capas, de esta lista o del txt si son de poligonos se seleccionan y si son de puntos se convierten en cuadriculas de 1x1 y se filtran las que si tienen. 
+        """alondra_de_dupont_ofical_area_relevancia=[r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp","alondra_de_dupont_ofical_area_relevancia"]
         alondra_de_dupont_nudo_medinaceli=[r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/Habitat_Medinaceli_2019.shp","alondra_de_dupont_nudo_medinaceli"]
         alondra_de_dupont_censo_provincial_2020=[r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/habitat_ricoti_SO_BU_2020_informe.shp","alondra_de_dupont_censo_provincial_2020"]
         alondra_de_dupont_censo_oficial_5x5_2008_2020=[r"O:/sigmena/carto/ESPECIES/PLAN_SEGUIM/PMONIT_FAU/AVES/AVES_ESTEP/Chersophilus_duponti/HISTORICO/1_PLANIFICACIÓN/ES41_CYL/ES41_HISTORICO_AOCPLA_5x5_Cduponti.shp","alondra_de_dupont_censo_oficial_5x5_2008_2020"]
@@ -464,7 +609,7 @@ class Solicitudes_sigmena:
         c2018_TPORES_COLONIAS_Gfulvus=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Gyps_fulvus/2018/2_RESULTADOS/42_SO/42_2018_TPORES_COLONIAS_Gfulvus.shp","c2018_TPORES_COLONIAS_Gfulvus"]
         c2018_TPORES_TERRITORIOS_Mmilvus_REP=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_FORES_AMEN/Milvus_milvus_REPRO/2018/2_RESULTADOS/42_SO/42_2018_TPORES_TERRITORIOS_Mmilvus_REP.shp","c2018_TPORES_TERRITORIOS_Mmilvus_REP"]
         c2018_TPORES_TERRITORIOS_Achrysaetos=[r"O:/sigmena/tablas/espacios_naturales/PMONIT_FAU/AVES/AVES_RAPAC_RUPI/Aquila_chrysaetos/2018/2_RESULTADOS/42_SO/42_2018_TPORES_TERRITORIOS_Achrysaetos.shp","c2018_TPORES_TERRITORIOS_Achrysaetos"]
-
+        """
 
         
         #defino capas generales
@@ -477,8 +622,7 @@ class Solicitudes_sigmena:
         zepa=r"O:/sigmena/carto/ESPACIOS/NATU2000/ZEPA/42_ZEPA.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPACIOS\NATU2000\ZEPA\42_ZEPA.shp","Z.E.P.A","ogr")
         alondra=r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPECIES\ESTUDIOS\CENSOS\ALONDRA RICOTI\42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp","Z. Alondra","ogr")
         yacimientos=r"O:/sigmena/carto/OTROS/BIENPATCULT/42_VW_BIENES.shp"#QgsVectorLayer(r"O:\sigmena\carto\OTROS\BIENPATCULT\42_VW_BIENES.shp","Yacimientos","ogr")
-        #pendientes=r"O:/sigmena/carto/M_FISICO/RELIEVE/PENDIENT/MDT5CYL_PEND_10_15.TIF"
-        #repoblaciones=r"O:/sigmena/carto/REPOBLAC/FTA/FTA_SORIA_1993_2018.shp"
+
         #carpeta de trabajo
         carpetasalida = tempfile.mkdtemp()
         print(carpetasalida)
@@ -494,18 +638,6 @@ class Solicitudes_sigmena:
 
 
 
-        
-        """Run method that performs all the real work"""
-
-        # Create the dialog with elements (after translation) and keep reference
-        # Only create GUI ONCE in callback, so that it will only load when the plugin is started
-
-            #self.dlg = SilvilidarDialog()
-            #la siguiente linea inicia el boton de cargar carpetas, peta al cerrar el qgis, deberia poner algun close o algo
-            #self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
-            #print("inicio el boton en el gui")
-            #self.dlg.pushButton_select_path.setEnabled(True)
-            #print ("pone le boton como habiltado")
         
 
         # show the dialog
@@ -526,14 +658,50 @@ class Solicitudes_sigmena:
 
             #lista vacia con el resultado de lo que afecta y de lo que no
             resultadocapas=[]
-            
-            #hago los cruces entre lyr9 que es la zona de interes y todas las demas
-            lista_de_capas_a_cruzar=[alondra_de_dupont_ofical_area_relevancia,alondra_de_dupont_nudo_medinaceli,alondra_de_dupont_censo_oficial_5x5_2008_2020,avutarda_oficial_cuadricula_5x5_2003_2020,sison_oficial_historico_5x5_1999_2020,ortega_oficial_historico_cuadriculas_5x5_1999_2020_,ortega_oficial_historico_cuadriculas_5x5_1999_2020,aguiluchos_censo,aguila_perdicera_potencial,aguila_perdicera_ultimos_territorios,aguila_real_historico,aguila_real_1x1_2018,aguilucho_cenizo_cuadriculas_censo_2017,aguilucho_cenizo_censo_zepas_2017,aguilucho_cenizo_parcelas,aguilucho_cenizo_cuadriculas_censo_parejas_rep_2017,aguilucho_lagunero_2011,alimoche_1x1_2018,buitre_leonado_1x1_2018,buitre_leonado_tpores_colonias_2018,milano_real_historico_aocres_1x1_inv,milano_real_10x10,milano_real_tpores_dormideros,milano_real_2018_tpores_dormideros_inv,milano_real_2018_tpores_territorios_rep,milano_real_nidos,milano_real_nidos_2013_17_tierras_altas,milano_real_2018,milano_real_reproductor_2018,milano_real_monta_10,milano_real_inv_2019,milano_real_rep_2019,milano_real_reproductor_2020,milano_real_rep_2019_2020,milano_real_campeo_2019_2020,halcon_peregrino_1x1_2018,c2018_AOCRES_1X1_Achrysaetos,c2018_AOCRES_10X10_Achrysaetos,c2018_AOCRES_1x1_Gfulvus, c2018_AOCRES_10x10_Gfulvus, c2018_AOCRES_1x1_Mmilvus_REP,  c2018_AOCRES_10x10_Mmilvus_REP,  c2018_AOCRES_1X1_Npercnopterus, c2018_AOCRES_10X10_Npercnopterus,c2019_AOCRES_10x10_Mmilvus_INV,c2019_AOCRES_1x1_Mmilvus_INV,c2019_AOCRES_1X1_Palchata_Porientalis,c2019_AOCRES_10X10_Palchata_Porientalis,c2019_AOCRES_1X1_Porientalis,c2019_AOCRES_10X10_Porientalis,c2019_AOCRES_10x10_Mmilvus_INV,c2019_AOCRES_1x1_Mmilvus_INV,c2019_AOCRES_10X10_AVEAC_INV,c2019_HUMEDALES_AVEAC,c2019_TPORES_ESTES_Ttetrax,c2019_TPORES_EJEMPLARES_Palchata_Porientalis,c2019_TPORES_EJEMPLARES_AVEAC_INV,c2019_TPORES_DORMIDEROS_Mmilvus,c2018_TPORES_DORMIDEROS_Mmilvus_INV,c2018_TPORES_TERRITORIOS_Npercnopterus,c2018_TPORES_COLONIAS_Gfulvus,c2018_TPORES_TERRITORIOS_Mmilvus_REP,c2018_TPORES_TERRITORIOS_Achrysaetos]
-            for elemento in lista_de_capas_a_cruzar:
+
+            #lo nuevo empieza aqui
+            myfile=open (os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\solicitudes_sigmena\archivoconcapas.txt"))
+            myline = myfile.readline()
+            print(myline)
+            #lista_de_capas_a_cruzar=[]
+            while myline:
+                #print(myline)
+                #titulo=myline.split("=")[0]
+                #lista_de_capas_a_cruzar.append(titulo)
+                #elemento=eval(myline.split("=")[1])
+                elemento=eval(myline)
+                #print(elemento)
                 self.crucecapasvectoriales(lyr9,elemento,carpetasalida)#tengo que ver como llamar al mup, tb layer 8 o 9
-            os.startfile(carpetasalida)
             
+    
+                myline = myfile.readline()#para pasar a la siguiente
+            myfile.close()
+            
+            #lo nuevo acaba aqui
 
 
+            
+            electrocuciones=[r"O:/sigmena/usuarios/espacios_naturales/Proyectos Loli/capas/Electrocuciones/Electrocuciones 1993-2021 nov21.shp","Electrocuciones"]
+            corredores=[r"O:/sigmena/carto/VEGETACI/OTROS/Corredores_Forestales_2_A_Crespo.shp","Corredores_Forestales_A_Crespo"]
+            mortandad_milano=[r"O:/sigmena/usuarios/espacios_naturales/Proyectos Loli/capas/milano real/mortandad_milano.shp","Mortandad_milano"]
+            muladares=[r"O:\sigmena\usuarios\espacios_naturales\ESPECIES PROTEGIDAS\Muladares\42_Muladares_etrs89.shp","Muladares"]
+            #hago los cruces entre lyr9 que es la zona de interes y todas las demas en este caso metos lineas y puntos que no quiero convertir en poligonos.
+            lista_de_capas_a_cruzar2=[electrocuciones,corredores, mortandad_milano,muladares]
+            for elemento in lista_de_capas_a_cruzar2:
+                self.crucecapasvectoriales2(lyr9,elemento,carpetasalida)
+
+
+            #para capas de puntos con informacion relevante que hay que pasar a cuadriculas, con su informacion
+            citas_BD_catalogo_de_flora=[r"R:/SIGMENA/prueba/2021/12/09/42_Citas_BD_Catalogo_de_Flora_etrs89.shp","Citas_BD_Catalogo_de_Flora",["X","Y"]]
+            lista_de_capas_a_cruzar3=[citas_BD_catalogo_de_flora]
+            for elemento in lista_de_capas_a_cruzar3:
+                self.crucecapasvectoriales3(lyr9,elemento,carpetasalida)
+            
+            os.startfile(carpetasalida)
+
+            #para la capa de citas de fauna que es de puntos y hay que convertir en cuadriculas.
+            #lo más facil puede ser hacer una cuadricula por cada punto.
+            #leer la capa de puntos.
+    
 
             

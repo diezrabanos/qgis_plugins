@@ -1,0 +1,4 @@
+['Espacios',r'c:/work/cuatropuntos.shp','capa borrar 3','vectorial']
+['Espacios',r'c:/work/lin6.shp','capa borrar 3','vectorial']
+['Ortofotos',r'c:/work/borrar.shp','capa borrar 3','vectorial']
+['Ortofotos',r'c:/work/borrar2.shp','capa borrar 3','vectorial']

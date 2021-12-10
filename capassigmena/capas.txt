@@ -1,4 +1,5 @@
-['Espacios',r'c:/work/cuatropuntos.shp','capa borrar 3','vectorial']
-['Espacios',r'c:/work/lin6.shp','capa borrar 3','vectorial']
+['Espacios',r'c:/work/cuatropuntos.shp','nombre capa bonito','vectorial']
+['Espacios',r'c:/work/lin6.shp','nombrecapa bonito2','vectorial']
 ['Ortofotos',r'c:/work/borrar.shp','capa borrar 3','vectorial']
-['Ortofotos',r'c:/work/borrar2.shp','capa borrar 3','vectorial']
+['Ortofotos',r'c:/work/Soria_Orto_407.bmp','nombre raster','raster']
+['Ortofotos',r'blablabla','mi wms1','wms']

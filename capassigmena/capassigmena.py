@@ -36,7 +36,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsApplication
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsApplication,QgsRasterLayer
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 
@@ -213,6 +213,14 @@ class Capassigmena:
         if migrupodecapas==lista[0]:
             if lista[3]=='vectorial':
                 layer = QgsVectorLayer(lista[1], lista[2], "ogr")
+                QgsProject.instance().addMapLayer(layer)
+            if lista[3]=='raster':
+                layer = QgsRasterLayer(lista[1], lista[2])
+                QgsProject.instance().addMapLayer(layer)
+            if lista[3]=='wms':
+                print("entro en wms")
+                urlWithParams = 'contextualWMSLegend=0&crs=EPSG:25830&dpiMode=7&featureCount=10&format=image/png&layers=Interministerial_1973-1986&styles=default&url=https://www.ign.es/wms/pnoa-historico'
+                layer = QgsRasterLayer(urlWithParams, 'some layer name', 'wms')
                 QgsProject.instance().addMapLayer(layer)
                 
         

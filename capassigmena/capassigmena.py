@@ -206,22 +206,48 @@ class Capassigmena:
 
     
     #funcion que carga capas que se le pasan de una lista [grupo,ruta,tipo]
+
     def cargacapas(self,migrupodecapas,lista):
         print("entro en cargacapas")
-        print (lista)
-        print(migrupodecapas)
+        #print (lista)
+        #print(migrupodecapas)
+        global sgroup
+
+
+
+        
+
+
+
+        
         if migrupodecapas==lista[0]:
+            
+            
             if lista[3]=='vectorial':
                 layer = QgsVectorLayer(lista[1], lista[2], "ogr")
-                QgsProject.instance().addMapLayer(layer)
+                QgsProject.instance().addMapLayer(layer,False)
+                sgroup.addLayer(layer)
+                
+                #root = QgsProject.instance().layerTreeRoot()
+                #layer2 = root.findLayer(layer.id())
+                #clone = layer2.clone()
+                #group.insertChildNode(0, clone)
+                #root.removeChildNode(layer2)
+                
+             
+                
             if lista[3]=='raster':
                 layer = QgsRasterLayer(lista[1], lista[2])
-                QgsProject.instance().addMapLayer(layer)
+                QgsProject.instance().addMapLayer(layer,False)
+                sgroup.addLayer(layer)
+             
             if lista[3]=='wms':
                 print("entro en wms")
                 urlWithParams = 'contextualWMSLegend=0&crs=EPSG:25830&dpiMode=7&featureCount=10&format=image/png&layers=Interministerial_1973-1986&styles=default&url=https://www.ign.es/wms/pnoa-historico'
                 layer = QgsRasterLayer(urlWithParams, 'some layer name', 'wms')
-                QgsProject.instance().addMapLayer(layer)
+                QgsProject.instance().addMapLayer(layer,False)
+                sgroup.addLayer(layer)
+               
                 
         
         
@@ -344,6 +370,11 @@ class Capassigmena:
             print(index)
             migrupodecapas=fila1[index]
             print(migrupodecapas)
+            print("creo grupo")
+            groupName=migrupodecapas#"test group"
+            root = QgsProject.instance().layerTreeRoot()
+            global sgroup
+            sgroup = root.addGroup(groupName)
 
             
             # Do something useful here - delete the line containing pass and

@@ -1,0 +1,35 @@
+
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=OruxmapsSigmena
+qgisMinimumVersion=3.0
+description=Load and modify layout templates
+version=1.0
+author=F. Javier Diez Rabanos
+email=dierabfr@jcyl.es
+
+about=Permite crear los mapas para utilziar con oruxmaps
+
+tracker=https://github.com/klakar/LayoutLoader/issues
+repository=https://github.com/klakar/LayoutLoader
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=Layout,Print Template
+
+homepage=https://github.com/klakar/LayoutLoader/wiki
+category=Plugins
+icon=icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+

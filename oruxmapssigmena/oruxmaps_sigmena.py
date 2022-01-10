@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 /***************************************************************************
 Oruxmaps
@@ -8,7 +9,7 @@ Oruxmaps
                               -------------------
         begin                : 2018-11-18
         git sha              : $Format:%H$
-        copyright            : (C) 2018 by Klas Karlsson
+        copyright            : (C) 2022 by Javier Díez
         email                : fjavier.diez@jcyl.es
  ***************************************************************************/
 
@@ -551,14 +552,14 @@ class OruxmapsSigmena:
                 fichero.write(filePath+"/Orto_Soria"+str(hoja)+".bmp\n")
                 fichero.write("0\n")
                 fichero.write("0\n")
-                fichero.write(str(round(rectagle_extent.xMinimum(),0))+str("\n"))
-                fichero.write(str(round(rectagle_extent.yMaximum(),0))+str("\n"))
+                fichero.write(str(int(round(rectagle_extent.xMinimum(),0)))+str("\n"))
+                fichero.write(str(int(round(rectagle_extent.yMaximum(),0)))+str("\n"))
                 fichero.write(str(int(round(rasterLyr.width())))+str("\n"))
                 fichero.write(str(int(round(rasterLyr.height())))+str("\n"))
                 #fichero.write(str(int(round(1189*499/25.4003,0)))+str("\n"))#OJO PODRIA SER VARIABLE
                 #fichero.write(str(int(round(841*499/25.4003,0)))+str("\n"))#OJO PODRIA SER VARIABLE
-                fichero.write(str(round(rectagle_extent.xMaximum(),0))+str("\n"))
-                fichero.write(str(round(rectagle_extent.yMinimum(),0))+str("\n"))
+                fichero.write(str(int(round(rectagle_extent.xMaximum(),0)))+str("\n"))
+                fichero.write(str(int(round(rectagle_extent.yMinimum(),0)))+str("\n"))
                 
                 
                 fichero.close()
@@ -1227,6 +1228,18 @@ class OruxmapsSigmena:
                 clic(810,710)
                 time.sleep(1)
                 clic(770,715)
+                time.sleep(1)
+
+                #prueba multicapa 
+                clic(320,750)
+                time.sleep(1)
+                clic(420,750)#50
+                time.sleep(1)
+                clic(470,750)#25
+                time.sleep(1)
+                clic(520,750)#12.5
+                time.sleep(1)
+                clic(570,750)#6.25
                 time.sleep(1)
 
                 #run

@@ -8,12 +8,12 @@ qgisMinimumVersion=3.0
 description=Load and modify layout templates
 version=1.0
 author=F. Javier Diez Rabanos
-email=dierabfr@jcyl.es
+email=fjavier.diez@jcyl.es
 
 about=Permite crear los mapas con QGIS para utiliziar con oruxmaps. Emplea oruxmapsdesktop de su creador. https://www.oruxmaps.com/cs/es/
 
-tracker=https://github.com/klakar/LayoutLoader/issues
-repository=https://github.com/klakar/LayoutLoader
+tracker=https://github.com/diezrabanos/qgis_plugins
+repository=https://github.com/diezrabanos/qgis_plugins
 # End of mandatory metadata
 
 # Recommended items:
@@ -22,9 +22,9 @@ repository=https://github.com/klakar/LayoutLoader
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=Layout,Print Template
+tags=Oruxmaps, IGN
 
-homepage=https://github.com/klakar/LayoutLoader/wiki
+homepage=https://github.com/diezrabanos/qgis_plugins
 category=Plugins
 icon=icon.png
 # experimental flag

@@ -6,7 +6,7 @@
 name=OruxmapsSigmena
 qgisMinimumVersion=3.0
 description=Load and modify layout templates
-version=1.0
+version=1.0.1
 author=F. Javier Diez Rabanos
 email=fjavier.diez@jcyl.es
 

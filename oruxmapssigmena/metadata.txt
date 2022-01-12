@@ -10,7 +10,7 @@ version=1.0
 author=F. Javier Diez Rabanos
 email=dierabfr@jcyl.es
 
-about=Permite crear los mapas para utilziar con oruxmaps
+about=Permite crear los mapas con QGIS para utiliziar con oruxmaps. Emplea oruxmapsdesktop de su creador. https://www.oruxmaps.com/cs/es/
 
 tracker=https://github.com/klakar/LayoutLoader/issues
 repository=https://github.com/klakar/LayoutLoader

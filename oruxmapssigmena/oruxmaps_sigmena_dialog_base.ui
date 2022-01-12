@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>387</width>
+    <width>473</width>
     <height>394</height>
    </rect>
   </property>
@@ -16,8 +16,8 @@
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>330</y>
+     <x>250</x>
+     <y>340</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -33,7 +33,7 @@
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>90</y>
+     <y>260</y>
      <width>331</width>
      <height>16</height>
     </rect>
@@ -45,9 +45,9 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>140</x>
-     <y>20</y>
-     <width>411</width>
+     <x>10</x>
+     <y>10</y>
+     <width>441</width>
      <height>16</height>
     </rect>
    </property>
@@ -59,16 +59,16 @@
     </font>
    </property>
    <property name="text">
-    <string>IMPRESION SIGMENA</string>
+    <string>Creación de mapas para ORUXMAPS o IGN Mapas de España</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBoxProyecto">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>50</x>
      <y>270</y>
      <width>121</width>
-     <height>17</height>
+     <height>61</height>
     </rect>
    </property>
    <property name="text">
@@ -78,69 +78,11 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBoxOrtoign">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>200</y>
-     <width>131</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>ORTOFOTO +  IGN</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBoxMFE">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>230</y>
-     <width>43</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>MFE</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="checkBoxOrtofoto">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>140</y>
-     <width>80</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>ORTOFOTO</string>
-   </property>
-   <property name="checked">
-    <bool>false</bool>
-   </property>
-  </widget>
-  <widget class="QRadioButton" name="radioButtonHorizontal">
-   <property name="geometry">
-    <rect>
-     <x>30</x>
-     <y>50</y>
-     <width>124</width>
-     <height>17</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>PLANO HORIZONTAL</string>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>120</y>
+     <x>50</x>
+     <y>270</y>
      <width>86</width>
      <height>16</height>
     </rect>
@@ -149,87 +91,120 @@
     <string>PLANOS A SACAR</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox_IGN">
+  <widget class="QLineEdit" name="lineEdit_nombre">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>160</y>
-     <width>41</width>
-     <height>17</height>
+     <x>260</x>
+     <y>80</y>
+     <width>113</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>IGN</string>
+    <string>Ortos_SIGMENA</string>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButtonVertical">
+  <widget class="QLineEdit" name="lineEdit_ruta">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>70</y>
-     <width>107</width>
-     <height>17</height>
+     <x>40</x>
+     <y>230</y>
+     <width>241</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>PLANO VERTICAL</string>
+    <string>D:/pruebas/IGN_JAVI</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_10">
+  <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>110</y>
-     <width>86</width>
+     <x>20</x>
+     <y>80</y>
+     <width>181</width>
      <height>16</height>
     </rect>
    </property>
    <property name="text">
-    <string>HOJAS A SACAR</string>
+    <string>NOMBRE DE LA SERIE DE MAPAS</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>144</x>
-     <y>59</y>
-     <width>100</width>
+     <x>10</x>
+     <y>190</y>
+     <width>451</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ruta donde se guardarán los archivos que despues habrá que copiar en el dispositivo android</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_select_path">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>230</y>
+     <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="maximumSize">
-    <size>
-     <width>100</width>
-     <height>16777215</height>
-    </size>
-   </property>
    <property name="text">
-    <string>Escala:1/</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <string>...</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="escalasComboBox">
+  <widget class="QComboBox" name="cb1">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
-     <x>250</x>
-     <y>60</y>
-     <width>100</width>
-     <height>20</height>
+     <x>280</x>
+     <y>160</y>
+     <width>171</width>
+     <height>30</height>
     </rect>
    </property>
-   <property name="maximumSize">
-    <size>
-     <width>100</width>
-     <height>16777215</height>
-    </size>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="maxVisibleItems">
+    <number>20</number>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>130</y>
+     <width>371</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Columna de la capa selecionada por la que se nombrará cada archivo</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>350</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Ayuda</string>
    </property>
   </widget>
  </widget>

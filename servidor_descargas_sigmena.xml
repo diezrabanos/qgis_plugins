@@ -155,6 +155,20 @@
       <experimental>False</experimental>
       <deprecated>False</deprecated>
     </pyqgis_plugin>
+	<pyqgis_plugin version="1.0.1" name="OruxMapsSigmena" plugin_id="9981">
+      <description>Permite crear cartografía personalizada desde QGIS para IGN Mapas de España u Oruxmaps para dispositivos android</description>
+      <about>Permite crear cartografía personalizada desde QGIS para IGN Mapas de España u Oruxmaps para dispositivos android. Para ello una vez creada la cartografía habrá que copiarla en la carpeta mapfiles dentro de la carpeta IGN u Oruxmaps del dispositivo android.</about>
+      <version>1.0.1</version>
+      <trusted>True</trusted>
+      <qgis_minimum_version>3.4.0</qgis_minimum_version>
+      <qgis_maximum_version>3.22.0</qgis_maximum_version>
+      <homepage>https://github.com/diezrabanos/qgis_plugins/</homepage>
+      <file_name>oruxmapssigmena.1.0.1.zip</file_name>
+      <author_name>F. Javier Díez Rábanos</author_name>
+      <download_url>https://github.com/diezrabanos/qgis_plugins/blob/master/oruxmapssigmena.1.0.1.zip?raw=true</download_url>
+      <experimental>False</experimental>
+      <deprecated>False</deprecated>
+    </pyqgis_plugin>
  </plugins>
 
 

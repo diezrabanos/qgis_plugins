@@ -1,0 +1,14 @@
+Para ejecutar OruxMapsDesktop:
+
+-->en windows doble click sobre OruxMapsDesktop.bat
+-->en linux doble click sobre OruxMapsDesktop.sh
+
+IMPORTANTE: mantener la estructura de ficheros y directorios para que funcione correctamente
+
+Para usar mapas Sqlite:
+
+Tienes que copiar en la carpeta /lib/ sqlite native library.
+
+Puedes encontrar estas librerias precompiladas aquí:
+
+http://sourceforge.net/projects/trekbuddyatlasc/files/SQLite%20library

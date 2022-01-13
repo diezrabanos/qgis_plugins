@@ -6,14 +6,14 @@
 name=OruxmapsSigmena
 qgisMinimumVersion=3.0
 description=Load and modify layout templates
-version=1.0.1
+version=1.0.2
 author=F. Javier Diez Rabanos
-email=fjavier.diez@jcyl.es
+email=dierabfr@jcyl.es
 
 about=Permite crear los mapas con QGIS para utiliziar con oruxmaps. Emplea oruxmapsdesktop de su creador. https://www.oruxmaps.com/cs/es/
 
-tracker=https://github.com/diezrabanos/qgis_plugins
-repository=https://github.com/diezrabanos/qgis_plugins
+tracker=https://github.com/klakar/LayoutLoader/issues
+repository=https://github.com/klakar/LayoutLoader
 # End of mandatory metadata
 
 # Recommended items:
@@ -22,9 +22,9 @@ repository=https://github.com/diezrabanos/qgis_plugins
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=Oruxmaps, IGN
+tags=Layout,Print Template
 
-homepage=https://github.com/diezrabanos/qgis_plugins
+homepage=https://github.com/klakar/LayoutLoader/wiki
 category=Plugins
 icon=icon.png
 # experimental flag

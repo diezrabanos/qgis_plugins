@@ -42,6 +42,7 @@ import tempfile
 import time
 
 import win32api, win32con
+from win32api import GetSystemMetrics
 import os
    
 
@@ -265,9 +266,13 @@ class OruxmapsSigmena:
             
             #defino la columna para etiquetar los resultados
             nombredelacolumna=str(columna)#"IGN50"
-
-            filePath = tempfile.mkdtemp()
-            print(filePath)
+            #tempfile.mkdtemp()
+            filePath = archivos_ruta+"/temporales"
+            try:
+                os.mkdir(filePath)
+            except:
+                print ("No se pudo crear el archivo" )
+            #print(filePath)
             
             #layer=QgsVectorLayer("O:/sigmena/carto/HOJAS/E50/42_Hojas_e50_etrs89.shp", "hojas de corte", "ogr")
             #print("nombre de la capa")
@@ -437,7 +442,7 @@ class OruxmapsSigmena:
                 print(elemento)
                 hoja=elemento[1]
                 print(hoja)
-                rasterLyr=QgsRasterLayer(filePath+"/"+self.dlg.lineEdit_nombre.text().replace(' ','_')+str(hoja)+".bmp","Orto_Soria"+str(hoja))
+                rasterLyr=QgsRasterLayer(filePath+"/"+self.dlg.lineEdit_nombre.text().replace(' ','_')+str(hoja)+".bmp",self.dlg.lineEdit_nombre.text().replace(' ','_')+str(hoja))
                 #print(rasterLyr)
                 #iface.addRasterLayer(data_source,layer_name)
                 rectagle_extent = rasterLyr.dataProvider().extent()
@@ -1029,8 +1034,13 @@ class OruxmapsSigmena:
 
 
                 
+                #calculo el centro de la pantalla
+                centropantalla_x=int(GetSystemMetrics(0)/2)
+                centropantalla_y=int(GetSystemMetrics(1)/2)
+                
                 #ruta bmp
-                clic(650,360)
+                clic(centropantalla_x-150,centropantalla_y-240)
+                
                 #print(mensaje[0][:-1])
                 nuevomensaje=mensaje[0][:-1].replace('\\','/')
                 #print(nuevomensaje)
@@ -1038,7 +1048,8 @@ class OruxmapsSigmena:
                 time.sleep(1)
 
                 #datum
-                clic(650,390)
+                #clic(650,390)
+                clic(centropantalla_x-150,centropantalla_y-210)
                 time.sleep(1)
                 typer("e")
                 time.sleep(1)
@@ -1054,61 +1065,74 @@ class OruxmapsSigmena:
                 time.sleep(1)
 
                 #proyeccion
-                clic(950,390)
+                #clic(950,390)
+                clic(centropantalla_x+150,centropantalla_y-210)
                 time.sleep(1)
                 typer("u")
                 time.sleep(1)
                 typer("30")
                 time.sleep(1)
-                clic(800,610)
+                #clic(800,610)
+                clic(centropantalla_x,centropantalla_y+10)
                 time.sleep(1)
                 
                 #p1 x
-                clic(370,450)
+                #clic(370,450)
+                clic(centropantalla_x-430,centropantalla_y-150)
                 typer(mensaje[1][:-1])
                 time.sleep(1)
                 #p1 y
-                clic(650,450)
+                #clic(650,450)
+                clic(centropantalla_x-150,centropantalla_y-150)
                 typer(mensaje[2][:-1])
                 time.sleep(1)
                 #p1 lon
-                clic(950,450)
+                #clic(950,450)
+                clic(centropantalla_x+150,centropantalla_y-150)
                 typer(mensaje[3][:-1])
                 time.sleep(1)
                 #p1 lat
-                clic(1150,450)
+                #clic(1150,450)
+                clic(centropantalla_x+350,centropantalla_y-150)
                 typer(mensaje[4][:-1])
                 time.sleep(1)
                 
                 #p2 x
-                clic(370,480)
+                #clic(370,480)
+                clic(centropantalla_x-430,centropantalla_y-120)
                 typer(mensaje[5][:-1])
                 time.sleep(1)
                 #p2 y
-                clic(650,480)
+                #clic(650,480)
+                clic(centropantalla_x-150,centropantalla_y-120)
                 typer(mensaje[6][:-1])
                 time.sleep(1)
                 #p2 lon
-                clic(950,480)
+                #clic(950,480)
+                clic(centropantalla_x+150,centropantalla_y-120)
                 typer(mensaje[7][:-1])
                 time.sleep(1)
                 #p2 lat
-                clic(1150,480)
+                #clic(1150,480)
+                clic(centropantalla_x+350,centropantalla_y-120)
                 typer(mensaje[8][:-1])
                 time.sleep(1)
 
                 #cuadricula
-                clic(1050,590)
+                #clic(1050,590)
+                clic(centropantalla_x+250,centropantalla_y-10)
                 time.sleep(1)
 
                 #nombremapa
-                clic(1050,630)
+                #clic(1050,630)
+                clic(centropantalla_x+250,centropantalla_y+30)
                 #print(mensaje[0].split("/")[-1][:-5])
                 typer(mensaje[0].split("/")[-1][:-5])#(mensaje[0][-18:-5])
                 time.sleep(1)
 
                 #rutamapa
-                clic(1050,660)
+                #clic(1050,660)
+                clic(centropantalla_x+250,centropantalla_y+60)
                 nuevomensaje=archivos_ruta#("D:/pruebas/IGN_JAVI")
                 #print(nuevomensaje)
                 typer(nuevomensaje)
@@ -1117,31 +1141,42 @@ class OruxmapsSigmena:
                 
                 
                 #jpg100
-                clic(770,690)
+                #clic(770,690)
+                clic(centropantalla_x-30,centropantalla_y+90)
                 time.sleep(1)
-                clic(810,710)
+                #clic(810,710)
+                clic(centropantalla_x+10,centropantalla_y+110)
                 time.sleep(1)
-                clic(810,710)
+                #clic(810,710)
+                clic(centropantalla_x+10,centropantalla_y+110)
                 time.sleep(1)
-                clic(810,710)
+                #clic(810,710)
+                clic(centropantalla_x+10,centropantalla_y+110)
                 time.sleep(1)
-                clic(770,715)
+                #clic(770,715)
+                clic(centropantalla_x-30,centropantalla_y+115)
                 time.sleep(1)
 
                 #prueba multicapa 
-                clic(320,750)
+                #clic(320,750)
+                clic(centropantalla_x-480,centropantalla_y+150)
                 time.sleep(1)
-                clic(420,750)#50
+                #clic(420,750)#50
+                clic(centropantalla_x-380,centropantalla_y+150)
                 time.sleep(1)
-                clic(470,750)#25
+                #clic(470,750)#25
+                clic(centropantalla_x-330,centropantalla_y+150)
                 time.sleep(1)
-                clic(520,750)#12.5
+                #clic(520,750)#12.5
+                clic(centropantalla_x-280,centropantalla_y+150)
                 time.sleep(1)
-                clic(570,750)#6.25
+                #clic(570,750)#6.25
+                clic(centropantalla_x-230,centropantalla_y+150)
                 time.sleep(1)
 
                 #run
-                clic(1050,710)
+                #clic(1050,710)
+                clic(centropantalla_x+250,centropantalla_y+110)
                 time.sleep(1)
                 
                 
@@ -1150,10 +1185,12 @@ class OruxmapsSigmena:
 
                 time.sleep(120)
                 #cierra ventana
-                clic(800,620)
+                #clic(800,620)
+                clic(centropantalla_x,centropantalla_y+20)
                 time.sleep(1)
                 #cierra programa
-                clic(1290,260)
+                #clic(1290,260)
+                clic(centropantalla_x+490,centropantalla_y-340)
                 time.sleep(1)
                 
 
@@ -1165,7 +1202,7 @@ class OruxmapsSigmena:
           
 
             #print("aqui estoy")
-            os.startfile(filePath)
+            
             for elemento in listadodeboundingbox:
                 print(elemento)
                 print("empiezo con el bmp")
@@ -1176,6 +1213,9 @@ class OruxmapsSigmena:
                 time.sleep(10)
                 print("empiezo con el oruxdesktop")
                 oruxdesktop(elemento)
+            iface.messageBar().pushMessage("ATENCION", "Ha finalizado la ejecución del complemento Oruxmaps Sigmena")
+            os.startfile(archivos_ruta)
+        
                 
             
 

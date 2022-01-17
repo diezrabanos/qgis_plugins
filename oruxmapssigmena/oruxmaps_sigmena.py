@@ -346,7 +346,8 @@ class OruxmapsSigmena:
             #print(paperSize[0] , paperSize[1])
             theMap = QgsLayoutItemMap(l)
             theMap.updateBoundingRect()
-            theMap.setRect(QRectF(x, y, w, h)) 
+            theMap.setRect(QRectF(x, y, w, h))
+            
             theMap.setPos(x,y)
             theMap.setFrameEnabled(True)
             #podria crear una funcion para cambiar la extension
@@ -413,7 +414,9 @@ class OruxmapsSigmena:
                 for capa in capas:
                     QgsProject.instance().layerTreeRoot().findLayer(capa).setItemVisibilityChecked(False)"""
                 theMap.setLayers(project.mapThemeCollection().masterVisibleLayers())   # remember ANNOTATION!
-                theMap.setExtent(newextend)
+                theMap.setExtent(newextend.scaled(1.1))
+                print("ojo scale 1.1")
+                print(newextend)
                 theMap.attemptSetSceneRect(QRectF(x, y, w, h))
                 l.addItem(theMap)
                 #pongo la escala

@@ -238,23 +238,7 @@ class OruxmapsSigmena:
         # Run the dialog event loop
         result = self.dlg.exec_()
         
-        #lista de capas imprescindibles ojo no lo uso
-        mup=r'O:/sigmena/carto/PROPIEDA/MONTES/PERTENEN/Mup_etrs89.shp'
-        consorcios=r"O:/sigmena/carto/PROPIEDA/MONTES/CONTRATO/Consorcios_etrs89.shp"
-        cortafuegos=r'O:/sigmena/carto/INCENDIO/CORTAFUE/CORTAFUEGOS_etrs89.shp'
-        pistas=r'O:/sigmena/carto/VIAS/FORESTAL/Pistas_etrs89.shp'
-        puntosdeagua=r'O:/sigmena/carto/INCENDIO/INFRAEST/42_Puntos_agua_etrs89.shp'
-        rios=r'O:/sigmena/carto/M_FISICO/HIDROGRA/42_HIDROL_E10_etrs89.shp'
-        cascosurbanos=r'O:/sigmena/carto/DIV_ADMI/GENERAL/42_cascos_ine_etrs89_.shp'
-        carreteras=r'O:/sigmena/carto/VIAS/GENERAL/42_tn_carr_cyl_red_vias.shp'
-        vegetacion=r'O:/sigmena/carto/VEGETACI/MFE/FOTOFIJA2015/42_MFE_FotoFija2015.shp'
-        ortofoto=r'R:/SIGMENA/CARTO/RASTER/ORTOFOTO/pnoa/ETRS89/2017/oi_cyl_2017_so_35_25830.ecw'
-        e25=r'R:/SIGMENA/CARTO/RASTER/ESCANEOS/E25/IGN/Georreferenciado_ETRS89/MTN25SOETRS89_E25_provincia_completa/MTN25SORIA25830.ecw'
         
-        
-        listaortofoto=[mup,cortafuegos,pistas,carreteras,puntosdeagua,rios,cascosurbanos,ortofoto]
-        listae25=[mup,cortafuegos,pistas,puntosdeagua,e25]
-        listavegetacion=[mup,cortafuegos,pistas,carreteras,puntosdeagua,rios,cascosurbanos,vegetacion]
 
         
         # See if OK was pressed TODO: probably need something to happen when pressing "cancel" too.
@@ -468,6 +452,7 @@ class OruxmapsSigmena:
 
             def oruxdesktop(elemento):
                 print(elemento)
+                time.sleep(2)
                 #abro oruxmapsdesktop    
                 #os.chdir("C:/WORK/Aplicaciones/OruxMapsDesktop")
                 os.chdir(os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\oruxmapssigmena\OruxMapsDesktop"))
@@ -722,7 +707,7 @@ class OruxmapsSigmena:
                             win32api.keybd_event(VK_CODE['.'], 0,0,0)
                             time.sleep(.05)
                             win32api.keybd_event(VK_CODE['left_shift'],0 ,win32con.KEYEVENTF_KEYUP ,0)
-                            win32api.keybd_event(VK_CODE[';'],0 ,win32con.KEYEVENTF_KEYUP ,0)
+                            win32api.keybd_event(VK_CODE['.'],0 ,win32con.KEYEVENTF_KEYUP ,0)
 
                         elif i == '"':
                             win32api.keybd_event(VK_CODE['left_shift'], 0,0,0)
@@ -1076,7 +1061,7 @@ class OruxmapsSigmena:
                 typer("30")
                 time.sleep(1)
                 #clic(800,610)
-                clic(centropantalla_x,centropantalla_y+10)
+                clic(centropantalla_x,centropantalla_y+12)
                 time.sleep(1)
                 
                 #p1 x
@@ -1128,7 +1113,7 @@ class OruxmapsSigmena:
 
                 #nombremapa
                 #clic(1050,630)
-                clic(centropantalla_x+250,centropantalla_y+30)
+                clic(centropantalla_x+250,centropantalla_y+35)
                 #print(mensaje[0].split("/")[-1][:-5])
                 typer(mensaje[0].split("/")[-1][:-5])#(mensaje[0][-18:-5])
                 time.sleep(1)

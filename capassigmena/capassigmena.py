@@ -338,7 +338,7 @@ class Capassigmena:
         print("empezamos")
 
         #prueba
-        fila1=["Espacios Monitorizacion de Fauna","Sensibilidad ambiental renovables","Espacios"]#,"Ortofotos"]#,"Flora","Espacios"]
+        fila1=["Espacios Monitorizacion de Fauna","Sensibilidad ambiental renovables","Espacios Naturales"]#,"Ortofotos"]#,"Flora","Espacios"]
         #fila1=[]
         #for field in layer.fields():
         #    fila1.append(field.name())

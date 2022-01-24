@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>splitDialogBase</class>
- <widget class="QDialog" name="splitDialogBase">
+ <class>capassigmenaDialogBase</class>
+ <widget class="QDialog" name="capassigmenaDialogBase">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
-    <height>280</height>
+    <width>300</width>
+    <height>175</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SPLIT</string>
+   <string>Cargar grupos de capas de SIGMENA</string>
   </property>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>230</y>
+     <x>100</x>
+     <y>110</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -61,7 +61,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>accepted()</signal>
-   <receiver>splitDialogBase</receiver>
+   <receiver>capassigmenaDialogBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -77,7 +77,7 @@
   <connection>
    <sender>button_box</sender>
    <signal>rejected()</signal>
-   <receiver>splitDialogBase</receiver>
+   <receiver>capassigmenaDialogBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

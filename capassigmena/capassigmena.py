@@ -36,7 +36,7 @@ import os.path
 
 #import para procesar
 import qgis.core as qgisCore
-from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsApplication,QgsRasterLayer
+from qgis.core import QgsProject, QgsVectorLayer,QgsField,QgsExpression,QgsExpressionContext,QgsExpressionContextScope,QgsVectorFileWriter, QgsMarkerSymbol,QgsRendererCategory,QgsCategorizedSymbolRenderer,QgsPointXY, QgsPoint,QgsFeature,QgsGeometry,QgsLineSymbol,QgsExpressionContextUtils,QgsPalLayerSettings,QgsTextFormat,QgsVectorLayerSimpleLabeling,QgsExpressionContextUtils,QgsCoordinateTransform,QgsCoordinateReferenceSystem,QgsApplication,QgsRasterLayer,QgsLayerDefinition
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 
@@ -244,9 +244,14 @@ class Capassigmena:
             if lista[3]=='wms':
                 print("entro en wms")
                 urlWithParams = 'contextualWMSLegend=0&crs=EPSG:25830&dpiMode=7&featureCount=10&format=image/png&layers=Interministerial_1973-1986&styles=default&url=https://www.ign.es/wms/pnoa-historico'
-                layer = QgsRasterLayer(urlWithParams, 'some layer name', 'wms')
+                layer = QgsRasterLayer(urlWithParams, lista[2], 'wms')
                 QgsProject.instance().addMapLayer(layer,False)
                 sgroup.addLayer(layer)
+            if lista[3]=='qlr':
+                project = QgsProject.instance()
+                root = project.layerTreeRoot()
+
+                QgsLayerDefinition().loadLayerDefinition(lista[1], project, sgroup) 
                
                 
         
@@ -333,7 +338,7 @@ class Capassigmena:
         print("empezamos")
 
         #prueba
-        fila1=["Espacios","Ortofotos"]
+        fila1=["Espacios Monitorizacion de Fauna","Sensibilidad ambiental renovables","Espacios"]#,"Ortofotos"]#,"Flora","Espacios"]
         #fila1=[]
         #for field in layer.fields():
         #    fila1.append(field.name())
@@ -389,6 +394,7 @@ class Capassigmena:
             
             while myline:
                 #convierto la linea en lista
+                print(myline)
                 elemento=eval(myline)
                 #print(elemento)
                 self.cargacapas(migrupodecapas,elemento)#tengo que ver como llamar al mup, tb layer 8 o 9

@@ -547,35 +547,40 @@ class Sigpac:
         processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
         sellectionado = layerbase.selectedFeatureIds()
         #QgsProject.instance().addMapLayers([layerbase])
-        mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
-        print (mun)
+        try:
+            mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+            print (mun)
+        except:
+            mun= ''
         #cuando se el municipio lo cargo y seleciono el punto de nuevo
-        caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+str(mun)+".shp")
+        caparecintos=os.path.join(rutacarpetarecintos,"RECFE22_"+str(mun)+".shp")
         layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
         #seleciono de nuevo por la localizacion sobre esta capa del municipio
         processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capabufer,'METHOD':0})
         sellectionado2 = layer.selectedFeatureIds()
+        try:
+            lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory: Sigpac_Click_recintos" })['OUTPUT']
+        
+            #cuenta elementos
+            elementos=len(list(lyr9.getFeatures()))
+            sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
+            renderer=QgsSingleSymbolRenderer(sym1)
+            #etiqueto
+            layer_settings  = QgsPalLayerSettings()
+            text_format = QgsTextFormat()
+            text_format.setFont(QFont("Arial", 12))
+            text_format.setSize(12)
+            text_format.setColor(QColor("Blue"))
+            #le meto un buffer a la etiqueta
+            buffer_settings = QgsTextBufferSettings()
+            buffer_settings.setEnabled(True)
+            buffer_settings.setSize(1)
+            buffer_settings.setColor(QColor("white"))
 
-        lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory: Sigpac_Click_recintos" })['OUTPUT']
-
-        #cuenta elementos
-        elementos=len(list(lyr9.getFeatures()))
-        sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
-        renderer=QgsSingleSymbolRenderer(sym1)
-        #etiqueto
-        layer_settings  = QgsPalLayerSettings()
-        text_format = QgsTextFormat()
-        text_format.setFont(QFont("Arial", 12))
-        text_format.setSize(12)
-        text_format.setColor(QColor("Blue"))
-        #le meto un buffer a la etiqueta
-        buffer_settings = QgsTextBufferSettings()
-        buffer_settings.setEnabled(True)
-        buffer_settings.setSize(1)
-        buffer_settings.setColor(QColor("white"))
-
-        text_format.setBuffer(buffer_settings)
-        layer_settings.setFormat(text_format)
+            text_format.setBuffer(buffer_settings)
+            layer_settings.setFormat(text_format)
+        except:
+            elementos=0
         if elementos==0:
             iface.messageBar().pushMessage("SIGPAC","Has hecho click fuera de la provincia", qgisCore.Qgis.Info,5)
             
@@ -1435,63 +1440,68 @@ class Sigpac:
                 processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
                 sellectionado = layerbase.selectedFeatureIds()
                 #QgsProject.instance().addMapLayers([layerbase])
-                mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+                try:
+                    mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+                except:
+                    mun=''
                 #cuando se el municipio lo cargo y seleciono el punto de nuevo
-                caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+str(mun)+".shp")
-                layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
-                #seleciono de nuevo por la localizacion sobre esta capa del municipio
-                processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
-                sellectionado2 = layer.selectedFeatureIds()
-
-                
-
-
-                
-                pol = str(layer.getFeature(sellectionado2[0])["C_POLIGONO"])
-                par = str(layer.getFeature(sellectionado2[0])["C_PARCELA"])
+                try:
+                    caparecintos=os.path.join(rutacarpetarecintos,"RECFE22_"+str(mun)+".shp")
+                    layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
+                    #seleciono de nuevo por la localizacion sobre esta capa del municipio
+                    processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+                    sellectionado2 = layer.selectedFeatureIds()
+                    pol = str(layer.getFeature(sellectionado2[0])["C_POLIGONO"])
+                    par = str(layer.getFeature(sellectionado2[0])["C_PARCELA"])
+                except:
+                    pass
              
 
                 #aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela
                 
                 
+            print("aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela")
 
-
-            caparecintos=os.path.join(rutacarpetarecintos,"RECFE21_"+mun+".shp")
+            caparecintos=os.path.join(rutacarpetarecintos,"RECFE22_"+mun+".shp")
+            print(rutacarpetarecintos,"RECFE22_"+mun+".shp")
             layer = QgsVectorLayer(caparecintos, mun, 'ogr')
             #QgsProject.instance().addMapLayers([layer])
 
             
             layer.selectByExpression("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par),QgsVectorLayer.SetSelection)
+            print("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par))
             #creo la nueva capa con la seleccion
             #output_path=archivo3
             #ojo esto es lo que acabo de cambiar
             #QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(), "ESRI Shapefile", onlySelected=True)
             #lyr9=QgsVectorLayer(output_path,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-            lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
+            try:
+                lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
 
-            
-
-
-            sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
-            renderer=QgsSingleSymbolRenderer(sym1)
-            #etiqueto
-            layer_settings  = QgsPalLayerSettings()
-            text_format = QgsTextFormat()
-            text_format.setFont(QFont("Arial", 12))
-            text_format.setSize(12)
-            text_format.setColor(QColor("Blue"))
-            #le meto un buffer a la etiqueta
-            buffer_settings = QgsTextBufferSettings()
-            buffer_settings.setEnabled(True)
-            buffer_settings.setSize(1)
-            buffer_settings.setColor(QColor("white"))
-
-            text_format.setBuffer(buffer_settings)
-            layer_settings.setFormat(text_format)
+                
 
 
+                sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
+                renderer=QgsSingleSymbolRenderer(sym1)
+                #etiqueto
+                layer_settings  = QgsPalLayerSettings()
+                text_format = QgsTextFormat()
+                text_format.setFont(QFont("Arial", 12))
+                text_format.setSize(12)
+                text_format.setColor(QColor("Blue"))
+                #le meto un buffer a la etiqueta
+                buffer_settings = QgsTextBufferSettings()
+                buffer_settings.setEnabled(True)
+                buffer_settings.setSize(1)
+                buffer_settings.setColor(QColor("white"))
+
+                text_format.setBuffer(buffer_settings)
+                layer_settings.setFormat(text_format)
             #cuenta elementos
-            elementos=len(list(lyr9.getFeatures()))
+                elementos=len(list(lyr9.getFeatures()))
+            except:
+                elementos=0
+                
             if elementos==0:
                 iface.messageBar().pushMessage("SIGPAC","En el municipio "+str(mun)+" poligono " +str(pol)+" no existe la parcela "+str(par), qgisCore.Qgis.Info,5)
                 

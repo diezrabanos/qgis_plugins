@@ -1,4 +1,8 @@
+O:/sigmena/carto/SIGPAC/Sigpac_2022/MUNICIPIOS_22.shp
+O:/sigmena/carto/SIGPAC/Sigpac_2022/recintos
+O:/sigmena/carto/SIGPAC/Sigpac_2022/MUNICIPIOS_22.shp
 O:/sigmena/carto/SIGPAC/Sigpac_2021/MUNICIPIOS_21.shp
+O:/sigmena/carto/SIGPAC/Sigpac_2022/recintos
 O:/sigmena/carto/SIGPAC/Sigpac_2021/recintos
 O:/sigmena/carto/SIGPAC/Sigpac_2021/42_MUNICIPIOS_21 - copia.shp
 O:/sigmena/carto/SIGPAC/Sigpac_2021/recintos

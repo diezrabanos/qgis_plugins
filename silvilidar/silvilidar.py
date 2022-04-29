@@ -114,6 +114,10 @@ class Silvilidar:
         self.dlg.pushButton_salida.clicked.connect(self.salida)
         self.dlg3.crecimiento.textChanged.connect(self.datosenlazados)
 
+        self.dlg.pushButton_select_shp.clicked.connect(self.select_shp)
+
+        
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -249,6 +253,16 @@ class Silvilidar:
         self.dlg4.show()
     def datosenlazados(self):
         self.dlg3.crecimientofcc.setText(str(8*float(self.dlg3.crecimiento.text())))
+
+    def select_shp(self):
+        """seleciono el shp con los datos con los poligonos que quiero buscar similares"""
+        rutaarchivomuestra = QFileDialog.getOpenFileName(self.dlg , "Capa de polígonos con las zonas de muestra",None ,'SHP(*.shp)')
+        self.dlg.ruta_muestra_similar.setText(rutaarchivomuestra[0])
+        #capa vectorial 
+        layervectorial=QgsVectorLayer(rutaarchivomuestra[0], "Capa con zonas de muestra", "ogr")
+        feats = [ feat for feat in layervectorial.getFeatures() ]#[ feat for feat in layers[0].getFeatures() ]
+        print(rutaarchivomuestra[0])
+        return rutaarchivomuestra[0]
 
  
 
@@ -393,7 +407,7 @@ class Silvilidar:
             
             #creo lista vacia entries
             entries = []
-             #funcion que carga una capa y prepara la banda para operar con ella
+            #funcion que carga una capa y prepara la banda para operar con ella
             def StringToRaster(raster,banda):
                 fileInfo = QFileInfo(raster)
                 path = fileInfo.filePath()

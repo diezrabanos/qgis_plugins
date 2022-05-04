@@ -1,11 +1,13 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 
 import processing
+import webbrowser
     
 
 
-carpeta="d:/pruebas/lidar/veinte5/"
+carpeta="d:/pruebas/lidar/veinte23/"
 
 os.makedirs(carpeta, exist_ok=True)
 
@@ -42,9 +44,105 @@ def simplificar_lista(lista):
 def estadisticas_lista(lista,coeficiente):
     estadisticos=[np.size(lista),np.mean(lista),np.std(lista)]
     rango=[np.mean(lista)-coeficiente*np.std(lista),np.mean(lista)+coeficiente*np.std(lista)]
-    print('TOTAL-------N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.format(np.size(lista), np.mean(lista), np.std(lista)))
-    print("Rango de valores objetivo entre ---------{:.2f} y {:.2f}---------".format(rango[0],rango[1]))
+    """print('TOTAL-------N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.format(np.size(lista), np.mean(lista), np.std(lista)))
+    print("Rango de valores objetivo entre ---------{:.2f} y {:.2f}---------".format(rango[0],rango[1]))"""
     return rango,estadisticos
+
+def crea_tabla(datos):
+    texto = '<table class="default">'
+    texto += ' <tr> \
+    <th scope="row">Datos de la muestra</th> \
+    <th>media</th> \
+    <th>desviacion estandar</th> \
+    </tr>'
+    n = 1
+    for dato in datos[1]:
+        texto += '<tr> \
+                 <th > Parcela {} </th> \
+                 <td > {} </' \
+                 'td> \
+                 <td > {} </td> \
+                 </tr >'.format(n, round(dato[0],1), round(dato[1],1))
+        n = n + 1
+    if len(datos[1]) > 0:
+        #print('meter los datos finales con la media y desviacion estandar total')
+        texto += '<tr> \
+                         <th > Todas las parcelas </th> \
+                         <td > {} </' \
+                 'td> \
+                 <td > {} </td> \
+                 </tr >'.format(round(np.mean(simplificar_lista(datos[0])),1),round(np.std(simplificar_lista(datos[0])),1)) # meter la media y desviacion media del conjunto de datos.
+    texto += '</table>'
+    return texto
+
+def grafica_histograma(datos, intervalo_min, intervalo_max, nombre):
+    fig, ax = plt.subplots()
+    ax.hist(datos, 10)  # np.arange(0,np.amax(datos)))
+    ax.axvline(intervalo_min, color='red', linestyle='dashed', linewidth=1)
+    ax.axvline(intervalo_max, color='red', linestyle='dashed', linewidth=1)
+    #plt.show()
+    plt.savefig(carpeta+nombre+'.png')
+    return carpeta+nombre+'.png'
+
+
+
+def crea_html(lista_elementos, lista_tablas,lista_graficas):
+    texto = '<head>\
+    <title>Estadisticos de la Muestra</title>\
+     <meta name="keywords" content="EstadÃ­sticos de la muestra">\
+     <meta name="description" content="Resumen de datos estadÃ­sticos de la muestra">\
+     <meta name="Author" content="Javi">\
+     <style>\
+        table {\
+  table-layout: fixed;\
+  width: 80%;\
+  border-collapse: collapse;\
+  border: 3px solid black;\
+}\
+thead th:nth-child(1) {\
+  width: 30%;\
+}\
+thead th:nth-child(2) {\
+  width: 20%;\
+}\
+thead th:nth-child(3) {\
+  width: 15%;\
+}\
+thead th:nth-child(4) {\
+  width: 35%;\
+}\
+th, td {\
+  padding: 20px;\
+}\
+th, td {\
+   width: 25%;\
+   text-align: left;/\
+   vertical-align: top;\
+   border: 1px solid ;\
+   border-collapse: collapse;\
+   padding: 0.3em;\
+   caption-side: bottom;\
+}\
+     </style>\
+    <script>\
+    </script>\
+    </head> \
+    <body><h1>DATOS DE LAS MUESTRAS</h1>'
+    n = 0
+    if len(lista_elementos) > 0:
+        for i in range(0, len(lista_elementos)):
+            texto += '<h2>{} </h2> \
+                     {}  \
+                     <br>\
+                     <img src={}>'.format(lista_elementos[i], lista_tablas[i],lista_graficas[i])
+            n = n + 1
+    texto += '</body></html>'
+    archivo_html=open(carpeta+"Datos_Muestra.html","w") 
+    archivo_html.write(texto) 
+    archivo_html.close() 
+    webbrowser.open_new(carpeta+"Datos_Muestra.html")
+    #return texto
+
 
 def filtro_raster_intervalo(nombre_raster,intervalo):
     for layer in iface.mapCanvas().layers():
@@ -235,7 +333,8 @@ def agrega(rlayer):
 
 def saca_valores_raster(nombre_raster,feats):
     #print('empiezo saca valores raster')
-    resultado=[]
+    resultado=[] # lista con todos los valores
+    resumen=[] #lista con la media y desviacion de cada parcela.
     for layer in iface.mapCanvas().layers():
         if layer.type() == QgsMapLayer.RasterLayer and layer.name()== nombre_raster:
             rlayer=layer
@@ -283,33 +382,46 @@ def saca_valores_raster(nombre_raster,feats):
                     y -= ysize
             resultado.append(values)
             for value in values:
-                print ('   Parcela-----N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.format(np.size(value), np.mean(value), np.std(value)))
-    return resultado
+                resumen.append([np.mean(value), np.std(value)])
+                #print ('   Parcela-----N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.format(np.size(value), np.mean(value), np.std(value)))
+    return resultado,resumen
 
 
 for nombre in capas_raster_de_interes:
     if nombre=='HM':
         resultado_hm=saca_valores_raster(nombre,feats)
-        resultado_hm_simplificado=simplificar_lista(resultado_hm)
+        resultado_hm_simplificado=simplificar_lista(resultado_hm[0])
+        tabla_hm=crea_tabla(resultado_hm)
+        #print('estadisticas_lista[0][0]', estadisticas_lista[0][0])
+        grafica_hm=grafica_histograma(resultado_hm_simplificado, estadisticas_lista(resultado_hm_simplificado,1)[0][0],estadisticas_lista(resultado_hm_simplificado,1)[0][1],"hm",)
         filtrado_hm=filtro_raster_intervalo(nombre,estadisticas_lista(resultado_hm_simplificado,1)[0] )
         
     if nombre=='HBC':
         resultado_hbc=saca_valores_raster(nombre,feats)
-        resultado_hbc_simplificado=simplificar_lista(resultado_hbc)
+        resultado_hbc_simplificado=simplificar_lista(resultado_hbc[0])
+        tabla_hbc=crea_tabla(resultado_hbc)
+        grafica_hbc=grafica_histograma(resultado_hbc_simplificado,estadisticas_lista(resultado_hbc_simplificado,1)[0][0],estadisticas_lista(resultado_hbc_simplificado,1)[0][1],"hbc")
         filtrado_hbc=filtro_raster_intervalo(nombre,estadisticas_lista(resultado_hbc_simplificado,1)[0] )
     if nombre=='LC':
         resultado_lc=saca_valores_raster(nombre,feats)
-        resultado_lc_simplificado=simplificar_lista(resultado_lc)
+        resultado_lc_simplificado=simplificar_lista(resultado_lc[0])
+        tabla_lc=crea_tabla(resultado_lc)
+        grafica_lc=grafica_histograma(resultado_lc_simplificado,estadisticas_lista(resultado_lc_simplificado,1)[0][0],estadisticas_lista(resultado_lc_simplificado,1)[0][1],"lc")
         filtrado_lc=filtro_raster_intervalo(nombre,estadisticas_lista(resultado_lc_simplificado,1)[0] )
     if nombre=='RC':
         resultado_rc=saca_valores_raster(nombre,feats)
-        resultado_rc_simplificado=simplificar_lista(resultado_rc)
+        resultado_rc_simplificado=simplificar_lista(resultado_rc[0])
+        tabla_rc=crea_tabla(resultado_rc)
+        grafica_rc=grafica_histograma(resultado_rc_simplificado,estadisticas_lista(resultado_rc_simplificado,1)[0][0],estadisticas_lista(resultado_rc_simplificado,1)[0][1],"rc")
+       
         filtrado_rc=filtro_raster_intervalo(nombre,estadisticas_lista(resultado_rc_simplificado,1)[0] )
     if nombre=='FCC':
         resultado_fcc=saca_valores_raster(nombre,feats)
-        resultado_fcc_simplificado=simplificar_lista(resultado_fcc)
+        resultado_fcc_simplificado=simplificar_lista(resultado_fcc[0])
+        tabla_fcc=crea_tabla(resultado_fcc)
+        grafica_fcc=grafica_histograma(resultado_fcc_simplificado,estadisticas_lista(resultado_fcc_simplificado,1)[0][0],estadisticas_lista(resultado_fcc_simplificado,1)[0][1],"fcc")
         filtrado_fcc=filtro_raster_intervalo(nombre,estadisticas_lista(resultado_fcc_simplificado,1)[0] )
-        
+crea_html(['HM','FCC','RC','HBC','LC'],[tabla_hm,tabla_fcc,tabla_rc,tabla_hbc,tabla_lc],[grafica_hm,grafica_fcc,grafica_rc,grafica_hbc,grafica_lc] )       # [] 
 #busca las celdas que encuentran lo anterior (multiplica)
 multiplicado=multiplica_rasters(filtrado_hm,filtrado_hbc,filtrado_lc,filtrado_rc,filtrado_fcc)
 raster=agrega(multiplicado)

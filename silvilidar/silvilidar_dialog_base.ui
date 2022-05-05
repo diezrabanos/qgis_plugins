@@ -33,38 +33,22 @@
     <string>SILVILIDAR</string>
    </property>
   </widget>
-  <widget class="QTabWidget" name="tabWidget">
+  <widget class="QTabWidget" name="tab">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>40</y>
      <width>481</width>
-     <height>361</height>
+     <height>341</height>
     </rect>
    </property>
    <property name="currentIndex">
     <number>1</number>
    </property>
-   <widget class="QWidget" name="tab">
+   <widget class="QWidget" name="principal">
     <attribute name="title">
      <string>Ejecución de SILVILIDAR                                 </string>
     </attribute>
-    <widget class="QDialogButtonBox" name="button_box">
-     <property name="geometry">
-      <rect>
-       <x>300</x>
-       <y>300</y>
-       <width>171</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
     <widget class="QPushButton" name="help_button">
      <property name="geometry">
       <rect>
@@ -298,7 +282,7 @@ desde la realización del vuelo LiDAR.</string>
      </property>
     </widget>
    </widget>
-   <widget class="QWidget" name="tab_2">
+   <widget class="QWidget" name="similar">
     <attribute name="title">
      <string>Busqueda de zonas similaresa unas dadas</string>
     </attribute>
@@ -531,23 +515,23 @@ desde la realización del vuelo LiDAR.</string>
       <string>1,0</string>
      </property>
     </widget>
-    <widget class="QDialogButtonBox" name="button_box_2">
-     <property name="geometry">
-      <rect>
-       <x>300</x>
-       <y>300</y>
-       <width>171</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
    </widget>
+  </widget>
+  <widget class="QDialogButtonBox" name="button_box">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>380</y>
+     <width>171</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
   </widget>
  </widget>
  <tabstops>

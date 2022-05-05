@@ -13,12 +13,13 @@ name=Silvilidar
 qgisMinimumVersion=3.0
 
 description=Permite procesar datos LiDAR de una manera sencilla para obtener
-version=1.1.0
+version=1.2.0
 author=Alejandro Crespo Rodrigo y F. Javier Diez Rabanos
-email=dierabfr@jcyl.es
+email=fjavier.diez@jcyl.es
 
 
 about=Se trata de la creacion de una metodologia y de una herramienta informatica (SilviLiDAR), mediante un script, que analiza una serie de parametros selvicolas obtenidos a partir de los datos LiDAR y, con la utilizacion de un arbol de decision construido en base a la estructura, estado de desarrollo y grado de competencia del arbolado, clasifica por celdas (cuadriculas basicas) el territorio por tipos de masa y su posible necesidad de actuacion selvicola, y lo expresa cartograficamente a traves de QGIS.
+Ademas permite buscar zonas similares a otras dibujadas basado en los datos LiDAR.
 tracker=http://bugs
 
 repository=http://repo

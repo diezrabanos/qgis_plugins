@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>496</width>
-    <height>406</height>
+    <height>411</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,7 +43,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="principal">
     <attribute name="title">
@@ -296,7 +296,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="text">
-      <string>Capa de polígonos con las zonas de muestra</string>
+      <string>Capa de polígonos con las zonas de referencia</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_select_shp">
@@ -341,7 +341,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="text">
-      <string>Capas raster a considerar con  coeficiente</string>
+      <string>Capas raster a considerar con  coeficiente multiplicador</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_rc1">
@@ -373,7 +373,7 @@ desde la realización del vuelo LiDAR.</string>
       <string>Altura de la base de copa</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_fcc1">
@@ -405,7 +405,7 @@ desde la realización del vuelo LiDAR.</string>
       <string>Longitud de copa</string>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_hm1">

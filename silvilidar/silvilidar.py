@@ -56,6 +56,7 @@ import sys
 # from qgis import *
 import time
 import webbrowser
+import tempfile
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1219,7 +1220,28 @@ class Silvilidar:
 
             # empiezo aqui con la segunda pestana, busca zonas similares  OJO
             if index == 1:
+                import random
                 carpeta = self.dlg.carpetalaz.text()
+                carpeta_nueva = carpeta + '/Busca_similar'
+
+
+                def crea_carpeta(carpeta,carpeta_nueva):
+                    if os.path.isdir(carpeta_nueva):
+                        crea_carpeta(carpeta,carpeta + '/Busca_similar' + str(random.randint(0, 1000)))
+                    else:
+                        carpeta_nueva = carpeta + '/Busca_similar' + str(random.randint(0, 1000))
+                        os.makedirs(carpeta_nueva, exist_ok=True)
+                    return carpeta_nueva
+
+
+                carpeta= crea_carpeta(carpeta, carpeta_nueva)
+                print(carpeta)
+
+                coef_hm = float(self.dlg.coef_hm1.text().replace(',','.'))
+                coef_hbc = float(self.dlg.coef_hbc1.text().replace(',','.'))
+                coef_rc = float(self.dlg.coef_rc1.text().replace(',','.'))
+                coef_lc = float(self.dlg.coef_lc1.text().replace(',','.'))
+                coef_fcc = float(self.dlg.coef_fcc1.text().replace(',','.'))
                 ruta_muestra = self.dlg.ruta_muestra_similar.text()
                 capas_raster_de_interes = []
                 if self.dlg.checkBox_hm1.isChecked():
@@ -1304,8 +1326,8 @@ class Silvilidar:
                     ax.axvline(intervalo_min, color='red', linestyle='dashed', linewidth=1)
                     ax.axvline(intervalo_max, color='red', linestyle='dashed', linewidth=1)
                     # plt.show()
-                    plt.savefig(carpeta + nombre + '.png')
-                    return carpeta + nombre + '.png'
+                    plt.savefig(carpeta +'/'+ nombre + '.png')
+                    return carpeta +'/'+ nombre + '.png'
 
                 def crea_html(lista_elementos, lista_tablas, lista_graficas):
                     texto = '<head>\
@@ -1359,10 +1381,10 @@ class Silvilidar:
                                      <img src={}>'.format(lista_elementos[i], lista_tablas[i], lista_graficas[i])
                             n = n + 1
                     texto += '</body></html>'
-                    archivo_html = open(carpeta + "Datos_Muestra.html", "w")
+                    archivo_html = open(carpeta + "/Datos_Muestra.html", "w")
                     archivo_html.write(texto)
                     archivo_html.close()
-                    webbrowser.open_new(carpeta + "Datos_Muestra.html")
+                    webbrowser.open_new(carpeta + "/Datos_Muestra.html")
                     # return texto
 
                 def filtro_raster_intervalo(nombre_raster, intervalo):
@@ -1478,10 +1500,10 @@ class Silvilidar:
                 def vectorizar(raster, salida):
                     parameters = {'INPUT': raster.source(), 'BAND': 1, 'EXTRA': '', 'FIELD': "DN",
                                   'EIGHT_CONNECTEDNESS': False,
-                                  'OUTPUT': carpeta + 'vectorizado.shp'}
+                                  'OUTPUT': carpeta + '/vectorizado.shp'}
                     processing.run("gdal:polygonize", parameters)  # .runAndLoadResults("gdal:polygonize",parameters)
                     # seleciono lo que me interesa
-                    lyr = QgsVectorLayer(carpeta + 'vectorizado.shp', "nombre", "ogr")
+                    lyr = QgsVectorLayer(carpeta + '/vectorizado.shp', "nombre", "ogr")
                     # hago una selecion de los elementos con dn=1, anado la informacion a la tabla y creo una capa nueva
                     # ojo deberia hacer una funcion para emplearlo mas veces.
                     layer = lyr  # iface.activeLayer()
@@ -1502,7 +1524,7 @@ class Silvilidar:
                     if len(ids) > 0:
                         # exporto la seleccion
                         layer.selectByIds(ids)
-                        output_path = carpeta + "vectorial2.shp"
+                        output_path = carpeta + "/vectorial2.shp"
 
                         QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(),
                                                                 "ESRI Shapefile",
@@ -1559,7 +1581,7 @@ class Silvilidar:
                 def agrega(rlayer):
                     # suavizado
                     parametros = {'INPUT': rlayer.source(), 'METHOD': 0, 'MODE': 1, 'RADIUS': 4,
-                                  'RESULT': carpeta + "suavizado.sdat"}
+                                  'RESULT': carpeta + "/suavizado.sdat"}
                     suavizado = processing.run('saga:simplefilter', parametros)['RESULT']
                     rlayer1 = QgsRasterLayer(suavizado, "suavizado")
                     # QgsProject.instance().addMapLayers([rlayer1])
@@ -1571,7 +1593,7 @@ class Silvilidar:
                     layer1.bandNumber = 1
                     entries.append(layer1)
                     # mayor de umbral
-                    output_raster = carpeta + "suavizado_seleccionado.tif"
+                    output_raster = carpeta + "/suavizado_seleccionado.tif"
                     calc = QgsRasterCalculator('(layer1@1 > 0.2 )', output_raster, 'GTiff', rlayer1.extent(),
                                                rlayer1.width(),
                                                rlayer1.height(), entries)
@@ -1580,7 +1602,7 @@ class Silvilidar:
                     # QgsProject.instance().addMapLayers([rlayer2])
                     # suavizado2
                     parametros = {'INPUT': rlayer2.source(), 'METHOD': 0, 'MODE': 1, 'RADIUS': 2,
-                                  'RESULT': carpeta + "suavizado2.sdat"}
+                                  'RESULT': carpeta + "/suavizado2.sdat"}
                     suavizado2 = processing.run('saga:simplefilter', parametros)['RESULT']
                     rlayer3 = QgsRasterLayer(suavizado2, "suavizado2")
                     # QgsProject.instance().addMapLayers([rlayer3])
@@ -1592,7 +1614,7 @@ class Silvilidar:
                     layer2.bandNumber = 1
                     entries.append(layer2)
                     # mayor de umbral
-                    output_raster = carpeta + "suavizado_seleccionado2.tif"
+                    output_raster = carpeta + "/suavizado_seleccionado2.tif"
                     calc = QgsRasterCalculator('(layer2@1 > 0.5 )', output_raster, 'GTiff', rlayer3.extent(),
                                                rlayer3.width(),
                                                rlayer3.height(), entries)
@@ -1653,8 +1675,8 @@ class Silvilidar:
                             resultado.append(values)
                             for value in values:
                                 resumen.append([np.mean(value), np.std(value)])
-                                # print ('   Parcela-----N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.
-                                # format(np.size(value), np.mean(value), np.std(value)))
+                                print ('   Parcela-----N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.
+                                format(np.size(value), np.mean(value), np.std(value)))
                     return resultado, resumen
 
                 tablas_de_interes = []
@@ -1667,11 +1689,11 @@ class Silvilidar:
                         tabla_hm = crea_tabla(resultado_hm)
                         tablas_de_interes.append(tabla_hm)
                         grafica_hm = grafica_histograma(resultado_hm_simplificado,
-                                                        estadisticas_lista(resultado_hm_simplificado, 1)[0][0],
-                                                        estadisticas_lista(resultado_hm_simplificado, 1)[0][1], "hm")
+                                                        estadisticas_lista(resultado_hm_simplificado, coef_hm)[0][0],
+                                                        estadisticas_lista(resultado_hm_simplificado, coef_hm)[0][1], "hm")
                         graficas_de_interes.append(grafica_hm)
                         filtrado_hm = filtro_raster_intervalo(nombre,
-                                                              estadisticas_lista(resultado_hm_simplificado, 1)[0])
+                                                              estadisticas_lista(resultado_hm_simplificado, coef_hm)[0])
                         filtrado_de_interes.append(filtrado_hm)
                     if nombre == 'HBC':
                         resultado_hbc = saca_valores_raster(nombre, feats)
@@ -1679,11 +1701,11 @@ class Silvilidar:
                         tabla_hbc = crea_tabla(resultado_hbc)
                         tablas_de_interes.append(tabla_hbc)
                         grafica_hbc = grafica_histograma(resultado_hbc_simplificado,
-                                                         estadisticas_lista(resultado_hbc_simplificado, 1)[0][0],
-                                                         estadisticas_lista(resultado_hbc_simplificado, 1)[0][1], "hbc")
+                                                         estadisticas_lista(resultado_hbc_simplificado, coef_hbc)[0][0],
+                                                         estadisticas_lista(resultado_hbc_simplificado, coef_hbc)[0][1], "hbc")
                         graficas_de_interes.append(grafica_hbc)
                         filtrado_hbc = filtro_raster_intervalo(nombre,
-                                                               estadisticas_lista(resultado_hbc_simplificado, 1)[0])
+                                                               estadisticas_lista(resultado_hbc_simplificado, coef_hbc)[0])
                         filtrado_de_interes.append(filtrado_hbc)
                     if nombre == 'LC':
                         resultado_lc = saca_valores_raster(nombre, feats)
@@ -1691,11 +1713,11 @@ class Silvilidar:
                         tabla_lc = crea_tabla(resultado_lc)
                         tablas_de_interes.append(tabla_lc)
                         grafica_lc = grafica_histograma(resultado_lc_simplificado,
-                                                        estadisticas_lista(resultado_lc_simplificado, 1)[0][0],
-                                                        estadisticas_lista(resultado_lc_simplificado, 1)[0][1], "lc")
+                                                        estadisticas_lista(resultado_lc_simplificado, coef_lc)[0][0],
+                                                        estadisticas_lista(resultado_lc_simplificado, coef_lc)[0][1], "lc")
                         graficas_de_interes.append(grafica_lc)
                         filtrado_lc = filtro_raster_intervalo(nombre,
-                                                              estadisticas_lista(resultado_lc_simplificado, 1)[0])
+                                                              estadisticas_lista(resultado_lc_simplificado, coef_lc)[0])
                         filtrado_de_interes.append(filtrado_lc)
                     if nombre == 'RC':
                         resultado_rc = saca_valores_raster(nombre, feats)
@@ -1703,11 +1725,11 @@ class Silvilidar:
                         tabla_rc = crea_tabla(resultado_rc)
                         tablas_de_interes.append(tabla_rc)
                         grafica_rc = grafica_histograma(resultado_rc_simplificado,
-                                                        estadisticas_lista(resultado_rc_simplificado, 1)[0][0],
-                                                        estadisticas_lista(resultado_rc_simplificado, 1)[0][1], "rc")
+                                                        estadisticas_lista(resultado_rc_simplificado, coef_rc)[0][0],
+                                                        estadisticas_lista(resultado_rc_simplificado, coef_rc)[0][1], "rc")
                         graficas_de_interes.append(grafica_rc)
                         filtrado_rc = filtro_raster_intervalo(nombre,
-                                                              estadisticas_lista(resultado_rc_simplificado, 1)[0])
+                                                              estadisticas_lista(resultado_rc_simplificado, coef_rc)[0])
                         filtrado_de_interes.append(filtrado_rc)
                     if nombre == 'FCC':
                         resultado_fcc = saca_valores_raster(nombre, feats)
@@ -1715,11 +1737,11 @@ class Silvilidar:
                         tabla_fcc = crea_tabla(resultado_fcc)
                         tablas_de_interes.append(tabla_fcc)
                         grafica_fcc = grafica_histograma(resultado_fcc_simplificado,
-                                                         estadisticas_lista(resultado_fcc_simplificado, 1)[0][0],
-                                                         estadisticas_lista(resultado_fcc_simplificado, 1)[0][1], "fcc")
+                                                         estadisticas_lista(resultado_fcc_simplificado, coef_fcc)[0][0],
+                                                         estadisticas_lista(resultado_fcc_simplificado, coef_fcc)[0][1], "fcc")
                         graficas_de_interes.append(grafica_fcc)
                         filtrado_fcc = filtro_raster_intervalo(nombre,
-                                                               estadisticas_lista(resultado_fcc_simplificado, 1)[0])
+                                                               estadisticas_lista(resultado_fcc_simplificado, coef_fcc)[0])
                         filtrado_de_interes.append(filtrado_fcc)
                 print(capas_raster_de_interes)
                 print(filtrado_de_interes)

@@ -263,11 +263,6 @@ class ZoomSigmena:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
-
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-
-            
             def deg_to_dms(deg, type='lat'):
                 decimals, number = math.modf(deg)
                 d = int(number)
@@ -313,7 +308,7 @@ class ZoomSigmena:
                 print(x)
                 print (y)
                 huso=30
-                destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="GRS80", units="m")
                 origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 UTM_X,UTM_Y = pyproj.transform(origenProj, destinoProj, lon,lat)
 
@@ -330,7 +325,7 @@ class ZoomSigmena:
 
       
                 huso=30
-                destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=huso, ellps="GRS80", units="m")
                 origenProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 UTM_X,UTM_Y = pyproj.transform(origenProj, destinoProj, lon,lat)
                 print(UTM_X)
@@ -354,7 +349,10 @@ class ZoomSigmena:
                             QgsField("xx",  QVariant.String),
                             QgsField("yy", QVariant.String),
                               QgsField("xxx",  QVariant.Double),
-                            QgsField("yyy", QVariant.Double)])
+                            QgsField("yyy", QVariant.Double),
+                            QgsField("x_29",  QVariant.Double),
+                            QgsField("y_29", QVariant.Double),
+                            ])
             vl2.updateFields() 
             # tell the vector layer to fetch changes from the provider
             
@@ -366,39 +364,53 @@ class ZoomSigmena:
             fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
             if src=="25830":
                 huso=30
-                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="GRS80", units="m")
                 destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
-
                 xx=(deg_to_dms(xxx,'lon'))
                 yy=(deg_to_dms(yyy))
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="GRS80", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=29, ellps="GRS80", units="m")
+                x_29,y_29 = pyproj.transform(origenProj, destinoProj, x,y)
+                
 
             if src=="25829":
                 huso=29
-                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="WGS84", units="m")
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="GRS80", units="m")
                 destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
-
                 xx=(deg_to_dms(xxx,'lon'))
-                yy=(deg_to_dms(yyy))    
+                yy=(deg_to_dms(yyy))
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="GRS80", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=30, ellps="GRS80", units="m")
+                x_29=x
+                y_29=y
+                x,y = pyproj.transform(origenProj, destinoProj, x_29,y_29)
+                
 
             if src=="23030":
                 huso=30
                 origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
                 destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
-
                 xx=(deg_to_dms(xxx,'lon'))
                 yy=(deg_to_dms(yyy))
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=29, ellps="intl", units="m")
+                x_29,y_29 = pyproj.transform(origenProj, destinoProj, x,y)
 
             if src=="23029":
                 huso=29
                 origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
                 destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
-
                 xx=(deg_to_dms(xxx,'lon'))
-                yy=(deg_to_dms(yyy))    
+                yy=(deg_to_dms(yyy))
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=30, ellps="intl", units="m")
+                x_29=x
+                y_29=y
+                x,y = pyproj.transform(origenProj, destinoProj, x_29,y_29)
             
             #para que lo pase a utms en pantalla
             if src=="4326":
@@ -407,11 +419,15 @@ class ZoomSigmena:
                 #xx=longtext
                 #yy=latext
                 huso=30
-                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="intl", units="m")
+                origenProj = pyproj.Proj(proj="utm", zone=huso, ellps="GRS80", units="m")
                 destinoProj = pyproj.Proj(proj='longlat', ellps='WGS84', datum='WGS84')
                 xxx,yyy = pyproj.transform(origenProj, destinoProj, x,y)
                 xx=(deg_to_dms(xxx,'lon'))
-                yy=(deg_to_dms(yyy)) 
+                yy=(deg_to_dms(yyy))
+                origenProj = pyproj.Proj(proj="utm", zone=30, ellps="GRS80", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=29, ellps="GRS80", units="m")
+                x_29,y_29 = pyproj.transform(origenProj, destinoProj, x,y)
+                
             #para que lo pase a utms en pantalla
             if src=="4258":
                 x=int(UTM_X)
@@ -421,7 +437,11 @@ class ZoomSigmena:
                 yyy=lat
                 xx=(deg_to_dms(xxx,'lon'))
                 yy=(deg_to_dms(yyy))
-            fet.setAttributes([ float(x),float(y),str(xx),str(yy),float(xxx),float(yyy)])
+                origenProj = pyproj.Proj(proj="utm", zone=30, ellps="GRS80", units="m")
+                destinoProj = pyproj.Proj(proj="utm", zone=29, ellps="GRS80", units="m")
+                x_29,y_29 = pyproj.transform(origenProj, destinoProj, x,y)
+                
+            fet.setAttributes([ round(float(x),2),round(float(y),2),str(xx),str(yy),float(xxx),float(yyy),float(x_29),float(y_29)])
             pr2.addFeatures([fet])
 
             

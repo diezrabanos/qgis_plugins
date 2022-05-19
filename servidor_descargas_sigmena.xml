@@ -46,7 +46,7 @@
 	<pyqgis_plugin version="1.1.2" name="ZoomSigmena" plugin_id="9994">
       <description>Permite hacer zoom a una coorddenada dada  </description>
       <about>Permite hacer zoom a una determinada coordenada introducida en varios sistemas de coordenadas que se pueden seleccionar con un desplegable.Crea una capa temporal con el punto introducido y permite etiquetarlo con dicha coordenada.</about>
-      <version>1.1.1</version>
+      <version>1.1.2</version>
       <trusted>True</trusted>
       <qgis_minimum_version>3.4.0</qgis_minimum_version>
       <qgis_maximum_version>3.22.0</qgis_maximum_version>

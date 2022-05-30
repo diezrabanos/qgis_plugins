@@ -1349,6 +1349,9 @@ class Silvilidar:
             # empiezo aqui con la segunda pestana, busca zonas similares  OJO
             if index == 1:
                 import random
+                 # compruebo que capas estan cargadas en el proyecto al iniciar el script
+                capasoriginales = QgsProject.instance().mapLayers()
+                
                 carpeta = self.dlg.carpetalaz.text()
                 if carpeta== '':
                     iface.messageBar().pushMessage("Error","Debe seleccionar una carpeta con los datos LiDAR", duration= 15)
@@ -1941,11 +1944,20 @@ class Silvilidar:
                     print(filtrado_de_interes)
                     crea_html(capas_raster_de_interes, tablas_de_interes,
                               graficas_de_interes)
+                   
+                    
+
+                    # print(resultado)
+                    #epsg = layervectorial.crs().postgisSrid()
+                    # elimino las capas que he cargado durante el proceso
+                    capas = QgsProject.instance().mapLayers()
+                    for capa in capas:
+                        if capa not in capasoriginales:
+                            QgsProject.instance().removeMapLayers([capa])
+                            
                     # busca las celdas que encuentran lo anterior (multiplica)
                     multiplicado = multiplica_rasters(filtrado_de_interes)
                     raster = agrega(multiplicado)
                     vectorizar(raster, carpeta + "similar3.shp")
 
-                    # print(resultado)
-                    epsg = layervectorial.crs().postgisSrid()
 

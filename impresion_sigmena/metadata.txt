@@ -8,7 +8,7 @@ qgisMinimumVersion=3.0
 description=Load and modify layout templates
 version=1.0
 author=F. Javier Diez Rabanos
-email=dierabfr@jcyl.es
+email=fjavier.diez@jcyl.es
 
 about=This plugin makes it simple to apply your map to a layout template from your standard templates folder. If you don't have any templates a few is included in the plugin ready for you to add to your QGIS profile.
 

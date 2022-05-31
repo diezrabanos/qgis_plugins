@@ -33,12 +33,14 @@ from .resources import *
 # Import the code for the dialog and for copying the templates to local profile folder
 from .impresion_sigmena_dialog import ImpresionSigmenaDialog
 import os.path
-from qgis.core import QgsApplication, QgsProject,QgsPrintLayout,QgsUnitTypes,QgsLayoutSize,QgsLayoutItemMap,QgsLayoutItemLabel,QgsLayoutExporter,QgsLayoutItemScaleBar,QgsVector,QgsVectorLayer,QgsRasterLayer,QgsLayoutItemMapGrid,QgsLayoutItemLegend,QgsLayoutPoint,QgsLegendStyle
+from qgis.core import QgsApplication, QgsProject,QgsPrintLayout,QgsUnitTypes,QgsLayoutSize,QgsLayoutItemMap,QgsLayoutItemLabel,QgsLayoutExporter,QgsLayoutItemScaleBar,QgsVector,QgsVectorLayer,QgsRasterLayer,QgsLayoutItemMapGrid,QgsLayoutItemLegend,QgsLayoutPoint,QgsLegendStyle,QgsMapLayer
 from distutils.dir_util import copy_tree
 from random import randrange as rand
 import webbrowser
 import tempfile
 import time
+from osgeo import ogr
+from qgis.utils import iface
 
 
 class ImpresionSigmena:
@@ -327,7 +329,7 @@ class ImpresionSigmena:
         """Run method that performs all the real work"""
         # This loads the dialog with templates (again) TODO check when it's best to do this
         #self.loadTemplates()
-        escalas=["5000","10000","15000","20000","25000","30000"]
+        escalas=["5000","10000","15000","20000","25000","30000","40000",'50000']
         self.dlg.escalasComboBox.clear() 
         for element in escalas:
             self.dlg.escalasComboBox.addItem( element)
@@ -347,12 +349,22 @@ class ImpresionSigmena:
         rios=r'O:/sigmena/carto/M_FISICO/HIDROGRA/42_HIDROL_E10_etrs89.shp'
         cascosurbanos=r'O:/sigmena/carto/DIV_ADMI/GENERAL/42_cascos_ine_etrs89_.shp'
         carreteras=r'O:/sigmena/carto/VIAS/GENERAL/42_tn_carr_cyl_red_vias.shp'
-        vegetacion=r'O:/sigmena/carto/VEGETACI/MFE/FOTOFIJA2015/42_MFE_FotoFija2015.shp'
+        vegetacion=r'O:/sigmena/carto/VEGETACI/MFE/MFE25/42_mfe_CastillayLeon.shp'
         ortofoto=r'R:/SIGMENA/CARTO/RASTER/ORTOFOTO/pnoa/ETRS89/2017/oi_cyl_2017_so_35_25830.ecw'
         e25=r'R:/SIGMENA/CARTO/RASTER/ESCANEOS/E25/IGN/Georreferenciado_ETRS89/MTN25SOETRS89_E25_provincia_completa/MTN25SORIA25830.ecw'
+        e50=r'R:/SIGMENA/CARTO/RASTER/ESCANEOS/E50/IGN/Georreferenciado_ETRS89/MNT50soria25830.ecw'
+
+        #geopackage
+        ruta_geopackage=r'V:/SIGMENA/Incendios/Incendios.gpkg'
+        asentamientos2='Asentamientos_2020_Vulner_IUF'
+        cascos2='Cascos_INE_e50_etrs89'
+        
+        
+        
         
         
         listaortofoto=[mup,cortafuegos,pistas,carreteras,puntosdeagua,rios,cascosurbanos,ortofoto]
+        listaortofoto_geopackage=[asentamientos2,cascos2]
         listae25=[mup,cortafuegos,pistas,puntosdeagua,e25]
         listavegetacion=[mup,cortafuegos,pistas,carreteras,puntosdeagua,rios,cascosurbanos,vegetacion]
 
@@ -453,9 +465,20 @@ class ImpresionSigmena:
             print(lm + 10, tm + (paperSize[1] - bm) + tm + 5 )
 
 
-                  
+            #ojo_geopackage inicio      
+            def add_gpkg_layer(gpkg, layer):
+                layers = [l.GetName() for l in ogr.Open(gpkg)]
+                if layer in layers:
+                    iface.addVectorLayer(gpkg + "|layername=" + layer, layer, 'ogr')
+                else: 
+                    print('Error: there is no layer named "{}" in {}!'.format(layer, gpkg))
 
-                                
+                    
+            def add_layers_from_gpkg(gpkg, layers):
+                for layer in layers:
+                    add_gpkg_layer(gpkg, layer)
+            #ojo_geopackage fin
+                                            
 
 
             def moverextend(xx,yy):
@@ -483,6 +506,52 @@ class ImpresionSigmena:
                 print(escala)
                 theMap.setScale(escala)
                 print("he incluido el mapa")
+                #METO LA LEYENDA
+                print("EMPIEZO A METER LA LEYENDA")
+                legend = QgsLayoutItemLegend(l)
+                #legend.setTitle("Leyenda")
+                
+                legend.setLinkedMap(theMap) # pass a QgsLayoutItemMap object
+                #incluye todos los visibles
+                legend.setLegendFilterByMapEnabled(True)
+                legend.setColumnCount(7)
+                legend.setBackgroundColor(QColor("white"))
+                # Set split to true to finish legend horizontal distribution
+                legend.setSplitLayer(False)
+                #todas las visibles de otra forma
+                lyrs_to_add=[]
+                tree = QgsProject.instance().layerTreeRoot()
+                for node in tree.findLayers():
+                    if node.layer().type() == QgsMapLayer.VectorLayer:
+                        lyrs_to_add.append(node.layer())
+                
+                legend.setAutoUpdateModel(False)
+                group = legend.model().rootGroup()
+                group.clear()
+                for la in lyrs_to_add:
+                    subgroup = group.addGroup(la.name())
+                    group.addLayer(la)
+                        
+                l.addItem(legend)
+                
+                legend.setStyleFont(QgsLegendStyle.Title, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.Subgroup, QFont("Arial", 7, QFont.StyleNormal))
+                legend.setStyleFont(QgsLegendStyle.SymbolLabel, QFont("Arial", 7, QFont.StyleNormal))
+
+                #legend.rstyle(QgsComposerLegendStyle.Symbol).setMargin(QgsComposerLegendStyle.Top, 0)
+
+
+                legend.setSymbolHeight(2)
+                
+                legend.setBoxSpace(0)
+                legend.adjustBoxSize()
+                
+                legend.attemptMove(QgsLayoutPoint(3, paperSize[1]/10-2.6, QgsUnitTypes.LayoutCentimeters))
+                #legend.attemptResize(QgsLayoutSize(2.8, 2.2, QgsUnitTypes.LayoutCentimeters))
+                legend.refresh()
+                
+                l.addLayoutItem(legend)
+                print("ACABO DE METER LA LEYENDA")
             # add title
             #titleFont = QFont(self.textFont, int(font_scale * 14))
             #titleFont.setBold(True)
@@ -533,6 +602,10 @@ class ImpresionSigmena:
                 vlcascosurbanos=QgsVectorLayer(cascosurbanos,"Cascos urbanos","ogr")
                 vlcascosurbanos.loadNamedStyle(os.path.join(rutaestilos,'cascosurbanos.qml'))
                 QgsProject.instance().addMapLayer(vlcascosurbanos)
+                #ojo_geopackage inicio
+                add_layers_from_gpkg(ruta_geopackage,listaortofoto_geopackage )
+                #ojo_geopackage fin
+                
                 
         
                 
@@ -547,6 +620,7 @@ class ImpresionSigmena:
                 print("he incluido el mapa")
 
                 #METO LA LEYENDA
+                print("EMPIEZO A METER LA LEYENDA")
                 legend = QgsLayoutItemLegend(l)
                 #legend.setTitle("Leyenda")
                 
@@ -558,20 +632,19 @@ class ImpresionSigmena:
                 # Set split to true to finish legend horizontal distribution
                 legend.setSplitLayer(False)
                 #todas las visibles de otra forma
-                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #print (lyrs_to_add2)
-                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras"]
+                lyrs_to_add=[]
+                tree = QgsProject.instance().layerTreeRoot()
+                for node in tree.findLayers():
+                    if node.layer().type() == QgsMapLayer.VectorLayer:
+                        lyrs_to_add.append(node.layer())
+                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras",asentamientos2]#ojo geopackage asentamientos2
                 legend.setAutoUpdateModel(False)
                 group = legend.model().rootGroup()
                 group.clear()
                 for la in lyrs_to_add:
                     if la.name() in lyrs_to_add2:
                         subgroup = group.addGroup(la.name())
-                        checked = la.checkedLayers()
-                        for c in checked:
-                            #subgroup.addLayer(c)
-                            group.addLayer(c)
+                        group.addLayer(la)
                         
                 l.addItem(legend)
                 
@@ -592,6 +665,7 @@ class ImpresionSigmena:
                 legend.refresh()
                 
                 l.addLayoutItem(legend)
+                print("ACABO DE METER LA LEYENDA")
 
             def configuraplanoe25():
                 global newextend
@@ -603,8 +677,12 @@ class ImpresionSigmena:
                 #cargo capas al proyecto
                 
                 rutaestilos=r'O:/sigmena/leyendas/qgis'
-                rle25 = QgsRasterLayer(e25, "E25")
-                rle25.renderer().setOpacity(1.0)
+                if escala<31000:
+                    rle25 = QgsRasterLayer(e25, "E25")
+                    rle25.renderer().setOpacity(1.0)
+                else:
+                    rle25 = QgsRasterLayer(e50, "E50")
+                    rle25.renderer().setOpacity(1.0)
                 #rlayer.loadNamedStyle(os.path.join(rutaestilos,'pendiente_10_15.qml'))
                 QgsProject.instance().addMapLayer(rle25)
                 vlmup=QgsVectorLayer(mup ,"M.U.P.","ogr")
@@ -647,9 +725,11 @@ class ImpresionSigmena:
                 # Set split to true to finish legend horizontal distribution
                 legend.setSplitLayer(False)
                 #todas las visibles de otra forma
-                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #print (lyrs_to_add2)
+                lyrs_to_add=[]
+                tree = QgsProject.instance().layerTreeRoot()
+                for node in tree.findLayers():
+                    if node.layer().type() == QgsMapLayer.VectorLayer:
+                        lyrs_to_add.append(node.layer())
                 lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras"]
                 legend.setAutoUpdateModel(False)
                 group = legend.model().rootGroup()
@@ -657,10 +737,7 @@ class ImpresionSigmena:
                 for la in lyrs_to_add:
                     if la.name() in lyrs_to_add2:
                         subgroup = group.addGroup(la.name())
-                        checked = la.checkedLayers()
-                        for c in checked:
-                            #subgroup.addLayer(c)
-                            group.addLayer(c)
+                        group.addLayer(la)
                         
                 l.addItem(legend)
                 
@@ -692,8 +769,12 @@ class ImpresionSigmena:
                 #cargo capas al proyecto
                 
                 rutaestilos=r'O:/sigmena/leyendas/qgis'
-                rle25 = QgsRasterLayer(e25, "E25")
-                rle25.renderer().setOpacity(1.0)
+                if escala<31000:
+                    rle25 = QgsRasterLayer(e25, "E25")
+                    rle25.renderer().setOpacity(1.0)
+                else:
+                    rle25 = QgsRasterLayer(e50, "E50")
+                    rle25.renderer().setOpacity(1.0)
                 QgsProject.instance().addMapLayer(rle25)
                 rlorto = QgsRasterLayer(ortofoto, "Orto")
                 rlorto.renderer().setOpacity(0.65)
@@ -739,20 +820,19 @@ class ImpresionSigmena:
                 # Set split to true to finish legend horizontal distribution
                 legend.setSplitLayer(False)
                 #todas las visibles de otra forma
-                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #print (lyrs_to_add2)
-                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua"]
+                lyrs_to_add=[]
+                tree = QgsProject.instance().layerTreeRoot()
+                for node in tree.findLayers():
+                    if node.layer().type() == QgsMapLayer.VectorLayer:
+                        lyrs_to_add.append(node.layer())
+                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras"]
                 legend.setAutoUpdateModel(False)
                 group = legend.model().rootGroup()
                 group.clear()
                 for la in lyrs_to_add:
                     if la.name() in lyrs_to_add2:
                         subgroup = group.addGroup(la.name())
-                        checked = la.checkedLayers()
-                        for c in checked:
-                            #subgroup.addLayer(c)
-                            group.addLayer(c)
+                        group.addLayer(la)
                         
                 l.addItem(legend)
                 
@@ -788,7 +868,7 @@ class ImpresionSigmena:
                 #rlayer.loadNamedStyle(os.path.join(rutaestilos,'pendiente_10_15.qml'))
                 #QgsProject.instance().addMapLayer(rlorto)
                 vlvegetacion=QgsVectorLayer(vegetacion ,"MFE","ogr")
-                vlvegetacion.loadNamedStyle(os.path.join(rutaestilos,'FOTOFIJA2015_LEYEND_MFE.qml'))
+                vlvegetacion.loadNamedStyle(os.path.join(rutaestilos,'42_mfe_CastillayLeon.qml'))
                 QgsProject.instance().addMapLayer(vlvegetacion)
                 vlmup=QgsVectorLayer(mup ,"M.U.P.","ogr")
                 vlmup.loadNamedStyle(os.path.join(rutaestilos,'MUP.qml'))
@@ -839,20 +919,19 @@ class ImpresionSigmena:
                 # Set split to true to finish legend horizontal distribution
                 legend.setSplitLayer(False)
                 #todas las visibles de otra forma
-                lyrs_to_add = [l for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #lyrs_to_add2 = [l.name() for l in QgsProject().instance().layerTreeRoot().children() if l.isVisible()]
-                #print (lyrs_to_add2)
-                lyrs_to_add2 = ["M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras","MFE"]
+                lyrs_to_add=[]
+                tree = QgsProject.instance().layerTreeRoot()
+                for node in tree.findLayers():
+                    if node.layer().type() == QgsMapLayer.VectorLayer:
+                        lyrs_to_add.append(node.layer())
+                lyrs_to_add2 = ['MFE',"M.U.P.","Consorcios","Cortafuegos","Pistas","Puntos de agua","Rios","Cascos urbanos","Carreteras"]
                 legend.setAutoUpdateModel(False)
                 group = legend.model().rootGroup()
                 group.clear()
                 for la in lyrs_to_add:
                     if la.name() in lyrs_to_add2:
                         subgroup = group.addGroup(la.name())
-                        checked = la.checkedLayers()
-                        for c in checked:
-                            #subgroup.addLayer(c)
-                            group.addLayer(c)
+                        group.addLayer(la)
                         
                 l.addItem(legend)
                 

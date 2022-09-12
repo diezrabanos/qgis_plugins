@@ -1,0 +1,1 @@
+[r"O:/Sigmena/Carto/INFRAEST/ENERGIA/RENOV_SensibAmb/enre_cyl_sens_ambi_excl_foto.shp","Sensibilidad fotovoltaica"]

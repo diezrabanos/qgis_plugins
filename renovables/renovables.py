@@ -63,14 +63,8 @@ import tempfile
 
 import pyproj
 
-class Config:
-    def __init__(self, iface):
-        self.dlg2 = ConfigDialog()
+from .configurar_capas import parcelas,nucleos,bic,sensifoto,sensieo,regadios
 
-class XY:
-    def __init__(self, iface):
-        self.dlg3 = XYDialog()
-        
 
 class Renovables:
     """QGIS Plugin Implementation."""
@@ -100,8 +94,7 @@ class Renovables:
                 QCoreApplication.installTranslator(self.translator)
 
         self.dlg = RenovablesDialog()
-        self.dlg2 = ConfigDialog()
-        self.dlg3 = XYDialog()
+        
 
         # Declare instance attributes
         self.actions = []
@@ -113,9 +106,8 @@ class Renovables:
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
         #abre la nueva ventana de configuracion
-        self.dlg.pushButton_configurar.clicked.connect(self.configurar)
+        
         self.dlg.pushButton_ruta_capa_zona.clicked.connect(self.select_file2)
-        self.dlg2.pushButton_select_path1.clicked.connect(self.select_file1)
         self.dlg.help_button.clicked.connect(self.help_pressed)
 
         self.dlg.radioButtonSolar.toggled.connect(self.solar)
@@ -234,43 +226,10 @@ class Renovables:
         # will be set False in run()
         self.first_start = True
         
-        #cojo los parametros necesarios del archivo de configuracion
-        global rutapuestosvigiancia
-        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\configuracion.txt")
-        if os.path.isfile(rutaarchivoconfiguracion) ==True:
-            fileconfig = open(rutaarchivoconfiguracion, "r")
-            fileconfigleido=fileconfig.readlines()
-            try:
-                rutapuestosvigiancia= (fileconfigleido[0].replace('\n',''))
-                fileconfig.close()
-            except:
-                rutapuestosvigiancia=""
-                
-        if os.path.isfile(rutaarchivoconfiguracion) ==False:
-            fileconfig = open(rutaarchivoconfiguracion, "w")
-            fileconfig.close()
-            rutapuestosvigiancia=""
-            
-    def select_file1(self):
-
-        """seleciono la capa con los datos de entrada terminos municipales del sigpac"""
-        global rutapuestosvigiancia
-        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\configuracion.txt")
-        rutapuestosvigiancia = QFileDialog.getOpenFileName(self.dlg2 , "Capa con los puestos de vigilancia",None ,'SHP(*.shp)')
-        self.dlg2.ruta1.setText(rutapuestosvigiancia[0])
-        archivo=rutapuestosvigiancia[0]
-        #inserto en linea 0 el contenido
-        if len(rutapuestosvigiancia[0])>0:
-            contenido=open(rutaarchivoconfiguracion).read().splitlines()
-            contenido.insert(0,rutapuestosvigiancia[0])
-            fileconfig = open(rutaarchivoconfiguracion, "w")
-
         
-            fileconfig.writelines("\n".join(contenido))
-            fileconfig.close()
-            iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
-
-
+        
+            
+   
 
 
     def select_file2(self):
@@ -278,19 +237,13 @@ class Renovables:
         """seleciono la capa con la zona de interes para recortar o seleccionar el resto de capas predefinidas"""
         global ruta_capa_zona
         
-        ruta_capa_zona = QFileDialog.getOpenFileName(self.dlg , "Capa con la zona de interes",None ,'SHP(*.shp)')
+        ruta_capa_zona = QFileDialog.getOpenFileName(self.dlg , "Capa con la zona del parque",None ,'SHP(*.shp)')
         self.dlg.ruta_capa_zona.setText(ruta_capa_zona[0])
-        print(ruta_capa_zona)
+        #print(ruta_capa_zona)
         
     
    
-    def configurar(self):
-        contras = QInputDialog.getText(None, 'CONTRASEÑA', 'Introduce la contraseña')
-        print (contras)
-        if contras[0]=='SIGMENITA':
-            self.dlg2.show()
-        else:
-            iface.messageBar().pushMessage("PARA CONFIGURAR INRODUCIR CONTRASEÑA", qgisCore.Qgis.Warning,5)    
+    
 
     def help_pressed(self):
         help_file = 'file:' + os.path.dirname(__file__) + '/Ayuda_renovables.pdf'
@@ -317,72 +270,41 @@ class Renovables:
             tiporenovable="eolica"
             print(tiporenovable)
 
-
-
-    
     #empiezo el cruce de capas vectoriales con la zona de interes, hace una seleccion de los elementos, no un clip. los selecciona  y los guarda. capa fotovoltaicas o eolicas es el elementofijo
     def crucecapasvectoriales(self,capadetrabajo,elementofijo,carpetasalida):
-        #print("entro en crucecapasvectoriales")
-        print('elementofijo')
-        print(elementofijo)
         global resultadocapas
-        
-        
-        #global carpetasalida
-
-        
-        #carpetasalida= '/'.join(capadetrabajo.split("/")[:-1])+"/capas_intermedias"
-        #sufijo=str(elementofijo.split("/")[-1])
-        sufijo=elementofijo[1]
+        sufijo='sensibilidad'
         print ("sufijo")
         print (sufijo)
         salida=carpetasalida+"/"+sufijo
-        print ('salida')
-        print (salida)
-        #print(capadetrabajo,elementofijo)
-        #habra que hacer que carge la capa de mups.
-        #print("salida",salida)
-        
-        layer = QgsVectorLayer(elementofijo[0], sufijo, "ogr")#no es necesario con el saveselectedfeatures
-        print(layer)
+        layer = QgsVectorLayer(elementofijo, sufijo, "ogr")
         
         #deberia hacer un zum a esta capa que luego será el que utilice para hacer el mapa.
         canvas = iface.mapCanvas()
-        #vlayer= QgsVectorLayer(capadetrabajo, ' hola', "ogr")
         extent = capadetrabajo.extent()
         canvas.setExtent(extent)
         
         
         processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capadetrabajo,'METHOD':0})
-        #processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})#es lo mas facil pero cambia la codifiacion
         #guardo los selecionados con la codifiacion indicada
         selection = layer.selectedFeatures()
-        print(selection)
-        
         feats = [feat for feat in layer.selectedFeatures()]
         elementos=len(feats)
-        print(elementos)
-        print(len(feats))
         resultado1=[]
         if len(feats)==0:
             print("no afecta a RANP, ni especies protegidas, ni montes arbolados")
         if len(feats)>0:
-            #print("es poligono")  creo capa de poligonos
+            print("si afecta a RANP, o especies protegidas, o montes arbolados")  #creo capa de poligonos
             mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", sufijo, "memory")
-            
-
             mem_layer_data = mem_layer.dataProvider()
             attr = layer.dataProvider().fields().toList()
             mem_layer_data.addAttributes(attr)
             mem_layer.updateFields()
             mem_layer_data.addFeatures(feats)
-           
-            
             QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida,"utf-8",driverName="ESRI Shapefile")
             QgsProject.instance().addMapLayer(mem_layer)
-            print("ojo, afecta a algo del apartado a, b o c. Comprobar en la capa.")
             # coloreo
-            mem_layer.loadNamedStyle('R:/SIGMENA/prueba/2022/09/05/sensibilidad_fotovoltaica_estilo_boton.qml')
+            mem_layer.loadNamedStyle(os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\sensibilidad_fotovoltaica_estilo_boton.qml"))
             mem_layer.triggerRepaint()
             iface.layerTreeView().refreshLayerSymbology(mem_layer.id())
             
@@ -393,145 +315,82 @@ class Renovables:
                 ambito = feature["ambito"]
                 nombre = feature["nombre"]
                 areaexcl= feature["areaexcl"]
+                espacio=feature["espacio"]
                 
-                resultado1.append([ambito,areaexcl,nombre])
-        print('resultado1')
-        print(resultado1)
+                resultado1.append([ambito,areaexcl,nombre,espacio])
         return resultado1
             
-
-            
-
     #empiezo el cruce de capas vectoriales con la zona de interes, hace una seleccion de los elementos, no un clip. los selecciona  y los guarda. capa regadio
-    def crucecapasvectoriales2(self,capadetrabajo,elementofijo,carpetasalida):
+    def crucecapasvectoriales2(self,capadetrabajo,regadios,carpetasalida):
         #cruce con las zonas de regadio
-        
         global resultadocapas
-        
-        sufijo=elementofijo[1]
-        print ("sufijo")
-        print (sufijo)
+        sufijo='regadios'
         salida=carpetasalida+"/"+sufijo
-        print ('salida')
-        print (salida)
-        #print(capadetrabajo,elementofijo)
-        #habra que hacer que carge la capa de mups.
-        #print("salida",salida)
-        
-        layer = QgsVectorLayer(elementofijo[0], sufijo, "ogr")#no es necesario con el saveselectedfeatures
-        print(layer)
+        layer = QgsVectorLayer(regadios, sufijo, "ogr")#no es necesario con el saveselectedfeatures
         processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capadetrabajo,'METHOD':0})
-        #processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})#es lo mas facil pero cambia la codifiacion
         #guardo los selecionados con la codifiacion indicada
         selection = layer.selectedFeatures()
-        print(selection)
-        
         feats = [feat for feat in layer.selectedFeatures()]
         elementos=len(feats)
-        print(elementos)
-        print(len(feats))
         resultado4=[]
         if len(feats)==0:
             print("no afecta a zonas regables")
         if len(feats)>0:
-            #print("es poligono")  creo capa de poligonos
+            print("si afecta a zonas regables")
             mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", sufijo, "memory")
-            
-
             mem_layer_data = mem_layer.dataProvider()
             attr = layer.dataProvider().fields().toList()
             mem_layer_data.addAttributes(attr)
             mem_layer.updateFields()
             mem_layer_data.addFeatures(feats)
-           
-            
             QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida,"utf-8",driverName="ESRI Shapefile")
             QgsProject.instance().addMapLayer(mem_layer)
-            print("ojo, afecta a zonas regables")
-            #hasta aqui para guardar lo selecionado
-
+            # coloreo
+            mem_layer.loadNamedStyle(os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\regadios_estilo_boton.qml"))
+            mem_layer.triggerRepaint()
+            iface.layerTreeView().refreshLayerSymbology(mem_layer.id())
             #trato de ver a que afecta para poder escribirlo en un informe
-            
             for feature in mem_layer.getFeatures():
                 zona = feature["zona"]
                 resultado4.append([zona])
-        print('resultado4')
-        print(resultado4)
         return resultado4
-            
 
-            
-
-          
-            
-
-        
-
-    def distancia1(self,capadetrabajo,carpetasalida):
+    def distancia1(self,bic,capadetrabajo,carpetasalida):
         #voy a mirar la distancia a los bic
-        
-        #layer = QgsVectorLayer(capadetrabajo, 'capadetrabajo', "ogr")#
-        #primero los cargo
         salida=carpetasalida+"/"+'buffer.shp'
         salida2=carpetasalida+"/"+'yacimientos_afectados.shp'
         salida3=carpetasalida+"/"+'yacimientos_afectados_distancia.shp'
         salida4=carpetasalida+"/"+'bic_afectados_distancia.shp'
-        print ('salida')
-        print (salida)
-        #print(capadetrabajo,elementofijo)
-        #habra que hacer que carge la capa .
-        #print("salida",salida)
-        bic=r"O:/sigmena/carto/OTROS/BIENPATCULT/42_VW_BIENES.shp"#deberia hacer un filtro de la de yacimientos cada vez, creo que es lo mejor. o buscar todos y luego filtrar lo que son de los que nos interesan, bic solo.
+        #deberia hacer un filtro de la de yacimientos cada vez, creo que es lo mejor. o buscar todos y luego filtrar lo que son de los que nos interesan, bic solo.
         layerbic = QgsVectorLayer(bic, 'yacimientos', "ogr")#no es necesario con el saveselectedfeatures
-        print('salida')
-        print(salida)
         processing.run("native:buffer", {'DISSOLVE' : True, 'DISTANCE' : 500, 'END_CAP_STYLE' : 0, 'INPUT' :capadetrabajo,'JOIN_STYLE' : 0, 'MITER_LIMIT' : 2, 'OUTPUT' : salida, 'SEGMENTS' : 10})
         capabuffer=QgsVectorLayer(salida, 'buffer', "ogr")
-        #QgsProject.instance().addMapLayer(capabuffer)
-
         #hago la interseccion entre estas dos capas a ver si afecta a algo.
         processing.run("native:selectbylocation", {'INPUT':layerbic,'PREDICATE':[0],'INTERSECT':capabuffer,'METHOD':0})
         selection = layerbic.selectedFeatures()
-        #print(selection)
-        
         feats = [feat for feat in layerbic.selectedFeatures()]
         elementos=len(feats)
-        print(elementos)
-        print(len(feats))
-        
         resultado2=[]
-        #print("resultado2")
-        #print(resultado2)
         if len(feats)==0:
             print("no afecta a yacimientos")
         if len(feats)>0:
-            #print("es poligono")  creo capa de poligonos
+            print("si afecta a yacimientos")
             mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", 'yacimientos_afectados', "memory")
-            
-
             mem_layer_data = mem_layer.dataProvider()
             attr = layerbic.dataProvider().fields().toList()
             mem_layer_data.addAttributes(attr)
             mem_layer.updateFields()
             mem_layer_data.addFeatures(feats)
-           
-            
             QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida2,"utf-8",driverName="ESRI Shapefile")
-            #QgsProject.instance().addMapLayer(mem_layer)
-            print("ojo, afecta a yacimientos.")
-            #calcular la distancia a todos
-            processing.run('native:joinbynearest',{ 'DISCARD_NONMATCHING' : False, 'FIELDS_TO_COPY' : [], 'INPUT' : salida2, 'INPUT_2' : capadetrabajo, 'MAX_DISTANCE' : None, 'NEIGHBORS' : 1, 'OUTPUT' : salida3, 'PREFIX' : '' })
+            fix_layer_salida2 = processing.run("native:fixgeometries", {'INPUT':salida2,'OUTPUT':'memory:'})['OUTPUT']            
+            processing.run('native:joinbynearest',{ 'DISCARD_NONMATCHING' : False, 'FIELDS_TO_COPY' : [], 'INPUT' : fix_layer_salida2, 'INPUT_2' : capadetrabajo, 'MAX_DISTANCE' : None, 'NEIGHBORS' : 1, 'OUTPUT' : salida3, 'PREFIX' : '' })
             layerselecionar=QgsVectorLayer(salida3, 'yacimientos_distancia', "ogr")
-            
             state='BIENES DE INTERÉS CULTURAL'#'BIENES DE INTERÃ‰S CULTURAL'
-            expression = QgsExpression( "\"REGIMEN\"='{}' ".format( state ))#(u'"OBJECTID" = 9147')
-            #print("paso12 de agregado")
+            expression = QgsExpression( "\"REGIMEN\"='{}' ".format( state ))
             # Added / changed lines ##########
             context = QgsExpressionContext()
             scope = QgsExpressionContextScope()
             context.appendScope(scope)
-            #print("paso13 de agregado")
-            
             feats = []
             ids = []
             for feat in layerselecionar.getFeatures():
@@ -540,83 +399,43 @@ class Renovables:
                 if result:
                     feats.append(feat)
                     ids.append(feat.id())
-                    # areas.append(feat.geometry().area() )
-            print(len(ids))
-            print(ids)
-            
             if len(ids) == 0:
                 print("No afecta a BIC")
             if len(ids) > 0:
-               
-                print("paso14 de agregado")
-                
-                # prov.addFeatures(feats)
-                layerselecionar.selectByIds(ids)
-                # lyr es la capa de entrada, la origen ue contiene todos los elementos
-                
+                print("afecta a BIC")
+                layerselecionar.selectByIds(ids)   
                 QgsVectorFileWriter.writeAsVectorFormat(layerselecionar, salida4, "CP120", layerselecionar.crs(), "ESRI Shapefile",  onlySelected=True)
                 layerbiccercanos= QgsVectorLayer(salida4,'bic cercanos', "ogr")
                 QgsProject.instance().addMapLayer(layerbiccercanos)
                 # coloreo
-                layerbiccercanos.loadNamedStyle('R:/SIGMENA/prueba/2022/09/05/bic_estilo_boton.qml')
+                ruta=QgsApplication.qgisSettingsDirPath()+"python/plugins/renovables/bic_estilo_boton.qml"
+                #print(ruta)
+                layerbiccercanos.loadNamedStyle(ruta)#('R:/SIGMENA/prueba/2022/09/05/bic_estilo_boton.qml')
                 layerbiccercanos.triggerRepaint()
                 iface.layerTreeView().refreshLayerSymbology(layerbiccercanos.id())
                 #trato de ver a que afecta para poder escribirlo en un informe
                 for feature in layerbiccercanos.getFeatures():
                     denominacion = feature["A_DENO_PPA"]
-                    distance = feature["distance"]
-                    #areaexcl= feature["areaexcl"]
-                    
-                    resultado2.append([denominacion,round(distance)])
-        print("resultado2")
-        print(resultado2)        
+                    distance = feature["distance"] 
+                    resultado2.append([denominacion,round(distance)])       
         return resultado2
-        #processing.run("native:saveselectedfeatures", {'INPUT':elementofijo,'OUTPUT':salida})#es lo mas facil pero cambia la codifiacion
-        #guardo los selecionados con la codifiacion indicada
-        #selection = layer.selectedFeatures()
-        #print(selection)
-        #hago un buffer de la capa de trabajo
-
-        #{ 'DISSOLVE' : True, 'DISTANCE' : 500, 'END_CAP_STYLE' : 0, 'INPUT' : 'R:/SIGMENA/prueba/2022/08/25/borrar_prueba_solar.shp', 'JOIN_STYLE' : 0, 'MITER_LIMIT' : 2, 'OUTPUT' : 'R:/SIGMENA/prueba/2022/08/25/borrarbuffer500.shp', 'SEGMENTS' : 10 }
-        #luego los filtro y me quedo solo con los bic, no yacimientos
-        #calculo la distancia
-        #me quedo con el más cercano.
-
-
-#miro la distancia nucleos urbanos
-    def distancia2(self,capadetrabajo,carpetasalida,distancia):
+        
+    #miro la distancia nucleos urbanos
+    def distancia2(self,capadetrabajo,carpetasalida,distancia,parcelas,nucleos):
         #voy a mirar la distancia a los nucleos urbanos de la parcela en la qu eesta contenida
-        #layer = QgsVectorLayer(capadetrabajo, 'capadetrabajo', "ogr")#
-        #global afecciones
-        #primero los cargo
         salidamenosbuffer=carpetasalida+"/"+'menosbuffer.shp'#para que la interseccion de la original con las parcelas no saque las colindantes por algo minusculo
         salida=carpetasalida+"/"+'buffer2.shp'
         salida0=carpetasalida+"/"+'parcelas.shp'
         salida2=carpetasalida+"/"+'nucleos_afectados.shp'
         salida3=carpetasalida+"/"+'nucleos_afectados_distancia.shp'
-        parcelas='O:/sigmena/carto/SIGPAC/Sigpac_2022/parcelas/42_PARFE22.shp'
-        #salida4=carpetasalida+"/"+'bic_afectados_distancia.shp'
-        print ('salida')
-        print (salida)
-        #print(capadetrabajo,elementofijo)
-        #habra que hacer que carge la capa .
-        #print("salida",salida)
-        nucleos='R:/SIGMENA/prueba/2022/09/05/lu.siu_cyl_catspo_disuelto.shp'#Capa descargada del siucyl el 06092022, he dejado solo lo urbano tanto consolidado como no y no lo urbanizable. Donde no hay he metido la capa de nucleos urbanos del idecyl Limites de entidades de población CyL.
         layernucleos = QgsVectorLayer(nucleos, 'nucleos', "ogr")#no es necesario con el saveselectedfeatures
         layerparcelas = QgsVectorLayer(parcelas, 'parcelas', "ogr")
-        print('salida')
-        print(salida)
         #hago un bufer para adentro de la capa de trabajo.
         processing.run("native:buffer", {'DISSOLVE' : True, 'DISTANCE' : -1, 'END_CAP_STYLE' : 0, 'INPUT' :capadetrabajo,'JOIN_STYLE' : 0, 'MITER_LIMIT' : 2, 'OUTPUT' : salidamenosbuffer, 'SEGMENTS' : 10})
         capabuffer=QgsVectorLayer(salidamenosbuffer, 'buffer_negativo', "ogr")
-
-        
         #el input debe ser la parcela no lo que meto como zona de parque.Para ello la tengo que seleccionar las aprcelas que intecsectan.
         processing.run("native:selectbylocation", {'INPUT':layerparcelas,'PREDICATE':[0],'INTERSECT':salidamenosbuffer,'METHOD':0})
         selection = layerparcelas.selectedFeatures()
-        print('parcelas afectadas')
-        print(selection)
-        
         feats = [feat for feat in layerparcelas.selectedFeatures()]
         feats_no9000=[]
         #trato de quitar los 9000
@@ -625,96 +444,62 @@ class Renovables:
                     feats_no9000.append(feature)
             if int(feature["C_REFPAR"][-5:])>9999:
                 feats_no9000.append(feature)
-        
-        #elementos=len(feats)
         elementos=len(feats_no9000)        
-        print("parcelas afectadas")
-        print(elementos)
-        #print(len(feats))
-        #if len(feats)==0:
         if len(feats_no9000)==0:
             print("no hay parcela, debe estar fuera de la provincia")
         #if len(feats)>0:
         if len(feats_no9000)>0:    
-            #print("es poligono")  creo capa de poligonos
             mem_layer1 = QgsVectorLayer("Polygon?crs=epsg:25830", 'parcelas_afectadas', "memory")
             mem_layer_data1 = mem_layer1.dataProvider()
             attr = layerparcelas.dataProvider().fields().toList()
             mem_layer_data1.addAttributes(attr)
             mem_layer1.updateFields()
-            #mem_layer_data1.addFeatures(feats)
             mem_layer_data1.addFeatures(feats_no9000)
-            
             QgsVectorFileWriter.writeAsVectorFormat(mem_layer1,salida0,"utf-8",driverName="ESRI Shapefile")
-            
-            
-
         #hago buffer de las parcelas afectadas
         processing.run("native:buffer", {'DISSOLVE' : True, 'DISTANCE' : distancia, 'END_CAP_STYLE' : 0, 'INPUT' :salida0,'JOIN_STYLE' : 0, 'MITER_LIMIT' : 2, 'OUTPUT' : salida, 'SEGMENTS' : 10})
         capabuffer=QgsVectorLayer(salida, 'buffer', "ogr")
-        #QgsProject.instance().addMapLayer(capabuffer)
-
         #hago la interseccion entre estas dos capas a ver si afecta a algo.
         processing.run("native:selectbylocation", {'INPUT':layernucleos,'PREDICATE':[0],'INTERSECT':capabuffer,'METHOD':0})
         selection = layernucleos.selectedFeatures()
-        print(selection)
-        
         feats = [feat for feat in layernucleos.selectedFeatures()]
         elementos=len(feats)
-        print(elementos)
-        print(len(feats))
         resultado3=[]
         if len(feats)==0:
             print("no afecta a nucleos")
         if len(feats)>0:
-            #print("es poligono")  creo capa de poligonos
             mem_layer = QgsVectorLayer("Polygon?crs=epsg:25830", 'nucleos_afectados', "memory")
-            
-
             mem_layer_data = mem_layer.dataProvider()
             attr = layernucleos.dataProvider().fields().toList()
             mem_layer_data.addAttributes(attr)
             mem_layer.updateFields()
             mem_layer_data.addFeatures(feats)
-           
-            
             QgsVectorFileWriter.writeAsVectorFormat(mem_layer,salida2,"utf-8",driverName="ESRI Shapefile")
-            #QgsProject.instance().addMapLayer(mem_layer)
             print("ojo, afecta a nucleos.")
             #calcular la distancia a todos
             processing.run('native:joinbynearest',{ 'DISCARD_NONMATCHING' : False, 'FIELDS_TO_COPY' : [], 'INPUT' : salida2, 'INPUT_2' : salida0, 'MAX_DISTANCE' : None, 'NEIGHBORS' : 1, 'OUTPUT' : salida3, 'PREFIX' : '' })
             layerselecionar=QgsVectorLayer(salida3, 'nucleos_distancia', "ogr")
+            layerselecionar.setProviderEncoding(u'UTF-8')# porque me salian mal algunos caracteres.
             QgsProject.instance().addMapLayer(layerselecionar)
             # coloreo
-            layerselecionar.loadNamedStyle('R:/SIGMENA/prueba/2022/09/05/nucleos_estilo_boton.qml')
+            layerselecionar.loadNamedStyle(os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\nucleos_estilo_boton.qml"))#('R:/SIGMENA/prueba/2022/09/05/nucleos_estilo_boton.qml')
             layerselecionar.triggerRepaint()
             iface.layerTreeView().refreshLayerSymbology(layerselecionar.id())
             #si hay afeccion a nucleos, cargo la capa de parcelas, sino no.
             QgsProject.instance().addMapLayer(mem_layer1)#capa de las parcelas
             # coloreo
-            mem_layer1.loadNamedStyle('R:/SIGMENA/prueba/2022/09/05/parcela_estilo_boton.qml')
+            mem_layer1.loadNamedStyle(os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\parcela_estilo_boton.qml"))#('R:/SIGMENA/prueba/2022/09/05/parcela_estilo_boton.qml')
             mem_layer1.triggerRepaint()
             iface.layerTreeView().refreshLayerSymbology(mem_layer1.id())
             #saco datos para informe
             for feature in layerselecionar.getFeatures():
                     denominacion = feature["DENNUC"]
                     distance = feature["distance"]
-                    #areaexcl= feature["areaexcl"]
                     if [denominacion,round(distance)] not in resultado3:
                         resultado3.append([denominacion,round(distance)])
-        
-        print('resultado3')
-        print(resultado3)
         return resultado3
 
-
-    
-    def hagomapa(self,carpetasalida,tipo,nombre,resultado1,resultado2,resultado3,escala):#basado en hagomapa3 del complemento informes resultado1=capa sigmena valladolid, resultado2=bic, resultado3=nucleos urbanos, escala=escala del mapa a sacar
-        #ano1=2001
-        #ano2=2002
-        #municip=''
-        #polig=''
-        #parcel=''
+    def hagomapa(self,carpetasalida,tipo,nombre,resultado1,resultado2,resultado3,resultado4,escala):#basado en hagomapa3 del complemento informes resultado1=capa sigmena valladolid, resultado2=bic, resultado3=nucleos urbanos, escala=escala del mapa a sacar
         #para los informes en pdf
         from reportlab.platypus import SimpleDocTemplate,Paragraph,Table,TableStyle,Image
         from reportlab.lib.styles import getSampleStyleSheet
@@ -726,46 +511,32 @@ class Renovables:
         from reportlab.pdfbase.ttfonts import TTFont
         #from PyPDF2 import PdfFileWriter, PdfFileReader
         import io
-
         filePath = carpetasalida
-        
-
         #elimino capas del proeycto actual
         def eliminacapas():
-            capasinteresantes=['bic cercanos',"Capa zona interes",'parcelas_afectadas','Sensibilidad_fotovoltaica','nucleos_distancia','PNOA_2017','pnoa_2021','pnoa2020']
+            capasinteresantes=['regadios','bic cercanos',"Capa proyecto",'parcelas_afectadas','sensibilidad','nucleos_distancia','PNOA_2017','pnoa_2021','pnoa2020']
             capas =QgsProject.instance().mapLayers()
-            print(capas)
-            print(type(capas))
+            #print(capas)
+            #print(type(capas))
             for capa in capas.items():
-                print(type(capa))
-                print (capa)
-                print (capa[1].name())
+                #print(type(capa))
+                #print (capa)
+                #print (capa[1].name())
                 #print(capa[:9])
                 if capa[1].name() not in capasinteresantes :
                     #QgsProject.instance().removeMapLayers( [capa] )   
                     QgsProject.instance().layerTreeRoot().findLayer(capa[1]).setItemVisibilityChecked(False)
             del(capas)
-        
         eliminacapas()
-            
         QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 1 )
         projectInstance = QgsProject.instance()
         layoutmanager = projectInstance.layoutManager()
-        layout = layoutmanager.layoutByName("A6") #Layout name
+        layout = layoutmanager.layoutByName("A6") #Layout name  ojo importante
         mapItem = layout.referenceMap()
         mapItem.zoomToExtent(iface.mapCanvas().extent())
         mapItem.setScale(escala)
-        
-        
-
-        # cargo el wms de la ortofoto y genero el png
+        # genero el png
         imagenes=[]
-        
-            
-        
-        
-
-        #mapItem.zoomToExtent(iface.mapCanvas().extent())
         legendExporter=QgsLayoutExporter(layout)
         imageSettings=legendExporter.ImageExportSettings()
         imageSettings.cropToContents=True
@@ -775,51 +546,33 @@ class Renovables:
         archi=( filePath  + "imagen.png" )
         exporter.exportToImage(archi,imageSettings )
         imagenes.append(archi)
-        print("todas las imagenes de comienzo")
-        print (imagenes)
-        #saco valor de la imagen en varios sitios para ver si esta en blanco
-        from PIL import Image as Imagepil
-        
-                       
-        
-            
-        print( "final ",imagenes)
         #anado todas las imagenes a un pdf
         carpetasalida=filePath
         c = canvas.Canvas(carpetasalida+"/salida.pdf", pagesize=portrait(A4))#landscape(A4))  # alternatively use bottomup=False
-        ruta_logo=r"o:/sigmena/logos/color_consejeria.jpg"
+        ruta_logo=r"o:/sigmena/logos/color_consejeria.jpg"#ojo
         img_logo=Image(ruta_logo)#,, width)#250*mm,250*mm)#los numeross son opcionales para determinar el tamaño
         img_logo._restrictSize(30 * mm, 20 * mm)
         img_logo.drawOn(c,170*mm,275 * mm)
         width, height = A6
-        
         c.setFont("Helvetica-Bold", 10)
         #aqui meto un texto de cabecera
         ptext =  "PLANTA " +tipo+" de: "+nombre
         c.drawString(30*mm, 270*mm, ptext)
-        
         nmax=len(imagenes)
-        print (nmax)
-        
         #meto la imagen
         c.setFont("Helvetica", 12)
         #aqui meto un texto
         ptext = "Cartografía" 
-        print(ptext)
-        #p = Paragraph(ptext, style=styles["Normal"])
-        
-        img_data1=Image(imagenes[0],height, width)#250*mm,250*mm)#los numeross son opcionales para determinar el tamaño
-        #img_data1.wrapOn(c, 200*mm,200*mm)
-        
-            
+        img_data1=Image(imagenes[0],height, width)
         x,y=30,160#30,20
         z,t=100,130
-        #p.wrapOn(c, 50*mm, 50*mm)  # size of 'textbox' for linebreaks etc.
-        #p.drawOn(c, z * mm, t * mm)    # position of text / where to draw
         img_data1.drawOn(c,x*mm,y * mm)
-        #c.drawCentredString( z*mm, t*mm, ptext)
-        #c.drawString(z*mm, t*mm, ptext)
-        
+        #otro texto
+        ytexto=162
+        c.setFont("Helvetica-Bold", 8)
+        #aqui meto un texto 
+        ptext =  "ESCALA 1:" +str(escala)
+        c.drawString(150*mm, ytexto*mm, ptext)
         #otro texto
         ytexto=152
         c.setFont("Helvetica-Bold", 10)
@@ -829,14 +582,13 @@ class Renovables:
         ytexto=ytexto-8
         ptext =  "de la gestión de los fondos europeos y el impulso de la actividad económica"
         c.drawString(30*mm, ytexto*mm, ptext)
-        
         #otro texto
         ytexto=ytexto-8#140
         c.setFont("Helvetica", 10)
         #aqui meto un texto
         texto='NO'
         for i in range(len(resultado1)):
-            print(resultado1[i][0])
+            #print(resultado1[i][0])
             if 'RANP - 'in resultado1[i][0]:      
                 texto='SÍ'
                 break
@@ -855,19 +607,32 @@ class Renovables:
                     ptext=resultado1[i][1]+': '+resultado1[i][2]
                     c.drawString(60*mm, ytexto*mm, ptext)
                     n=n+1
-        
         #otro texto
         ytexto=ytexto-8
         c.setFont("Helvetica", 10)
         #aqui meto un texto de cabecera
         texto='NO'
+        for i in range(len(resultado1)):
+            #print(resultado1[i][0])
+            if 'Plan 'in resultado1[i][0]:      
+                texto='SÍ'
+                break
         if tipo=='FOTOVOLTAICA': 
             ptext =  "Artículo13, 2b), Terrenos incluidos en áreas críticas de las especies protegidas............."+texto
         if tipo=='EÓLICA':
             ptext =  "Artículo13, 1b), Terrenos incluidos en áreas críticas de las especies protegidas............."+texto
         c.drawString(40*mm, ytexto*mm, ptext)
+        #meto un subtexto con los datos de porque es RANP
+        if texto=='SÍ':
+            c.setFont("Helvetica", 8)
+            n=1
+            for i in range(len(resultado1)):
+                if 'Plan 'in resultado1[i][0]:
+                    ytexto=ytexto-8
+                    ptext=resultado1[i][0]+': '+resultado1[i][3]
+                    c.drawString(60*mm, ytexto*mm, ptext)
+                    n=n+1
         #otro texto
-        
         #aqui meto un texto de cabecera
         if tipo=='FOTOVOLTAICA':
             ytexto=ytexto-8
@@ -881,11 +646,8 @@ class Renovables:
             ptext =  "Artículo13, 2c), Montes arbolados....................................................................................."+texto
             c.drawString(40*mm, ytexto*mm, ptext)
             c.setFont("Helvetica", 10)
-                 
-        
         #aqui meto un texto de cabecera
         ytexto=ytexto-8
-        print(resultado2)
         if len(resultado2)==0:
             texto='NO'
         else:
@@ -925,86 +687,46 @@ class Renovables:
                     ptext=resultado3[i][0]+' a '+str(resultado3[i][1])+' metros'
                     c.drawString(60*mm, ytexto*mm, ptext)
                     n=n+1
-        
         #aqui meto un texto de cabecera
         ytexto=ytexto-8
         c.setFont("Helvetica", 10)
-        texto='NO'
+        if len(resultado4)==0:
+            texto='NO'
+        else:
+            texto='SÍ' 
         if tipo=='FOTOVOLTAICA':
-            ptext =  "Artículo13, 2f), Terrenos sobre los que se hayan desarrollado zonas regables..............."+texto
+            ptext =  "Artículo13, 2f), Terrenos sobre los que se hayan desarrollado zonas regables................"+texto
         if tipo=='EÓLICA':
-             ptext =  "Artículo13, 1e), Terrenos sobre los que se hayan desarrollado zonas regables..............."+texto
+             ptext =  "Artículo13, 1e), Terrenos sobre los que se hayan desarrollado zonas regables................"+texto
         c.drawString(40*mm, ytexto*mm, ptext)
-        
-        
-        #c.showPage()#otra pagina
-            
-        #c.drawCentredString( 100*mm, 15*mm, "- "+str(n//2+1) +" -")
+        #meto un subtexto con los datos de porque esta en regadio
+        if texto=='SÍ':
+            print(resultado4)
+            c.setFont("Helvetica", 8)
+            n=1
+            for i in range(len(resultado4)):
+                    ytexto=ytexto-8
+                    ptext=resultado4[i][0]
+                    c.drawString(60*mm, ytexto*mm, ptext)
+                    n=n+1
         c.setFont("Helvetica", 8)
         c.drawString(190*mm, 15*mm, "SIGMENA")
     
         c.save()
-        help_file = 'file:' + carpetasalida + '/salida.pdf'
-        print(help_file)
-        webbrowser.open_new(help_file)
-
-        #def analisissolar(self):#no lo uso
-        #print("voy a analizar lo solar")
-        #2a. RANP salvo mup con cultivos autorizados (habria que restar los aprovechamientos en mup)+
-        #2b areas criticas de especies protegidas con plan de conservacion  o recuperacion+
-        #montes arbolados
-        #self.interseccion1()
-        #menos de 500 m a bic
-        #self.distancia1()
-        #menos de 500 m a nucleos urbanos a parcela
-        #self.distancia2()
-        #zonas regables
-        #self.interseccion3()
-
+        result_file = 'file:' + carpetasalida + '/salida.pdf'
+        webbrowser.open_new(result_file)
                     
- 
-                    
-
     def run(self):
         print ("paso por el run")
-       
         #coloco el puntero arriba del todo
         QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
-        
-        #listado de capas con las que trabajar, a cortar
-        #CAPAS DE ESPACIOS EMAIL LOLI 20211129, las he pasado a un txt en la misma carpeta. Habria que hacer que se pudiese selecionar desde la configuracion.
-        #las capas del txt si son de poligonos se seleccionan y si son de puntos se convierten en cuadriculas de 1x1 y se filtran las que si tienen. 
-        
-        #capa con las parcelas para ver al distancia a nucleos urbanos
-        parcelas='O:/sigmena/carto/SIGPAC/Sigpac_2022/parcelas/42_PARFE22.shp'
-        #nucleos='O:/sigmena/carto/DIV_ADMI/GENERAL/42_cascos_ine_etrs89_.shp'
-        bic=r"O:/sigmena/carto/OTROS/BIENPATCULT/42_VW_BIENES.shp"#deberia hacer un filtro de la de yacimientos cada vez, creo que es lo mejor. o buscar todos y luego filtrar lo que son de los que nos interesan, bic solo.
-        sensifoto=[r"O:/Sigmena/Carto/INFRAEST/ENERGIA/RENOV_SensibAmb/enre_cyl_sens_ambi_excl_foto.shp","Sensibilidad_fotovoltaica"]#'O:/Sigmena/Carto/INFRAEST/ENERGIA/RENOV_SensibAmb/enre_cyl_sens_ambi_excl_foto.shp'
-        sensieo=[r'O:/Sigmena/Carto/INFRAEST/ENERGIA/RENOV_SensibAmb/enre_cyl_sens_amb_excl_eol.shp',"Sensibilidad_eolica"]
-        regadios=[r"R:/SIGMENA/prueba/2022/09/05/regadios.shp","Regadios"]
-        
-        #defino capas generales, no las utilizo
-                
-        mup=r'O:/sigmena/carto/PROPIEDA/MONTES/PERTENEN/Mup_etrs89.shp'#QgsVectorLayer(r'O:/sigmena/carto/PROPIEDA/MONTES/PERTENEN/Mup_etrs89.shp' ,"M.U.P.","ogr")     #OJO ESTA CAPA NO ESTA BIEN, NO ES LA BUENA AUN!!!!
-        consorcio="O:/sigmena/carto/PROPIEDA/MONTES/CONTRATO/Consorcios_etrs89.shp"#QgsVectorLayer(r"O:/sigmena/carto/PROPIEDA/MONTES/CONTRATO/Consorcios_etrs89.shp","Consorcios","ogr")
-        vvpp=r"O:/sigmena/carto/VVPP/REDVVPP/42_vvpp_etrs89.shp"#QgsVectorLayer(r"O:/sigmena/carto/VVPP/REDVVPP/42_vvpp_etrs89.shp","VVPP","ogr")
-        ren="O:/sigmena/carto/ESPACIOS/REN/42_ren_ex_etrs89.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPACIOS\REN\42_ren_ex_etrs89.shp","R.E.N","ogr")
-        zec=r"O:/sigmena/carto/ESPACIOS/NATU2000/ZEC/42_ZEC.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPACIOS\NATU2000\ZEC\42_ZEC.shp","Z.E.C","ogr")
-        zepa=r"O:/sigmena/carto/ESPACIOS/NATU2000/ZEPA/42_ZEPA.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPACIOS\NATU2000\ZEPA\42_ZEPA.shp","Z.E.P.A","ogr")
-        alondra=r"O:/sigmena/carto/ESPECIES/ESTUDIOS/CENSOS/ALONDRA RICOTI/42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp"#QgsVectorLayer(r"O:\sigmena\carto\ESPECIES\ESTUDIOS\CENSOS\ALONDRA RICOTI\42_AREAS_RELEVANCIA_ALONDRA_RICOTI_etrs89.shp","Z. Alondra","ogr")
-        yacimientos=r"O:/sigmena/carto/OTROS/BIENPATCULT/42_VW_BIENES.shp"#QgsVectorLayer(r"O:\sigmena\carto\OTROS\BIENPATCULT\42_VW_BIENES.shp","Yacimientos","ogr")
-
         #carpeta de trabajo
         carpetasalida = tempfile.mkdtemp()
         print(carpetasalida)
-  
         # show the dialog
         self.dlg.show()
         if self.first_start == True:
             self.first_start = False
-            
-        
-        
         # Run the dialog event loop
         result = self.dlg.exec_()
         # See if OK was pressed
@@ -1014,56 +736,37 @@ class Renovables:
             nombre_parque_b=self.dlg.nombre_parque.text()##displayText()
             escala=int(self.dlg.lineEdit_escala.text())
             print(ruta_capa_zona[0])
-            lyr9 = QgsVectorLayer(ruta_capa_zona[0], 'Capa zona interes', 'ogr')
+            lyr9 = QgsVectorLayer(ruta_capa_zona[0], 'Capa proyecto', 'ogr')
             QgsProject.instance().addMapLayers([lyr9])
-            #ver si estoy trabajando con solar o con eolica
-            #por defecto horizontal
+            # coloreo
+            lyr9.loadNamedStyle(os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\proyecto_estilo_boton.qml"))#('R:/SIGMENA/prueba/2022/09/05/parcela_estilo_boton.qml')
+            lyr9.triggerRepaint()
+            iface.layerTreeView().refreshLayerSymbology(lyr9.id())
+            #leo el txt y sus variables
+            #lo nuevo empieza aqui
+            myfile=open (os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\archivoconcapas.txt"))
+            myline = myfile.readline()
+            while myline:
+                print(myline)
+                exec(myline)
+                myline = myfile.readline()#para pasar a la siguiente
+            time.sleep(1)
+            #lo nuevo acaba aqui
             if self.dlg.radioButtonSolar.isChecked():
                 tiporenovable="solar"
                 resultado1=self.crucecapasvectoriales(lyr9,sensifoto,carpetasalida)
-                resultado2=self.distancia1(lyr9,carpetasalida)
-                resultado3=self.distancia2(lyr9,carpetasalida,500)
+                resultado2=self.distancia1(bic,lyr9,carpetasalida)
+                resultado3=self.distancia2(lyr9,carpetasalida,500,parcelas,nucleos)
                 resultado4=self.crucecapasvectoriales2(lyr9,regadios,carpetasalida)
-                
-                self.hagomapa(carpetasalida,'FOTOVOLTAICA',nombre_parque_b,resultado1,resultado2,resultado3,escala)
-                
+                self.hagomapa(carpetasalida,'FOTOVOLTAICA',nombre_parque_b,resultado1,resultado2,resultado3,resultado4,escala)
             if self.dlg.radioButtonEolica.isChecked():
                 tiporenovable="eolica"
                 resultado11=self.crucecapasvectoriales(lyr9,sensieo,carpetasalida)
-                resultado22=self.distancia1(lyr9,carpetasalida)
-                resultado33=self.distancia2(lyr9,carpetasalida,1000)
+                resultado22=self.distancia1(bic,lyr9,carpetasalida)
+                resultado33=self.distancia2(lyr9,carpetasalida,1000,parcelas,nucleos)
                 resultado44=self.crucecapasvectoriales2(lyr9,regadios,carpetasalida)
-                self.hagomapa(carpetasalida,'EÓLICA',nombre_parque_b,resultado11,resultado22,resultado33,escala)
-            print(tiporenovable)
-            #lista vacia con el resultado de lo que afecta y de lo que no
-            resultadocapas=[]
+                self.hagomapa(carpetasalida,'EÓLICA',nombre_parque_b,resultado11,resultado22,resultado33,resultado44,escala)
 
-            #lo nuevo empieza aqui
-            #myfile=open (os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\renovables\archivoconcapas.txt"))
-            #myline = myfile.readline()
-            #print(myline)
-            #lista_de_capas_a_cruzar=[]
-            #while myline:
-                #print(myline)
-                #titulo=myline.split("=")[0]
-                #lista_de_capas_a_cruzar.append(titulo)
-                #elemento=eval(myline.split("=")[1])
-                #elemento=eval(myline)
-                #print(elemento)
-            #self.crucecapasvectoriales(lyr9,sensifoto,carpetasalida)#tengo que ver como llamar al mup, tb layer 8 o 9
-            #print("ok")
-            
-    
-                #myline = myfile.readline()#para pasar a la siguiente
-            #myfile.close()
-            time.sleep(1)
-            
-            #lo nuevo acaba aqui
-
-
-            
-           
-                
             os.startfile(carpetasalida)
 
             

@@ -29,19 +29,6 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_configurar">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>100</y>
-     <width>61</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Configurar</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="help_button">
    <property name="geometry">
     <rect>

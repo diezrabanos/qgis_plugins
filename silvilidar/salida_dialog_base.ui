@@ -265,7 +265,7 @@ por la simplificación de la salida</string>
     <string>Fracción de Cabida Cubierta de Matorral</string>
    </property>
    <property name="checked">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

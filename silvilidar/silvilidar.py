@@ -155,44 +155,6 @@ class Silvilidar:
             status_tip=None,
             whats_this=None,
             parent=None):
-        """Add a toolbar icon to the toolbar.
-
-        :param icon_path: Path to the icon for this action. Can be a resource
-            path (e.g. ':/plugins/foo/bar.png') or a normal file system path.
-        :type icon_path: str
-
-        :param text: Text that should be shown in menu items for this action.
-        :type text: str
-
-        :param callback: Function to be called when the action is triggered.
-        :type callback: function
-
-        :param enabled_flag: A flag indicating if the action should be enabled
-            by default. Defaults to True.
-        :type enabled_flag: bool
-
-        :param add_to_menu: Flag indicating whether the action should also
-            be added to the menu. Defaults to True.
-        :type add_to_menu: bool
-
-        :param add_to_toolbar: Flag indicating whether the action should also
-            be added to the toolbar. Defaults to True.
-        :type add_to_toolbar: bool
-
-        :param status_tip: Optional text to show in a popup when mouse pointer
-            hovers over the action.
-        :type status_tip: str
-
-        :param parent: Parent widget for the new action. Defaults None.
-        :type parent: QWidget
-
-        :param whats_this: Optional text to show in the status bar when the
-            mouse pointer hovers over the action.
-
-        :returns: The action that was created. Note that the action is also
-            added to self.actions list.
-        :rtype: QAction
-        """
 
         # cambio el icon path para mi equipo.
         usuario = QgsApplication.qgisSettingsDirPath()
@@ -343,6 +305,8 @@ class Silvilidar:
             salida7 = os.path.join(carpeta, tronco + "_height.txt")
             salida8 = os.path.join(carpeta, tronco + "_height_grid_original.asc")
             salida100 = os.path.join(carpeta, tronco + "_basecopa.asc")
+            #salida101 = os.path.join(carpeta, tronco + "_profile.txt")
+            #salida102 = os.path.join(carpeta, tronco + "_skewness.txt")
 
             parametros1 = 10
             parametros1_0 = ""  # "/median:3 /wparam:2.5 /aparam:4 /bparam:4"
@@ -358,6 +322,8 @@ class Silvilidar:
             parametro7 = 2
             parametros100 = 27  # percentil del 20 por ciento
             parametros104 = 37  # percentil del 95 por ciendto
+            #parametros101 = 71  # 71 es el profile area desde la version 4.4 de fusion
+            parametros102 = 14  # 14 es el skweness
 
             entrada0 = os.path.join(carpeta, las)
             entrada1 = os.path.join(carpeta, las)
@@ -400,6 +366,14 @@ class Silvilidar:
             total5 = funcion4 + " " + entrada4 + " " + str(parametros5) + " " + salida5
             os.system(total5)
 
+            # paso5 genera un grid de profile area
+            # total101 = funcion4 + " " + entrada4 + " " + str(parametros101) + " " + salida101
+            # os.system(total101)
+
+            # paso102 genera un grid de skewness
+            #total102 = funcion4 + " " + entrada4 + " " + str(parametros102) + " " + salida102
+            #os.system(total102)
+
             # paso6 convierto en ascii
             total6 = funcion6 + " " + str(parametros6) + " " + entrada6
             os.system(total6)
@@ -407,14 +381,15 @@ class Silvilidar:
             # paso7  convierto en ascii
             total7 = funcion7 + " " + entrada1 + " " + salida7 + " " + str(parametro7)
             os.system(total7)
-            #nuevo matorral    OJO_________________________________________________________________________________________________________________________________para que no pierda tiempo se podia hacer que solo lo cree si lo tienes puesto como salida. 
+            #nuevo matorral 0.5-2   OJO_____________________________________________________________________________________________________________
+            # ____________________para que no pierda tiempo se podia hacer que solo lo cree si lo tienes puesto como salida.
             if self.dlg4.checkBox_matorral.isChecked():
                 funcion_fcc="c:/fusion/Cover"
                 salida_fcc=os.path.join(carpeta, tronco + "_fcc_matorral.dtm")
                 h_min_matorral='0.5'
                 h_max_matorral='2'
                 config_upper = "/upper:{h_max_matorral}".format(h_max_matorral=h_max_matorral)
-                total_fcc = funcion_fcc+ " " +salida2+ " " +salida_fcc+ " " +h_min_matorral+ " " +parametros2+ " " +entrada1
+                total_fcc = funcion_fcc+ " " +config_upper +" "+salida2+ " " +salida_fcc+ " " +h_min_matorral+ " " +parametros2+ " " +entrada1
                 print(total_fcc)
                 os.system(total_fcc)
                 salida_fcc_ascii=os.path.join(carpeta,  tronco + "_fcc_matorral.asc")
@@ -429,8 +404,30 @@ class Silvilidar:
                     print("fallo carga de capa")
             #_______________________________________________________________________________________________________________________________________________________
 
-            
-            
+            # nuevo matorral 0.5-2   OJO______________________________________________________________________________
+            # ___________________________________________________para que no pierda tiempo se podia hacer que solo lo cree si lo tienes puesto como salida.
+            # if self.dlg4.checkBox_matorral.isChecked():
+            #             funcion_fcc = "c:/fusion/Cover"
+            #             salida_fcc2 = os.path.join(carpeta, tronco + "_fcc_matorral1.dtm")
+            #
+            #             h_min_matorral = '2'
+            #             h_max_matorral = '5'
+            #             config_upper = "/upper:{h_max_matorral}".format(h_max_matorral=h_max_matorral)
+            #             total_fcc1 = funcion_fcc + " " + config_upper + " " + salida2 + " " + salida_fcc2 + " " + h_min_matorral + " " + parametros2 + " " + entrada1
+            #             print(total_fcc1)
+            #             os.system(total_fcc1)
+            #             salida_fcc_ascii1 = os.path.join(carpeta, tronco + "_fcc_matorral1.asc")
+            #             total_fcc21 = "c:/fusion/DTM2ASCII /raster" + " " + salida_fcc2 + " " + salida_fcc_ascii1
+            #             print(total_fcc21)
+            #             os.system(total_fcc21)
+            #             # cargo  raster fcc
+            #             fileName = total_fcc21
+            #             Layer = QgsRasterLayer(fileName, "fcc_matorral1")
+            #             QgsProject.instance().addMapLayers([Layer])
+            #             if not Layer:
+            #                 print("fallo carga de capa")
+            # _______________________________________________________________________________________________________________________________________________________
+
             # cargo  raster fcc
             fileName = salida5
             Layer = QgsRasterLayer(fileName, "fcc")
@@ -847,6 +844,11 @@ class Silvilidar:
             calculo(' hm@1 - hbc@1 ', "lc")
             StringToRaster(os.path.join(carpeta, troncoresumido + '_lc.tif'), "lc")
 
+            # StringToRaster(salida101, "profile")
+            # calculo('profile@1', "profile")
+            #StringToRaster(salida102, "skweness")
+            #calculo('skweness@1', "skweness")
+
             # genero una carpeta para los datos intermedios
             carpetap = os.path.join(carpeta, "p")
             carpeta = carpetap
@@ -868,6 +870,8 @@ class Silvilidar:
             # proyecto la longitud de copa
             calculo('(hmp@1 - hbcp@1)', 'lcp')
             StringToRaster(os.path.join(carpeta, troncoresumido + '_lcp.tif'), "lcp")
+
+
 
             # introduzco los condicionantes para cada tipo de masa
 

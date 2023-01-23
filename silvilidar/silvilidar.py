@@ -399,7 +399,30 @@ class Silvilidar:
                 # cargo  raster fcc
                 fileName = total_fcc2
                 Layer = QgsRasterLayer(fileName, "fcc_matorral")
-                QgsProject.instance().addMapLayers([Layer])
+                #QgsProject.instance().addMapLayers([Layer])
+                #nuevo para convertir nodata a fcc de 0
+                parametros = { 'COPY_SUBDATASETS' : False, 'DATA_TYPE' : 0, 'EXTRA' : '', 'INPUT' : salida_fcc_ascii,
+                               'NODATA' : -1000, 'OPTIONS' : '', 'OUTPUT' : 'TEMPORARY_OUTPUT', 'TARGET_CRS' : None }
+                fccmatorral = processing.run('gdal:translate', parametros)['OUTPUT']
+                rlayer1 = QgsRasterLayer(fccmatorral, "fccmatorral")
+                QgsProject.instance().addMapLayers([rlayer1])
+                entries = []
+                layer1 = QgsRasterCalculatorEntry()
+                layer1.ref = 'layer1@1'
+                layer1.raster = rlayer1
+                layer1.bandNumber = 1
+                entries.append(layer1)
+                # mayor de umbral
+                output_raster = carpeta + "/" + troncoresumido + '_FCC_Matorral.tif'
+                calc = QgsRasterCalculator('(layer1@1 < 0 ) * 0 +(layer1@1 >= 0 ) * layer1@1 ', output_raster, 'GTiff', rlayer1.extent(),
+                                           rlayer1.width(),
+                                           rlayer1.height(), entries)
+                calc.processCalculation()
+                rlayer2 = QgsRasterLayer(output_raster, "fccmatorral")
+                #QgsProject.instance().addMapLayers([rlayer2])
+                #HASTA AQUI EL NUEVO MATORRAL CON FCC DE 0 COMO MINIMO, SIN NO DATA
+
+
                 if not Layer:
                     print("fallo carga de capa")
             #_______________________________________________________________________________________________________________________________________________________
@@ -1095,7 +1118,7 @@ class Silvilidar:
             files = glob.glob(busca)
             out = os.path.join(carpeta, cadena.upper() + ".vrt")
             params = {'INPUT': files, 'RESOLUTION': 0, 'SEPARATE': False, 'PROJ_DIFFERENCE': False, 'ADD_ALPHA': False,
-                      'ASSIGN_CRS': None, 'RESAMPLING': 0, 'SRC_NODATA': '', 'EXTRA': '', 'OUTPUT': out}
+                      'ASSIGN_CRS': QgsProject.instance().crs().authid(), 'RESAMPLING': 0, 'SRC_NODATA': '', 'EXTRA': '', 'OUTPUT': out}
             result = processing.run("gdal:buildvirtualraster", params)
             rutacapa = result['OUTPUT']
             layer = QgsRasterLayer(rutacapa, cadena.upper())
@@ -1105,22 +1128,10 @@ class Silvilidar:
             layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + cadena + '.qml')
             layer.triggerRepaint()
             iface.layerTreeView().refreshLayerSymbology(layer.id())
+
+
             
-        def juntarasters2(cadena):
-            busca = os.path.join(carpeta, "*_" + cadena + ".asc")
-            files = glob.glob(busca)
-            out = os.path.join(carpeta, cadena.upper() + ".vrt")
-            params = {'INPUT': files, 'RESOLUTION': 0, 'SEPARATE': False, 'PROJ_DIFFERENCE': False, 'ADD_ALPHA': False,
-                      'ASSIGN_CRS': None, 'RESAMPLING': 0, 'SRC_NODATA': '', 'EXTRA': '', 'OUTPUT': out}
-            result = processing.run("gdal:buildvirtualraster", params)
-            rutacapa = result['OUTPUT']
-            layer = QgsRasterLayer(rutacapa, cadena.upper())
-            QgsProject.instance().addMapLayer(layer)
-            # coloreo
 
-            layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + cadena + '.qml')
-            layer.triggerRepaint()
-            iface.layerTreeView().refreshLayerSymbology(layer.id())
 
 
         """Run method that performs all the real work"""
@@ -1308,7 +1319,7 @@ class Silvilidar:
                 if self.dlg4.checkBox_hbc.isChecked():
                     juntarasters("hbc")
                 if self.dlg4.checkBox_matorral.isChecked():
-                    juntarasters2("fcc_matorral")
+                    juntarasters("fcc_matorral")#2
                     
 
                 """
@@ -1578,6 +1589,7 @@ class Silvilidar:
 
 
                         def filtro_raster_intervalo(nombre_raster, intervalo):
+                            print(nombre_raster, intervalo)
                             rlayer = QgsRasterLayer(carpeta[:-17]+'/'+nombre_raster+'.vrt', nombre_raster)
                             print(carpeta[:-17]+'/'+nombre_raster+'.vrt')
                             #QgsProject.instance().addMapLayer(rlayer)
@@ -1594,7 +1606,7 @@ class Silvilidar:
                             entries.append(layer1)
 
                             calc = QgsRasterCalculator(
-                                '(layer1@1 > ' + str(minimo) + ' AND layer1@1 < ' + str(maximo) + ') ',
+                                '(layer1@1 >= ' + str(minimo) + ' AND layer1@1 <= ' + str(maximo) + ') ',
                                 output_raster,
                                 'GTiff',
                                 rlayer.extent(),
@@ -1653,6 +1665,7 @@ class Silvilidar:
                             return nuevalayer
 
                         def multiplica_rasters(suffix_input):
+                            print('estoy en multiplica_rasters')
                             output_raster = carpeta + "/multilpicado.tif"
                             expr = ''
                             rasters = []
@@ -1663,7 +1676,9 @@ class Silvilidar:
                                 expr = expr + '"{}@1"*'.format(suffix)
 
                             expr = expr.rstrip('*')
+                            print(expr)
                             #print(rasters[0].source())
+                            #print(rasters[1].source())
                             alg_params = {
                                 'CELLSIZE': 0,
                                 'CRS': None,
@@ -1872,6 +1887,8 @@ class Silvilidar:
                                 resumen.append([np.mean(value), np.std(value)])
                                 print ('   Parcela-----N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.
                                 format(np.size(value), np.mean(value), np.std(value)))
+                            print('_resultado_')
+                            print(resultado)
                             return resultado, resumen
 
                         tablas_de_interes = []

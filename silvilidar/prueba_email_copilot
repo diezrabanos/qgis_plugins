@@ -1,3 +1,0 @@
-f = opener.open(url, params)
-
-

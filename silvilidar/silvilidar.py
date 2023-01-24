@@ -251,7 +251,7 @@ class Silvilidar:
 
     def run(self):
         def version_fusion_4_40():
-             """Para ver si ejecuto el profile area que solo esta a partir de esa version"""
+            """Para ver si ejecuto el profile area que solo esta a partir de esa version"""
             with open('c:/FUSION/fusionnotes.txt', 'r') as f:
                 primera_linea = f.readline()
             if '4.40' in primera_linea:

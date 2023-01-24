@@ -40,6 +40,9 @@ from .salida_dialog import SalidaDialog
 import os.path
 
 # import para procesar
+import platform
+from qgis.analysis import QgsNativeAlgorithms
+from processing.core.Processing import Processing
 from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer, QgsFeatureRequest, QgsField, QgsExpression, \
     QgsExpressionContext, QgsExpressionContextScope, QgsVectorFileWriter, QgsFillSymbol, QgsRendererCategory, \
     QgsCategorizedSymbolRenderer, QgsExpressionContextUtils, QgsApplication,QgsMapLayer,QgsPointXY,QgsGeometry,\
@@ -247,6 +250,27 @@ class Silvilidar:
 
 
     def run(self):
+        def version_fusion_4_40():
+             """Para ver si ejecuto el profile area que solo esta a partir de esa version"""
+            with open('c:/FUSION/fusionnotes.txt', 'r') as f:
+                primera_linea = f.readline()
+            if '4.40' in primera_linea:
+                return True
+            else:
+                return False
+
+
+        def bits64():
+            #para ver si ejecuto las funciones de 32 o 64 bits
+            return platform.architecture()[0] == '64bit'
+
+        def activar_processing_y_saga():
+            # activo processing y saga porque los necesita para procesar.
+            Processing.initialize()
+            QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
+            QgsApplication.processingRegistry().addProvider(QgsApplication.processingRegistry().providerById('saga'))
+
+        activar_processing_y_saga()
 
         # defino la funcion que busca los archivos las o laz que existan y le paso los parametros resultantes
         # del formulario
@@ -287,12 +311,18 @@ class Silvilidar:
             troncoresumido = patron.findall(las)[0].replace("-", "_")
 
             # definicion de parametros funciones y rutas
-            funcion1 = "c:/fusion/groundfilter"
-            funcion2 = "c:/fusion/gridsurfacecreate"
-            funcion3 = "c:/fusion/gridmetrics"
+            funcion1 = "c:/fusion/groundfilter"#64
+            funcion2 = "c:/fusion/gridsurfacecreate"#64
+            funcion3 = "c:/fusion/gridmetrics"#64
+            funcion6 = "c:/fusion/DTM2ASCII"#64
+            funcion7 = "c:/Fusion/LDA2ASCII"#64
             funcion4 = "c:/fusion/csv2grid"
-            funcion6 = "c:/fusion/DTM2ASCII"
-            funcion7 = "c:/Fusion/LDA2ASCII"
+            if bits64():
+                funcion1=funcion1+"64"
+                funcion2=funcion2+"64"
+                funcion3=funcion3+"64"
+                funcion6=funcion6+"64"
+                funcion7=funcion7+"64"
 
             salida0 = os.path.join(carpeta, a[0] + ".las")
             salida00 = os.path.join(carpeta, "filt" + a[0] + ".las")
@@ -305,7 +335,8 @@ class Silvilidar:
             salida7 = os.path.join(carpeta, tronco + "_height.txt")
             salida8 = os.path.join(carpeta, tronco + "_height_grid_original.asc")
             salida100 = os.path.join(carpeta, tronco + "_basecopa.asc")
-            #salida101 = os.path.join(carpeta, tronco + "_profile.txt")
+            if version_fusion_4_40()==True:
+                salida101 = os.path.join(carpeta, tronco + "_profile.txt")
             #salida102 = os.path.join(carpeta, tronco + "_skewness.txt")
 
             parametros1 = 10
@@ -322,8 +353,9 @@ class Silvilidar:
             parametro7 = 2
             parametros100 = 27  # percentil del 20 por ciento
             parametros104 = 37  # percentil del 95 por ciendto
-            #parametros101 = 71  # 71 es el profile area desde la version 4.4 de fusion
-            parametros102 = 14  # 14 es el skweness
+            if version_fusion_4_40():
+                parametros101 = 71  # 71 es el profile area desde la version 4.4 de fusion
+            #parametros102 = 14  # 14 es el skweness
 
             entrada0 = os.path.join(carpeta, las)
             entrada1 = os.path.join(carpeta, las)
@@ -366,9 +398,10 @@ class Silvilidar:
             total5 = funcion4 + " " + entrada4 + " " + str(parametros5) + " " + salida5
             os.system(total5)
 
-            # paso5 genera un grid de profile area
-            # total101 = funcion4 + " " + entrada4 + " " + str(parametros101) + " " + salida101
-            # os.system(total101)
+            # paso5 genera un grid de profile area solo funciona apartir de la version 4.4 de fusion
+            if version_fusion_4_40():
+                total101 = funcion4 + " " + entrada4 + " " + str(parametros101) + " " + salida101
+                os.system(total101)
 
             # paso102 genera un grid de skewness
             #total102 = funcion4 + " " + entrada4 + " " + str(parametros102) + " " + salida102
@@ -866,9 +899,9 @@ class Silvilidar:
             StringToRaster(os.path.join(carpeta, troncoresumido + '_rc.tif'), "rc")
             calculo(' hm@1 - hbc@1 ', "lc")
             StringToRaster(os.path.join(carpeta, troncoresumido + '_lc.tif'), "lc")
-
-            # StringToRaster(salida101, "profile")
-            # calculo('profile@1', "profile")
+            if version_fusion_4_40():
+                StringToRaster(salida101, "profile")
+                calculo('profile@1', "profile")
             #StringToRaster(salida102, "skweness")
             #calculo('skweness@1', "skweness")
 

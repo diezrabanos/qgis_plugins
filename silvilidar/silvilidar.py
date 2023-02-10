@@ -42,11 +42,10 @@ import os.path
 # import para procesar
 import platform
 from qgis.analysis import QgsNativeAlgorithms
-from processing.core.Processing import Processing
 from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer, QgsFeatureRequest, QgsField, QgsExpression, \
     QgsExpressionContext, QgsExpressionContextScope, QgsVectorFileWriter, QgsFillSymbol, QgsRendererCategory, \
     QgsCategorizedSymbolRenderer, QgsExpressionContextUtils, QgsApplication,QgsMapLayer,QgsPointXY,QgsGeometry,\
-    QgsRaster
+    QgsRaster,QgsCoordinateReferenceSystem
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
 # from PyQt5.QtCore import QFileInfo
@@ -259,18 +258,38 @@ class Silvilidar:
             else:
                 return False
 
-
         def bits64():
-            #para ver si ejecuto las funciones de 32 o 64 bits
+            # para ver si ejecuto las funciones de 32 o 64 bits
             return platform.architecture()[0] == '64bit'
 
+        #ojo, esto creo que da problemas
         def activar_processing_y_saga():
             # activo processing y saga porque los necesita para procesar.
             Processing.initialize()
             QgsApplication.processingRegistry().addProvider(QgsNativeAlgorithms())
             QgsApplication.processingRegistry().addProvider(QgsApplication.processingRegistry().providerById('saga'))
 
-        activar_processing_y_saga()
+        # activar_processing_y_saga()
+        def print2(objeto):
+            filename= "c:/work/silvilidar.txt"
+            if isinstance(objeto, str):
+                with open(filename, "a") as file:
+                    file.write(objeto)
+                    file.write('\n')
+            elif type(objeto) == dict:
+                with open(filename, "a") as file:
+                    for clave, valor in objeto.items():
+                        file.write(str(clave)+" "+str(valor))
+                    file.write('\n')
+            elif type(objeto) == list:
+                with open(filename, "a") as file:
+                    for elemento in objeto:
+                        file.write(elemento)
+                    file.write('\n')
+            else:
+                with open(filename, "a") as file:
+                    file.write("No se puede imprimir")
+                    file.write('\n')
 
         # defino la funcion que busca los archivos las o laz que existan y le paso los parametros resultantes
         # del formulario
@@ -303,8 +322,8 @@ class Silvilidar:
                          longitudcopaminima, crecimientofcc):
             fcstring = ""
             print("empieza exprime lidar")
-            horaepiezaexprimelidar = time.time()
-            print(horaepiezaexprimelidar)
+            #horaepiezaexprimelidar = time.time()
+            #print(horaepiezaexprimelidar)
             # defino un par de variables con el nombre del archivo y su abreviatura. Pensado para la denominacion estandar de los archivos LiDAR del PNOA
             tronco = las[:-4]
             patron = re.compile(('\d{3}\_\d{4}|\d{3}\-\d{4}|\d{4}\_\d{1}\-\d{1}'))
@@ -318,11 +337,11 @@ class Silvilidar:
             funcion7 = "c:/Fusion/LDA2ASCII"#64
             funcion4 = "c:/fusion/csv2grid"
             if bits64():
-                funcion1=funcion1+"64"
-                funcion2=funcion2+"64"
-                funcion3=funcion3+"64"
-                funcion6=funcion6+"64"
-                funcion7=funcion7+"64"
+                funcion1 = funcion1 + "64"
+                funcion2 = funcion2 + "64"
+                funcion3 = funcion3 + "64"
+                funcion6 = funcion6 + "64"
+                funcion7 = funcion7 + "64"
 
             salida0 = os.path.join(carpeta, a[0] + ".las")
             salida00 = os.path.join(carpeta, "filt" + a[0] + ".las")
@@ -355,7 +374,7 @@ class Silvilidar:
             parametros104 = 37  # percentil del 95 por ciendto
             if version_fusion_4_40():
                 parametros101 = 71  # 71 es el profile area desde la version 4.4 de fusion
-            #parametros102 = 14  # 14 es el skweness
+            # parametros102 = 14  # 14 es el skweness
 
             entrada0 = os.path.join(carpeta, las)
             entrada1 = os.path.join(carpeta, las)
@@ -398,7 +417,7 @@ class Silvilidar:
             total5 = funcion4 + " " + entrada4 + " " + str(parametros5) + " " + salida5
             os.system(total5)
 
-            # paso5 genera un grid de profile area solo funciona apartir de la version 4.4 de fusion
+            # paso5 genera un grid de profile area solo funciona a partir de la version 4.4 de fusion
             if version_fusion_4_40():
                 total101 = funcion4 + " " + entrada4 + " " + str(parametros101) + " " + salida101
                 os.system(total101)
@@ -417,6 +436,7 @@ class Silvilidar:
             #nuevo matorral 0.5-2   OJO_____________________________________________________________________________________________________________
             # ____________________para que no pierda tiempo se podia hacer que solo lo cree si lo tienes puesto como salida.
             if self.dlg4.checkBox_matorral.isChecked():
+                #print2("voy a crear el matorral")
                 funcion_fcc="c:/fusion/Cover"
                 salida_fcc=os.path.join(carpeta, tronco + "_fcc_matorral.dtm")
                 h_min_matorral='0.5'
@@ -435,29 +455,36 @@ class Silvilidar:
                 #QgsProject.instance().addMapLayers([Layer])
                 #nuevo para convertir nodata a fcc de 0
                 parametros = { 'COPY_SUBDATASETS' : False, 'DATA_TYPE' : 0, 'EXTRA' : '', 'INPUT' : salida_fcc_ascii,
-                               'NODATA' : -1000, 'OPTIONS' : '', 'OUTPUT' : 'TEMPORARY_OUTPUT', 'TARGET_CRS' : None }
-                fccmatorral = processing.run('gdal:translate', parametros)['OUTPUT']
-                rlayer1 = QgsRasterLayer(fccmatorral, "fccmatorral")
-                QgsProject.instance().addMapLayers([rlayer1])
-                entries = []
-                layer1 = QgsRasterCalculatorEntry()
-                layer1.ref = 'layer1@1'
-                layer1.raster = rlayer1
-                layer1.bandNumber = 1
-                entries.append(layer1)
-                # mayor de umbral
-                output_raster = carpeta + "/" + troncoresumido + '_FCC_Matorral.tif'
-                calc = QgsRasterCalculator('(layer1@1 < 0 ) * 0 +(layer1@1 >= 0 ) * layer1@1 ', output_raster, 'GTiff', rlayer1.extent(),
-                                           rlayer1.width(),
-                                           rlayer1.height(), entries)
-                calc.processCalculation()
-                rlayer2 = QgsRasterLayer(output_raster, "fccmatorral")
-                #QgsProject.instance().addMapLayers([rlayer2])
-                #HASTA AQUI EL NUEVO MATORRAL CON FCC DE 0 COMO MINIMO, SIN NO DATA
+                               'NODATA' : -1000, 'OPTIONS' : '', 'OUTPUT' : 'TEMPORARY_OUTPUT', 'TARGET_CRS' : QgsProject.instance().crs().authid() }
+                try:
+                    fccmatorral = processing.run('gdal:translate', parametros)['OUTPUT']
+                    rlayer1 = QgsRasterLayer(fccmatorral, "fccmatorral")
+                    QgsProject.instance().addMapLayers([rlayer1])
+                    entries = []
+                    layer1 = QgsRasterCalculatorEntry()
+                    layer1.ref = 'layer1@1'
+                    layer1.raster = rlayer1
+                    layer1.bandNumber = 1
+                    entries.append(layer1)
+                    # mayor de umbral
+                    output_raster = carpeta + "/" + troncoresumido + '_FCC_Matorral.tif'
+                    calc = QgsRasterCalculator('(layer1@1 < 0 ) * 0 +(layer1@1 >= 0 ) * layer1@1 ', output_raster,
+                                               'GTiff', rlayer1.extent(),
+                                               rlayer1.width(),
+                                               rlayer1.height(), entries)
+                    calc.processCalculation()
+                    rlayer2 = QgsRasterLayer(output_raster, "fccmatorral")
+                    # QgsProject.instance().addMapLayers([rlayer2])
+                    # HASTA AQUI EL NUEVO MATORRAL CON FCC DE 0 COMO MINIMO, SIN NO DATA
+                    if not Layer:
+                        print("fallo carga de capa")
+                except:
+                    iface.messageBar().pushMessage("SILVILIDAR",
+                                                   "Es necesario tener activado el complemento procesos. Si se reinicia QGIS, se activará automáticamente.",
+                                                   duration=10)
+                    time.sleep(10)
 
 
-                if not Layer:
-                    print("fallo carga de capa")
             #_______________________________________________________________________________________________________________________________________________________
 
             # nuevo matorral 0.5-2   OJO______________________________________________________________________________
@@ -530,59 +557,9 @@ class Silvilidar:
 
             # defino funcion para crear una capa shape que generalice los datos de un raster    filtro es el nivel de generalizacion entre 0 y 1
             def agregado(rasterdeentrada, filtro):
-
-
-
-                """
-                    # suavizado
-                    parametros = {'INPUT': rlayer.source(), 'METHOD': 0, 'MODE': 1, 'RADIUS': 4,
-                                  'RESULT': carpeta + "/suavizado.sdat"}
-                    suavizado = processing.run('saga:simplefilter', parametros)['RESULT']
-                    rlayer1 = QgsRasterLayer(suavizado, "suavizado")
-                    # QgsProject.instance().addMapLayers([rlayer1])
-                    # filtrado
-                    entries = []
-                    layer1 = QgsRasterCalculatorEntry()
-                    layer1.ref = 'layer1@1'
-                    layer1.raster = rlayer1
-                    layer1.bandNumber = 1
-                    entries.append(layer1)
-                    # mayor de umbral
-                    output_raster = carpeta + "/suavizado_seleccionado.tif"
-                    calc = QgsRasterCalculator('(layer1@1 > 0.2 )', output_raster, 'GTiff', rlayer1.extent(),
-                                               rlayer1.width(),
-                                               rlayer1.height(), entries)
-                    calc.processCalculation()
-                    rlayer2 = QgsRasterLayer(output_raster, "suavizado_seleccionado")
-                    # QgsProject.instance().addMapLayers([rlayer2])
-                    # suavizado2
-                    parametros = {'INPUT': rlayer2.source(), 'METHOD': 0, 'MODE': 1, 'RADIUS': 2,
-                                  'RESULT': carpeta + "/suavizado2.sdat"}
-                    suavizado2 = processing.run('saga:simplefilter', parametros)['RESULT']
-                    rlayer3 = QgsRasterLayer(suavizado2, "suavizado2")
-                    # QgsProject.instance().addMapLayers([rlayer3])
-                    # filtrado2
-                    entries = []
-                    layer2 = QgsRasterCalculatorEntry()
-                    layer2.ref = 'layer2@1'
-                    layer2.raster = rlayer3
-                    layer2.bandNumber = 1
-                    entries.append(layer2)
-                    # mayor de umbral
-                    output_raster = carpeta + "/suavizado_seleccionado2.tif"
-                    calc = QgsRasterCalculator('(layer2@1 > 0.5 )', output_raster, 'GTiff', rlayer3.extent(),
-                                               rlayer3.width(),
-                                               rlayer3.height(), entries)
-                    calc.processCalculation()
-                    rlayer4 = QgsRasterLayer(output_raster, "suavizado_seleccionado2")
-                    #QgsProject.instance().addMapLayers([rlayer4])
-                    return rlayer4
-                    """
-
-                # try:
                 # filtro para rellenar huecos
                 print("empieza agregado")
-                horaempiezaagregado = time.time()
+                #horaempiezaagregado = time.time()
                 # suavizado
                 input1 = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '1.tif')
                 output1 = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '2.sdat')
@@ -619,90 +596,6 @@ class Silvilidar:
                 rlayer4 = QgsRasterLayer(output4, "suavizado_seleccionado2")
                 QgsProject.instance().addMapLayers([rlayer4])
                 
-                #return rlayer4
-
-                    
-                """
-                # filtro y me quedo con lo mayor de 0,99
-                calc = QgsRasterCalculator("'" + rasterdeentrada + '1n@1 > 0.9999999',
-                                           os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '1nf.tif'),
-                                           'GTiff',
-                                           layerglobal.extent(),
-                                           layerglobal.width(),
-                                           layerglobal.height(),
-                                           entries)
-                calc.processCalculation()
-                del (calc)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '1nf.tif'),
-                               rasterdeentrada + str("1nf"))
-
-                # filtro gausian para dar valor en funcion de los vecinos
-                input = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '1nf.tif')
-                result = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + 'g2.sdat')
-                params = {'INPUT': input, 'MODE': 1, 'RADIUS': 5, 'SIGMA': 1, 'RESULT': result}
-                processing.run('saga:gaussianfilter', params)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + 'g2.sdat'),
-                               rasterdeentrada + str("g2"))
-
-                # filtro y me quedo con lo mayor de un valor
-                calc = QgsRasterCalculator("'" + rasterdeentrada + 'g2@1 > ' + str(filtro) + "'",
-                                           os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + 'g2s.tif'),
-                                           'GTiff',
-                                           layerglobal.extent(),
-                                           layerglobal.width(),
-                                           layerglobal.height(),
-                                           entries)
-                calc.processCalculation()
-                del (calc)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + 'g2s.tif'),
-                               rasterdeentrada + str("g2s"))
-
-                # filtro  filter clums eliminar los huecos menores de 1300 m2
-                input = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + 'g2s.tif')
-                result = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '3.sdat')
-                params = {'GRID': input, 'OUTPUT': result, 'THRESHOLD': 13}
-                processing.run('saga:removesmallpixelclumpstonodata', params)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '3.sdat'),
-                               rasterdeentrada + str("3"))
-
-                # filtro para rellenar huecos pequenos
-                print("paso5 de agregado")
-                input = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '3.sdat')
-                output = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '31.tif')
-                params = {'INPUT': input, 'DISTANCE': 3, 'BAND': 1, 'ITERATIONS': 0, 'NO_MASK': False, 'OUTPUT': output}
-                processing.run('gdal:fillnodata', params)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '31.tif'),
-                               rasterdeentrada + str("31"))
-
-                # filtro mayorityffilter para dar valor en funcion de los vecinos
-                print("paso6 de agregado")
-                input = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '31.tif')
-                result = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '4.sdat')
-                params = {'INPUT': input, 'MODE': 0, 'RADIUS': 1, 'RESULT': result, 'THRESHOLD': 4}
-                processing.run('saga:majorityfilter', params)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '4.sdat'),
-                               rasterdeentrada + str("4"))
-
-                # filtro  filter clums eliminar los huecos
-                print("paso7 de agregado")
-                input = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '4.sdat')
-                min = 5
-                result = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '6.tif')
-                params = {'EIGHT_CONNECTEDNESS': False, 'INPUT': input, 'MASK_LAYER': None, 'NO_MASK': False,
-                          'OUTPUT': result, 'THRESHOLD': 5}
-                processing.run('gdal:sieve', params)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '6.tif'),
-                               rasterdeentrada + str("6"))
-
-                # filtro para rellenar huecos pequenos
-                print("paso8 de agregado")
-                input = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '6.tif')
-                output = os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '7.tif')
-                params = {'INPUT': input, 'DISTANCE': 3, 'BAND': 1, 'ITERATIONS': 0, 'NO_MASK': False, 'OUTPUT': output}
-                processing.run('gdal:fillnodata', params)
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_' + rasterdeentrada + '7.tif'),
-                               rasterdeentrada + str("7"))
-                """
 
                 # lo vectorizo
                 print("paso9 de agregado")
@@ -745,22 +638,14 @@ class Silvilidar:
                         ids.append(feat.id())
                         # areas.append(feat.geometry().area() )
                 ################
-                horaacabaagregado0 = time.time()
-                print("tiempo agregado0")
-                print(horaempiezaagregado - horaacabaagregado0)
+                #horaacabaagregado0 = time.time()
+                #print("tiempo agregado0")
+                #print(horaempiezaagregado - horaacabaagregado0)
                 if len(ids) > 0:
                     # print ("len feats")
                     # print( len( feats))
                     print("paso14 de agregado")
-                    """epsg = layer.crs().postgisSrid()
-                        uri = "Polygon?crs=epsg:" + str(epsg) + "&field=id:integer""&index=yes"
-                        mem_layer = QgsVectorLayer(uri, 'mem_layer', 'memory')
-                        prov = mem_layer.dataProvider()
-                        print ("paso15 de agregado")"""
-                    """for i, feat in enumerate(feats):
-                            #feat.setAttributes([i])
-                            mem_layer.addFeature(feat)
-                            ids.append(feat.id())"""
+
                     # prov.addFeatures(feats)
                     lyr.selectByIds(ids)
                     # lyr es la capa de entrada, la origen ue contiene todos los elementos
@@ -836,15 +721,6 @@ class Silvilidar:
                         # print ("len feats")
                         # print( len( feats))
                         print("paso14 de agregado")
-                        """epsg = layer.crs().postgisSrid()
-                            uri = "Polygon?crs=epsg:" + str(epsg) + "&field=id:integer""&index=yes"
-                            mem_layer = QgsVectorLayer(uri, 'mem_layer', 'memory')
-                            prov = mem_layer.dataProvider()
-                            print ("paso15 de agregado")"""
-                        """for i, feat in enumerate(feats):
-                                #feat.setAttributes([i])
-                                mem_layer.addFeature(feat)
-                                ids.append(feat.id())"""
                         # prov.addFeatures(feats)
                         lyr2.selectByIds(ids)
                         # lyr es la capa de entrada, la origen ue contiene todos los elementos
@@ -855,28 +731,11 @@ class Silvilidar:
                                               rasterdeentrada + str("3"), "ogr")
                         QgsProject.instance().addMapLayer(lyr3)
                         print("en teoria ha hecho la seleccion2")
-                        horaacabaagregado1 = time.time()
-                        print("tiempoacabaagregado1")
-                        print(horaacabaagregado1 - horaacabaagregado0)
+                        #horaacabaagregado1 = time.time()
+                        #print("tiempoacabaagregado1")
+                        #print(horaacabaagregado1 - horaacabaagregado0)
 
-                    """ layer2=QgsVectorLayer(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'2.shp'),rasterdeentrada+str("2"),"ogr")
-                        print ("pasa por aqui6")
-                        QgsProject.instance().addMapLayers([layer2])
-                        print ("pasa por aqui7")
-                        selection = layer2.getFeatures(QgsFeatureRequest().setFilterExpression(u'"area" > 2500'))
-                        print ("pasa por aqui8")
-                        elementos=len(list(selection))
-                        print (elementos)
-                        if elementos >0:
-                            selection = layer2.getFeatures(QgsFeatureRequest().setFilterExpression(u'"area" > 2500'))#lo repito porque se pierde
-                            selecionado = layer2.setSelectedFeatures([s.id() for s in selection])
-                            print (selecionado)
-                            params={ 'INPUT' : os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'2.shp'), 'OUTPUT' : os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.shp') }
-                            processing.run("qgis:saveselectedfeatures",params)
-                            print("ha chutado")
-                            layer3=QgsVectorLayer(os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'3.shp'),rasterdeentrada+str("3"),"ogr")
-                            QgsProject.instance().addMapLayer(layer3)
-                            print("ha cargado el layer3")"""
+
                     # else:
                     #   print("pass en el agregado")
                     #  pass
@@ -887,8 +746,8 @@ class Silvilidar:
             #   pass
             # calculo las variables basicas sin proyectar
             print("empieza calculo las variables basicas sin proyectar")
-            horaepiezacalculovariabesbasicas = time.time()
-            print(horaepiezacalculovariabesbasicas)
+            #horaepiezacalculovariabesbasicas = time.time()
+            #print(horaepiezacalculovariabesbasicas)
             StringToRaster(salida5, "fcc")
             calculo('fcc@1', "fcc")
             StringToRaster(salida4, "hm")
@@ -899,6 +758,7 @@ class Silvilidar:
             StringToRaster(os.path.join(carpeta, troncoresumido + '_rc.tif'), "rc")
             calculo(' hm@1 - hbc@1 ', "lc")
             StringToRaster(os.path.join(carpeta, troncoresumido + '_lc.tif'), "lc")
+
             if version_fusion_4_40():
                 StringToRaster(salida101, "profile")
                 calculo('profile@1', "profile")
@@ -1017,13 +877,13 @@ class Silvilidar:
 
             StringToRaster(os.path.join(carpeta, troncoresumido + '_V.tif'), "vol")
 
-            horaepiezacalculotiposdemasa = time.time()
-            print("tiempo en raster")
-            print(horaepiezacalculotiposdemasa - horaepiezacalculovariabesbasicas)
+            #horaepiezacalculotiposdemasa = time.time()
+            #print("tiempo en raster")
+            #print(horaepiezacalculotiposdemasa - horaepiezacalculovariabesbasicas)
             # empiezo carga de capas c
             print("empieza cargadecapastipos")
-            horaepiezacargadecapastipos = time.time()
-            print(horaepiezacargadecapastipos)
+            #horaepiezacargadecapastipos = time.time()
+            #print(horaepiezacargadecapastipos)
             StringToRaster(os.path.join(carpeta, troncoresumido + '_C1.tif'), "c1")
             StringToRaster(os.path.join(carpeta, troncoresumido + '_C2.tif'), "c2")
             StringToRaster(os.path.join(carpeta, troncoresumido + '_C3.tif'), "c3")
@@ -1062,8 +922,16 @@ class Silvilidar:
 
             # lo vectorizo
             parameters = {'INPUT': os.path.join(carpeta, troncoresumido + '_suma.tif'), 'BAND': 1, 'FIELD': "DN",
-                          'EIGHT_CONNECTEDNESS': False, 'OUTPUT': os.path.join(carpeta, troncoresumido + '_suma.shp')}
-            processing.runAndLoadResults("gdal:polygonize", parameters)
+                          'EIGHT_CONNECTEDNESS': False, 'OUTPUT': os.path.join(carpeta, troncoresumido + '_suma.shp')} #ojo mirar si hay que quitar el eight connectedness
+            try:
+                processing.run("gdal:polygonize", parameters)
+            except:
+                iface.messageBar().pushMessage("SILVILIDAR",
+                                               "Es necesario tener activado el complemento procesos. Si se reinicia QGIS, se activará automáticamente.",
+                                               duration=10)
+                time.sleep(10)
+            # lyr = QgsVectorLayer(os.path.join(carpeta, troncoresumido + '_suma.shp'), "nombre", "ogr")
+            #print2('vectorizado la suma de las capas c')
             # processing.run("gdalogr:polygonize",os.path.join(carpeta,troncoresumido+'_suma.tif'),"DN",os.path.join(carpeta,troncoresumido+'_suma.shp'))
             # sumashp=QgsVectorLayer(os.path.join(carpeta,troncoresumido+'_suma.shp'),"sumashp","ogr")
             # QgsMapLayerRegistry.instance().addMapLayer(sumashp)
@@ -1106,7 +974,7 @@ class Silvilidar:
         # defino una funcion que une en una capa el resultado de todas las hojas
         def juntoshapes(busca, salida):
             print("empieza juntoshapes")
-            horaepiezajuntoshapes = time.time()
+            #horaepiezajuntoshapes = time.time()
             files = glob.glob(busca)
             out = os.path.join(carpeta, salida + ".shp")
             entradas = ";".join(files)
@@ -1116,7 +984,7 @@ class Silvilidar:
             print(entrada)
             print("entradas")
             print(entradas)
-            params = {'LAYERS': entrada, 'OUTPUT': out, 'CRS': None}
+            params = {'LAYERS': entrada, 'OUTPUT': out, 'CRS': QgsProject.instance().crs().authid()}
             if len(files) > 100:
                 lista1 = files[:len(files) / 2]
                 lista2 = files[len(files) / 2:]
@@ -1128,6 +996,7 @@ class Silvilidar:
                 processing.run('native:mergevectorlayers', params)
             elif len(files) > 1 and len(files) <= 100:
                 processing.run('native:mergevectorlayers', params)
+
             elif len(
                     files) == 1:  #### metodo bueno de selecionar y guardar mirar tiempos para ver si esta es mejor a la que tengo en agregate
                 layer2 = QgsVectorLayer(files[0], "entrada", "ogr")
@@ -1136,14 +1005,15 @@ class Silvilidar:
                 selecionado = layer2.selectByIds([s.id() for s in selection])
                 params = {'INPUT': files[0], 'OUTPUT': out}
                 processing.run("native:saveselectedfeatures", params)
+
             else:
                 pass
             del (out)
             del (entrada)
             del (files)
-            horaacabajuntoshapes = time.time()
-            print("tiempo junto shapes")
-            print(horaepiezajuntoshapes - horaacabajuntoshapes)
+            #horaacabajuntoshapes = time.time()
+            #print("tiempo junto shapes")
+            #print(horaepiezajuntoshapes - horaacabajuntoshapes)
 
         # defino una funcion que une en una capa el resultado de todas las hojas raster, hace un grid de lo que encuentre con la cadena
         def juntarasters(cadena):
@@ -1152,16 +1022,21 @@ class Silvilidar:
             out = os.path.join(carpeta, cadena.upper() + ".vrt")
             params = {'INPUT': files, 'RESOLUTION': 0, 'SEPARATE': False, 'PROJ_DIFFERENCE': False, 'ADD_ALPHA': False,
                       'ASSIGN_CRS': QgsProject.instance().crs().authid(), 'RESAMPLING': 0, 'SRC_NODATA': '', 'EXTRA': '', 'OUTPUT': out}
-            result = processing.run("gdal:buildvirtualraster", params)
-            rutacapa = result['OUTPUT']
-            layer = QgsRasterLayer(rutacapa, cadena.upper())
-            QgsProject.instance().addMapLayer(layer)
-            # coloreo
+            try:
+                result = processing.run("gdal:buildvirtualraster", params)
+                rutacapa = result['OUTPUT']
+                layer = QgsRasterLayer(rutacapa, cadena.upper())
+                QgsProject.instance().addMapLayer(layer)
+                # coloreo
 
-            layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + cadena + '.qml')
-            layer.triggerRepaint()
-            iface.layerTreeView().refreshLayerSymbology(layer.id())
-
+                layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + cadena + '.qml')
+                layer.triggerRepaint()
+                iface.layerTreeView().refreshLayerSymbology(layer.id())
+            except:
+                iface.messageBar().pushMessage("SILVILIDAR",
+                                               "Es necesario tener activado el complemento procesos. Si se reinicia QGIS, se activará automáticamente.",
+                                               duration=10)
+                time.sleep(10)
 
             
 
@@ -1178,7 +1053,7 @@ class Silvilidar:
             # self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
             print("inicio el boton en el gui")
             # self.dlg.pushButton_select_path.setEnabled(True)
-            print("pone le boton como habiltado")
+            print("pone le boton como habilitado")
 
         # show the dialog
         self.dlg.show()
@@ -1189,6 +1064,10 @@ class Silvilidar:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+            #compruebo que este activo el plugin de processing y saga
+            QSettings().setValue('/PythonPlugins/processing', 'true')
+            QSettings().setValue('/PythonPlugins/sagaprovider', 'true')
+
             index = self.dlg.tab.currentIndex()
             if index == 0:
                 print(self.tr(u'EMPEZAMOS'))
@@ -1199,42 +1078,23 @@ class Silvilidar:
                 # la carpeta la he cogido al pulsar el boton de la carpeta
 
                 # meto aqui variables que luego deberan estar en la cajita   OJO
-                hcorte2 = self.dlg2.hcorte2.text()
-                crecimiento = self.dlg3.crecimiento.text()  ##displayText()
-                fccbaja = self.dlg2.fccbaja.text()  ##displayText()
-                fccterrazas = self.dlg2.fccterrazas.text()  ##displayText()
-                fccmedia = self.dlg2.fccmedia.text()  ##displayText()
-                fccalta = self.dlg2.fccalta.text()  ##displayText()
-                hmontebravoe = self.dlg2.hmontebravoe.text()  ##displayText()
-                hmontebravo = self.dlg2.hmontebravo.text()  ##displayText()
-                hselvicolas = self.dlg2.hselvicolas.text()  ##displayText()
-                hclaras = self.dlg2.hclaras.text()  # displayText()
-                hclaras2 = self.dlg2.hclaras2.text()  # displayText()
-                hbcminima = self.dlg2.hbcminima.text()  # displayText()
-                hbcdesarrollado = self.dlg2.hbcdesarrollado.text()  # displayText()
-                rcclaras = self.dlg2.rcclaras.text()  # displayText()
-                rcextremo = self.dlg2.rcextremo.text()  # displayText()
-                longitudcopaminima = self.dlg2.longitudcopaminima.text()  ##displayText()
-                crecimientofcc = self.dlg3.crecimientofcc.text()  ##displayText()
-                """hcorte2= 2
-                crecimiento= 1.5
-                fccbaja=20.0
-                fccterrazas=57.5
-                fccmedia=46.0
-                fccalta=95.0
-                hmontebravoe=3.5
-                hmontebravo=5.0
-                hselvicolas=7.5
-                hclaras=12.0
-                hclaras2=16.5
-                hbcminima=3.0
-                hbcdesarrollado= 5.5
-                rcclaras=35.0
-                rcextremo=17.0
-                longitudcopaminima=3.25
-                crecimientofcc=12.5"""
-
-                # AQUI ACABA
+                hcorte2 = self.dlg2.hcorte2.text()#2
+                crecimiento = self.dlg3.crecimiento.text()  ##displayText()1.5
+                fccbaja = self.dlg2.fccbaja.text()  ##displayText()20.0
+                fccterrazas = self.dlg2.fccterrazas.text()  ##displayText()57.5
+                fccmedia = self.dlg2.fccmedia.text()  ##displayText()46.0
+                fccalta = self.dlg2.fccalta.text()  ##displayText()95.0
+                hmontebravoe = self.dlg2.hmontebravoe.text()  ##displayText()3.5
+                hmontebravo = self.dlg2.hmontebravo.text()  ##displayText()5.0
+                hselvicolas = self.dlg2.hselvicolas.text()  ##displayText()7.5
+                hclaras = self.dlg2.hclaras.text()  # displayText()12.0
+                hclaras2 = self.dlg2.hclaras2.text()  # displayText()16.5
+                hbcminima = self.dlg2.hbcminima.text()  # displayText()3.0
+                hbcdesarrollado = self.dlg2.hbcdesarrollado.text()  # displayText()5.5
+                rcclaras = self.dlg2.rcclaras.text()  # displayText()35.0
+                rcextremo = self.dlg2.rcextremo.text()  # displayText()17.0
+                longitudcopaminima = self.dlg2.longitudcopaminima.text()  ##displayText()3.25
+                crecimientofcc = self.dlg3.crecimientofcc.text()  ##displayText()12.5
 
                 # compruebo que capas estan cargadas en el proyecto al iniciar el script
                 capasoriginales = QgsProject.instance().mapLayers()
@@ -1262,16 +1122,81 @@ class Silvilidar:
                         QgsProject.instance().removeMapLayers([capa])
                 del (capas)
 
-                # cargo las capas finales
-                teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged.shp'), "Teselas", "ogr")
-                teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'), "Teselas Proyectado1",
-                                          "ogr")
-                teselas2 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado2.shp'), "Teselas Proyectado2",
-                                          "ogr")
+
+
+                # cargo los rasters virtuales si chekeado en la salidas
+                if self.dlg4.checkBox_altura.isChecked():
+                    juntarasters("hm")
+                if self.dlg4.checkBox_fcc.isChecked():
+                    juntarasters("fcc")
+                if self.dlg4.checkBox_rc.isChecked():
+                    juntarasters("rc")
+                if self.dlg4.checkBox_lc.isChecked():
+                    juntarasters("lc")
+                if self.dlg4.checkBox_hbc.isChecked():
+                    juntarasters("hbc")
+                if self.dlg4.checkBox_matorral.isChecked():
+                    juntarasters("fcc_matorral")
+                    
+                # cargo las capas finales vectoriales
+                if self.dlg4.checkBox_teselas.isChecked():
+                    teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged.shp'), "Teselas", "ogr")
+                    teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'), "Teselas Proyectado1",
+                                              "ogr")
+                    teselas2 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado2.shp'), "Teselas Proyectado2",
+                                              "ogr")
+
+                    # coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
+
+                    # ordeno los elementos de teselas ojo ojo
+                    # ordenados=coloresteselas.items()
+                    # ordenados.sort(key=lambda clave: str(clave[1][3]))
+                    # me salto el orden del diccionario
+                    ordenados = [('1', ('solid', '255,255,204,255', 'Raso o Regenerado', '001')),
+                                 ('2', ('solid', '255,255,0,255', 'Menor (Monte Bravo)', '002')),
+                                 ('17',
+                                  ('solid', 'orange', 'Bajo Latizal No Concurrente o Latizal Encinar no Denso', '003')),
+                                 (
+                                     '3', (
+                                         'vertical', '255,192,0,255',
+                                         'Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)',
+                                         '004')),
+                                 ('4', ('solid', '255,204,153,255', 'Bajo Latizal Desarrollado', '005')),
+                                 (
+                                 '51', ('b_diagonal', '255,0,255,255', 'Resalveo en Latizal poco desarrollado', '006')),
+                                 ('52', ('f_diagonal', '255,0,0,255', 'Resalveo o clareo en Latizal', '007')),
+                                 ('61', ('solid', '255,153,255,255', 'Latizal poco desarrollado Tratado', '008')),
+                                 ('62', ('solid', '255,124,128,255', 'Latizal Tratado', '009')),
+                                 ('7', ('solid', '204,255,153,255', 'Alto Latizal Claro', '010')),
+                                 ('81', ('b_diagonal', '146,208,80,255', 'Poda Alta y Clara Suave en Latizal', '011')),
+                                 ('9', ('f_diagonal', '0,176,80,255', 'Primera Clara y Poda Alta', '012')),
+                                 ('10', ('solid', '102,255,153,255', 'Alto Latizal Aclarado', '013')),
+                                 ('111', ('solid', '102,255,255,255', 'Fustal Claro', '014')), ('82', (
+                            'b_diagonal', '51,204,204,255', 'Poda Alta y Clara Suave en Monte Desarrollado', '015')),
+                                 ('121', ('f_diagonal', '0,176,255,240', 'Clara en Fustal', '016')),
+                                 ('141', ('solid', '204,236,255,255', 'Fustal Aclarado', '017')),
+                                 ('112', ('solid', '139,139,232,255', 'Fustal Maduro Claro', '018')),
+                                 ('122', ('b_diagonal', '65,51,162,255', 'Clara en Fustal Maduro', '019')),
+                                 ('13', ('cross', '0,112,192,255', 'Clara Urgente en Fustal Maduro', '020')),
+                                 ('142', ('solid', '166,166,207,255', 'Fustal Maduro Aclarado', '021')),
+                                 ('15', ('horizontal', '112,48,160,255', 'Posibilidad de Regeneracion', '022'))]
+
+                    categorias = []
+
+                    for clase, (relleno, color, etiqueta, orden) in ordenados:
+                        props = {'style': relleno, 'color': color, 'style_border': 'no'}
+                        sym = QgsFillSymbol.createSimple(props)
+                        categoria = QgsRendererCategory(clase, sym, etiqueta)
+                        categorias.append(categoria)
+
+                    field = "DN"
+                    renderer = QgsCategorizedSymbolRenderer(field, categorias)
+                    teselas.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(teselas)
+
                 clara = QgsVectorLayer(os.path.join(carpeta, 'Clara_merged.shp'), "Clara", "ogr")
                 regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion_merged.shp'), "Regeneracion", "ogr")
                 resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo_merged.shp'), "Resalveo", "ogr")
-
                 # aplico simbologia a estas capas, si existen
                 try:
                     symbolsclara = clara.renderer().symbol()
@@ -1297,89 +1222,8 @@ class Silvilidar:
                 except:
                     pass
 
-                # coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
 
-                # ordeno los elementos de teselas ojo ojo
-                # ordenados=coloresteselas.items()
-                # ordenados.sort(key=lambda clave: str(clave[1][3]))
-                # me salto el orden del diccionario
-                ordenados = [('1', ('solid', '255,255,204,255', 'Raso o Regenerado', '001')),
-                             ('2', ('solid', '255,255,0,255', 'Menor (Monte Bravo)', '002')),
-                             ('17', ('solid', 'orange', 'Bajo Latizal No Concurrente o Latizal Encinar no Denso', '003')), (
-                             '3', (
-                             'vertical', '255,192,0,255', 'Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)',
-                             '004')), ('4', ('solid', '255,204,153,255', 'Bajo Latizal Desarrollado', '005')),
-                             ('51', ('b_diagonal', '255,0,255,255', 'Resalveo en Latizal poco desarrollado', '006')),
-                             ('52', ('f_diagonal', '255,0,0,255', 'Resalveo en Latizal', '007')),
-                             ('61', ('solid', '255,153,255,255', 'Latizal poco desarrollado Tratado', '008')),
-                             ('62', ('solid', '255,124,128,255', 'Latizal Tratado', '009')),
-                             ('7', ('solid', '204,255,153,255', 'Alto Latizal Claro', '010')),
-                             ('81', ('b_diagonal', '146,208,80,255', 'Poda Alta y Clara Suave en Latizal', '011')),
-                             ('9', ('f_diagonal', '0,176,80,255', 'Primera Clara y Poda Alta', '012')),
-                             ('10', ('solid', '102,255,153,255', 'Alto Latizal Aclarado', '013')),
-                             ('111', ('solid', '102,255,255,255', 'Fustal Claro', '014')), ('82', (
-                    'b_diagonal', '51,204,204,255', 'Poda Alta y Clara Suave en Monte Desarrollado', '015')),
-                             ('121', ('f_diagonal', '0,176,255,240', 'Clara en Fustal', '016')),
-                             ('141', ('solid', '204,236,255,255', 'Fustal Aclarado', '017')),
-                             ('112', ('solid', '139,139,232,255', 'Fustal Maduro Claro', '018')),
-                             ('122', ('b_diagonal', '65,51,162,255', 'Clara en Fustal Maduro', '019')),
-                             ('13', ('cross', '0,112,192,255', 'Clara Urgente en Fustal Maduro', '020')),
-                             ('142', ('solid', '166,166,207,255', 'Fustal Maduro Aclarado', '021')),
-                             ('15', ('horizontal', '112,48,160,255', 'Posibilidad de Regeneracion', '022'))]
 
-                categorias = []
-
-                for clase, (relleno, color, etiqueta, orden) in ordenados:
-                    props = {'style': relleno, 'color': color, 'style_border': 'no'}
-                    sym = QgsFillSymbol.createSimple(props)
-                    categoria = QgsRendererCategory(clase, sym, etiqueta)
-                    categorias.append(categoria)
-
-                field = "DN"
-                renderer = QgsCategorizedSymbolRenderer(field, categorias)
-                teselas.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(teselas)
-
-                # cargo los rasters virtuales si chekeado en la salidas
-                if self.dlg4.checkBox_altura.isChecked():
-                    juntarasters("hm")
-                if self.dlg4.checkBox_fcc.isChecked():
-                    juntarasters("fcc")
-                if self.dlg4.checkBox_rc.isChecked():
-                    juntarasters("rc")
-                if self.dlg4.checkBox_lc.isChecked():
-                    juntarasters("lc")
-                if self.dlg4.checkBox_hbc.isChecked():
-                    juntarasters("hbc")
-                if self.dlg4.checkBox_matorral.isChecked():
-                    juntarasters("fcc_matorral")#2
-                    
-
-                """
-                categorias1=[]
-                for clase,(relleno,color, etiqueta,orden) in ordenados:    
-                    props={'style':relleno, 'color':color, 'style_border':'no'}
-                    sym=QgsFillSymbol.createSimple(props)
-                    categoria1=QgsRendererCategory(clase,sym,etiqueta)
-                    categorias1.append(categoria1)
-    
-                field="DN"
-                renderer=QgsCategorizedSymbolRenderer(field,categorias1)
-                teselas1.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(teselas1)
-    
-                categorias2=[]
-                for clase,(relleno,color, etiqueta,orden) in ordenados:    
-                    props={'style':relleno, 'color':color, 'style_border':'no'}
-                    sym=QgsFillSymbol.createSimple(props)
-                    categoria2=QgsRendererCategory(clase,sym,etiqueta)
-                    categorias2.append(categoria2)
-    
-                field="DN"
-                renderer=QgsCategorizedSymbolRenderer(field,categorias2)
-                teselas2.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(teselas2)
-                """
 
                 # repinto todo refrescando la vista
                 canvas.freeze(False)
@@ -1603,7 +1447,7 @@ class Silvilidar:
                                     entries.append(layer1)
 
                                     calc = QgsRasterCalculator(
-                                        '(layer1@1 > ' + str(minimo) + ' AND layer1@1 < ' + str(maximo) + ') ',
+                                        '(layer1@1 >= ' + str(minimo) + ' AND layer1@1 <= ' + str(maximo) + ') ',
                                         output_raster,
                                         'GTiff',
                                         rlayer.extent(),
@@ -1622,7 +1466,6 @@ class Silvilidar:
 
 
                         def filtro_raster_intervalo(nombre_raster, intervalo):
-                            print(nombre_raster, intervalo)
                             rlayer = QgsRasterLayer(carpeta[:-17]+'/'+nombre_raster+'.vrt', nombre_raster)
                             print(carpeta[:-17]+'/'+nombre_raster+'.vrt')
                             #QgsProject.instance().addMapLayer(rlayer)
@@ -1639,7 +1482,7 @@ class Silvilidar:
                             entries.append(layer1)
 
                             calc = QgsRasterCalculator(
-                                '(layer1@1 >= ' + str(minimo) + ' AND layer1@1 <= ' + str(maximo) + ') ',
+                                '(layer1@1 > ' + str(minimo) + ' AND layer1@1 < ' + str(maximo) + ') ',
                                 output_raster,
                                 'GTiff',
                                 rlayer.extent(),
@@ -1698,7 +1541,6 @@ class Silvilidar:
                             return nuevalayer
 
                         def multiplica_rasters(suffix_input):
-                            print('estoy en multiplica_rasters')
                             output_raster = carpeta + "/multilpicado.tif"
                             expr = ''
                             rasters = []
@@ -1709,12 +1551,10 @@ class Silvilidar:
                                 expr = expr + '"{}@1"*'.format(suffix)
 
                             expr = expr.rstrip('*')
-                            print(expr)
                             #print(rasters[0].source())
-                            #print(rasters[1].source())
                             alg_params = {
                                 'CELLSIZE': 0,
-                                'CRS': None,
+                                'CRS': QgsProject.instance().crs().authid(),
                                 'EXPRESSION': expr,
                                 'EXTENT': rasters[0].extent(),#rasters[0].extent(),
                                 'LAYERS': rasters,
@@ -1920,8 +1760,6 @@ class Silvilidar:
                                 resumen.append([np.mean(value), np.std(value)])
                                 print ('   Parcela-----N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.
                                 format(np.size(value), np.mean(value), np.std(value)))
-                            print('_resultado_')
-                            print(resultado)
                             return resultado, resumen
 
                         tablas_de_interes = []

@@ -105,22 +105,6 @@ a minute per grid </translation>
         <source>Longitud de copa</source>
         <translation>Crown lenght (m)</translation>
     </message>
-	<message>
-        <location filename="../salida_dialog_base.ui" line="265"/>
-        <source>Fracción de Cabida Cubierta de Matorral</source>
-        <translation>Scrub Cover (%)</translation>
-    </message>
-	<message>
-        <location filename="../salida_dialog_base.ui" line="281"/>
-        <source>Teselas Silvilidar</source>
-        <translation>Silvilidar polygons</translation>
-    </message>
-	<message>
-        <location filename="../salida_dialog_base.ui" line="281"/>
-        <source>Altamente recomendado</source>
-        <translation>Highly recommended</translation>
-    </message>
-	
 </context>
 <context>
     <name>ConfigDialog</name>

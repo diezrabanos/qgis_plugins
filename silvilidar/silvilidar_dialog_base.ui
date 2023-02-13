@@ -341,7 +341,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="text">
-      <string>Capas raster a considerar con  coeficiente multiplicador</string>
+      <string>Capas raster a considerar con coeficiente multiplicador</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_rc1">
@@ -434,7 +434,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="text">
-      <string>FCC Matorral</string>
+      <string>Fracción de Cabida Cubierta Matorral</string>
      </property>
     </widget>
     <widget class="QLineEdit" name="coef_hm1">

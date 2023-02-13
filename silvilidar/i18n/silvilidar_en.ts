@@ -222,6 +222,56 @@ a minute per grid </translation>
         <source>AYUDA SILVILIDAR</source>
         <translation>SILVILIDAR HELP</translation>
     </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="50"/>
+        <source>Ejecución de SILVILIDAR                                 </source>
+        <translation>SILVILIDAR Execution</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="287"/>
+        <source>Busqueda de zonas similaresa unas dadas</source>
+        <translation>Search similar areas to given ones</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="299"/>
+        <source>Capa de polígonos con las zonas de referencia</source>
+        <translation>Polygon layer with reference zones</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="344"/>
+        <source>Capas raster a considerar con coeficiente multiplicador</source>
+        <translation>Raster layers to consider with multiplier coefficient</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="357"/>
+        <source>Razón de copa</source>
+        <translation>Crown ratio</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="373"/>
+        <source>Altura de la base de copa</source>
+        <translation>Height to crown base</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="389"/>
+        <source>Fracción de Cabida Cubierta</source>
+        <translation>Canopy Cover</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="405"/>
+        <source>Longitud de copa</source>
+        <translation>Crown lenght</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="421"/>
+        <source>Altura </source>
+        <translation>Height</translation>
+    </message>
+	<message>
+        <location filename="../silvilidar_dialog_base.ui" line="437"/>
+        <source>Fracción de Cabida Cubierta Matorral</source>
+        <translation>Scrub Cover</translation>
+    </message>
     <message>
         <location filename="../silvilidar_dialog_base.ui" line="126"/>
         <source>PERSONALIZAR DATOS DE SALIDA</source>

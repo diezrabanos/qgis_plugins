@@ -249,6 +249,27 @@ class Silvilidar:
 
 
     def run(self):
+        def lenguaje_informe():
+            def lenguaje_equipo():
+                # es = castellano
+                import locale
+                idioma = locale.getdefaultlocale()[0][0:2]
+                return idioma
+
+            def lenguaje_qgis():
+                # es = castellano
+                idioma = QSettings().value("locale/userLocale")[0:2]
+                return idioma
+
+            lenguaje_equipo = lenguaje_equipo()
+            lenguaje_qgis = lenguaje_qgis()
+            if lenguaje_equipo and lenguaje_qgis == "es":
+                return "es"
+            else:
+                return "en"
+
+        lenguaje_informe = lenguaje_informe()
+
         def version_fusion_4_40():
             """Para ver si ejecuto el profile area que solo esta a partir de esa version"""
             with open('c:/FUSION/fusionnotes.txt', 'r') as f:
@@ -336,7 +357,7 @@ class Silvilidar:
             funcion6 = "c:/fusion/DTM2ASCII"#64
             funcion7 = "c:/Fusion/LDA2ASCII"#64
             funcion4 = "c:/fusion/csv2grid"
-            if bits64():
+            if bits64() and version_fusion_4_40():
                 funcion1 = funcion1 + "64"
                 funcion2 = funcion2 + "64"
                 funcion3 = funcion3 + "64"
@@ -485,31 +506,7 @@ class Silvilidar:
                     time.sleep(10)
 
 
-            #_______________________________________________________________________________________________________________________________________________________
 
-            # nuevo matorral 0.5-2   OJO______________________________________________________________________________
-            # ___________________________________________________para que no pierda tiempo se podia hacer que solo lo cree si lo tienes puesto como salida.
-            # if self.dlg4.checkBox_matorral.isChecked():
-            #             funcion_fcc = "c:/fusion/Cover"
-            #             salida_fcc2 = os.path.join(carpeta, tronco + "_fcc_matorral1.dtm")
-            #
-            #             h_min_matorral = '2'
-            #             h_max_matorral = '5'
-            #             config_upper = "/upper:{h_max_matorral}".format(h_max_matorral=h_max_matorral)
-            #             total_fcc1 = funcion_fcc + " " + config_upper + " " + salida2 + " " + salida_fcc2 + " " + h_min_matorral + " " + parametros2 + " " + entrada1
-            #             print(total_fcc1)
-            #             os.system(total_fcc1)
-            #             salida_fcc_ascii1 = os.path.join(carpeta, tronco + "_fcc_matorral1.asc")
-            #             total_fcc21 = "c:/fusion/DTM2ASCII /raster" + " " + salida_fcc2 + " " + salida_fcc_ascii1
-            #             print(total_fcc21)
-            #             os.system(total_fcc21)
-            #             # cargo  raster fcc
-            #             fileName = total_fcc21
-            #             Layer = QgsRasterLayer(fileName, "fcc_matorral1")
-            #             QgsProject.instance().addMapLayers([Layer])
-            #             if not Layer:
-            #                 print("fallo carga de capa")
-            # _______________________________________________________________________________________________________________________________________________________
 
             # cargo  raster fcc
             fileName = salida5
@@ -1028,7 +1025,6 @@ class Silvilidar:
                 layer = QgsRasterLayer(rutacapa, cadena.upper())
                 QgsProject.instance().addMapLayer(layer)
                 # coloreo
-
                 layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + cadena + '.qml')
                 layer.triggerRepaint()
                 iface.layerTreeView().refreshLayerSymbology(layer.id())
@@ -1137,8 +1133,32 @@ class Silvilidar:
                     juntarasters("hbc")
                 if self.dlg4.checkBox_matorral.isChecked():
                     juntarasters("fcc_matorral")
+                    if lenguaje_informe == "es":
+                        pass
+                    else:
+                        #copio el fcc matorral y lo renombro como fcc_scrub
+                        import shutil
+                        shutil.copy(os.path.join(carpeta, "FCC_MATORRAL.vrt"), os.path.join(carpeta, "FCC_SCRUB.vrt"))
+                        #cargo la capa fcc_scrub
+                        layer = QgsRasterLayer(os.path.join(carpeta, "fcc_scrub.vrt"), "FCC_SCRUB")
+                        QgsProject.instance().addMapLayer(layer)
+                        # coloreo
+                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/fcc_matorral.qml')
+                        layer.triggerRepaint()
+                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+
+                        #elimino de la vista la capa fcc_matorral
+                        def remove_layer_by_name(name):
+                            layers = QgsProject.instance().mapLayersByName(name)
+                            if len(layers) > 0:
+                                layer = layers[0]
+                                QgsProject.instance().removeMapLayer(layer)
+
+                        remove_layer_by_name('FCC_MATORRAL')
+
                     
                 # cargo las capas finales vectoriales
+
                 if self.dlg4.checkBox_teselas.isChecked():
                     teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged.shp'), "Teselas", "ogr")
                     teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'), "Teselas Proyectado1",
@@ -1193,10 +1213,17 @@ class Silvilidar:
                     renderer = QgsCategorizedSymbolRenderer(field, categorias)
                     teselas.setRenderer(renderer)
                     QgsProject.instance().addMapLayer(teselas)
-
-                clara = QgsVectorLayer(os.path.join(carpeta, 'Clara_merged.shp'), "Clara", "ogr")
-                regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion_merged.shp'), "Regeneracion", "ogr")
-                resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo_merged.shp'), "Resalveo", "ogr")
+                if lenguaje_informe == "es":
+                    subtexto1 = "Clara"
+                    subtexto2 = "Regeneración"
+                    subtexto3 = "Clareo Resalveo"
+                else:
+                    subtexto1 = "Thinning"
+                    subtexto2 = "Regeneration"
+                    subtexto3 = "Precommercial thinning"
+                clara = QgsVectorLayer(os.path.join(carpeta, 'Clara_merged.shp'), subtexto1, "ogr")
+                regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion_merged.shp'), subtexto2, "ogr")
+                resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo_merged.shp'), subtexto3, "ogr")
                 # aplico simbologia a estas capas, si existen
                 try:
                     symbolsclara = clara.renderer().symbol()
@@ -1322,6 +1349,26 @@ class Silvilidar:
                                     listanueva.append(elemento)
                             return listanueva
 
+                        """def lenguaje_informe():
+                            def lenguaje_equipo():
+                                # es = castellano
+                                import locale
+                                idioma = locale.getdefaultlocale()[0][0:2]
+                                return idioma
+
+                            def lenguaje_qgis():
+                                # es = castellano
+                                idioma = QSettings().value("locale/userLocale")[0:2]
+                                return idioma
+
+                            lenguaje_equipo = lenguaje_equipo()
+                            lenguaje_qgis = lenguaje_qgis()
+                            if lenguaje_equipo and lenguaje_qgis == "es":
+                                return "es"
+                            else:
+                                return "en"
+                        lenguaje_informe= lenguaje_informe()"""
+
                         def estadisticas_lista(lista, coeficiente):
                             estadisticos = [np.size(lista), np.mean(lista), np.std(lista)]
                             rango = [np.mean(lista) - coeficiente * np.std(lista), np.mean(lista) + coeficiente * np.std(lista)]
@@ -1331,16 +1378,28 @@ class Silvilidar:
                             return rango, estadisticos
 
                         def crea_tabla(datos):
+                            if lenguaje_informe == "es":
+                                subtexto1 = 'Datos de la muestra'
+                                subtexto2 = 'Media'
+                                subtexto3 = 'Desviación estandar'
+                                subtexto4 = 'Polígono'
+                                subtexto5 = 'Todos los polígonos'
+                            else:
+                                subtexto1 = 'Sample data'
+                                subtexto2 = 'Mean'
+                                subtexto3 = 'Standard deviation'
+                                subtexto4 = 'Polygon'
+                                subtexto5 = 'All polygons'
                             texto = '<table class="default">'
                             texto += ' <tr> \
-                            <th scope="row">Datos de la muestra</th> \
-                            <th>media</th> \
-                            <th>desviacion estandar</th> \
+                            <th scope="row">'+subtexto1+'</th> \
+                            <th>'+subtexto2+'</th> \
+                            <th>'+subtexto3+'</th> \
                             </tr>'
                             n = 1
                             for dato in datos[1]:
                                 texto += '<tr> \
-                                         <th > Parcela {} </th> \
+                                         <th > '+subtexto4+' {} </th> \
                                          <td > {} </' \
                                          'td> \
                                          <td > {} </td> \
@@ -1349,7 +1408,7 @@ class Silvilidar:
                             if len(datos[1]) > 0:
                                 # print('meter los datos finales con la media y desviacion estandar total')
                                 texto += '<tr> \
-                                                 <th > Todas las parcelas </th> \
+                                                 <th > '+subtexto5+' </th> \
                                                  <td > {} </' \
                                          'td> \
                                          <td > {} </td> \
@@ -1370,15 +1429,21 @@ class Silvilidar:
                             return carpeta +'/'+ nombre + '.png'
 
                         def crea_html(lista_elementos, lista_tablas, lista_graficas):
-                            texto = '<head>\
-                            <title>Estadisticos de la Muestra</title>\
+                            if lenguaje_informe == "es":
+                                subtexto='DATOS DE LAS ZONAS DE REFERENCIA'
+                            else:
+                                subtexto = 'REFERENCE ZONE DATA'
+
+                            texto = '<head> \
+                            <meta charset="UTF-8"> \
+                            <title>Estadísticos de la Muestra</title>\
                              <meta name="keywords" content="EstadÃ­sticos de la muestra">\
                              <meta name="description" content="Resumen de datos estadÃ­sticos de la muestra">\
                              <meta name="Author" content="Javi">\
                              <style>\
                                 table {\
                                 table-layout: fixed;\
-                                width: 80%;\
+                                width: 80%s;\
                                 border-collapse: collapse;\
                                 border: 3px solid black;\
                                 }\
@@ -1410,7 +1475,7 @@ class Silvilidar:
                             <script>\
                             </script>\
                             </head> \
-                            <body><h1>DATOS DE LAS MUESTRAS</h1>'
+                            <body><h1>'+subtexto+'</h1>'
 
                             n = 0
                             if len(lista_elementos) > 0:
@@ -1427,42 +1492,7 @@ class Silvilidar:
                             webbrowser.open_new(carpeta + "/Datos_Muestra.html")
                             # return texto
 
-                        def filtro_raster_intervalo2borrar(nombre_raster, intervalo):#serviria para cargar capas del proyecto
-                            registry = QgsProject.instance()
-                            #for layer in iface.mapCanvas().layers():#busca solo entre las visibles
-                            for layer in registry.mapLayers().values():#busca entre todas las capas
-                                if layer.type() == QgsMapLayer.RasterLayer and layer.name() == nombre_raster:
-                                    rlayer = layer
-                                    # intervalo=[min,max]
-                                    minimo = intervalo[0]
-                                    maximo = intervalo[1]
-                                    entries = []
-                                    input_raster = rlayer
-                                    output_raster = carpeta +'/'+ nombre_raster + "filtro.tif"
-                                    # Define band1
-                                    layer1 = QgsRasterCalculatorEntry()
-                                    layer1.ref = 'layer1@1'
-                                    layer1.raster = rlayer
-                                    layer1.bandNumber = 1
-                                    entries.append(layer1)
 
-                                    calc = QgsRasterCalculator(
-                                        '(layer1@1 >= ' + str(minimo) + ' AND layer1@1 <= ' + str(maximo) + ') ',
-                                        output_raster,
-                                        'GTiff',
-                                        rlayer.extent(),
-                                        rlayer.width(),
-                                        rlayer.height(),
-                                        entries)
-
-                                    calc.processCalculation()
-                                    nuevalayer = QgsRasterLayer(output_raster, nombre_raster.lower() + "_filtro")
-                                    # QgsProject.instance().addMapLayers([nuevalayer])
-                                    #print('estoy aqui')
-                                    #print(rlayer)
-                                    #print(rlayer.name())
-                                    #print(rlayer.extent())
-                                    return nuevalayer.source()
 
 
                         def filtro_raster_intervalo(nombre_raster, intervalo):
@@ -1493,52 +1523,6 @@ class Silvilidar:
                             calc.processCalculation()
                             nuevalayer = QgsRasterLayer(output_raster, nombre_raster.lower() + "_filtro")
                             return nuevalayer.source()
-
-                        def multiplica_rasters2(rlayer1, rlayer2, rlayer3, rlayer4, rlayer5): # OJO va mas rapido pero hay que /
-                            # parametrizarlo para una cantidad diferente de elementos
-                            entries = []
-                            output_raster = carpeta + "/multilpicado.tif"  # "D:/pruebas/lidar/mi_capa6.tif"
-                            # Define band1
-                            layer1 = QgsRasterCalculatorEntry()
-                            layer1.ref = 'layer1@1'
-                            layer1.raster = rlayer1
-                            layer1.bandNumber = 1
-                            entries.append(layer1)
-                            # Define band2
-                            layer2 = QgsRasterCalculatorEntry()
-                            layer2.ref = 'layer2@1'
-                            layer2.raster = rlayer2
-                            layer2.bandNumber = 1
-                            entries.append(layer2)
-                            # Define band3
-                            layer3 = QgsRasterCalculatorEntry()
-                            layer3.ref = 'layer3@1'
-                            layer3.raster = rlayer3
-                            layer3.bandNumber = 1
-                            entries.append(layer3)
-                            # Define band4
-                            layer4 = QgsRasterCalculatorEntry()
-                            layer4.ref = 'layer4@1'
-                            layer4.raster = rlayer4
-                            layer4.bandNumber = 1
-                            entries.append(layer4)
-                            # Define band5
-                            layer5 = QgsRasterCalculatorEntry()
-                            layer5.ref = 'layer5@1'
-                            layer5.raster = rlayer5
-                            layer5.bandNumber = 1
-                            entries.append(layer5)
-
-                            calc = QgsRasterCalculator('(layer1@1 * layer2@1 * layer3@1 * layer4@1 * layer5@1 )', output_raster,
-                                                       'GTiff',
-                                                       rlayer1.extent(), rlayer1.width(), rlayer1.height(), entries)
-                            calc.processCalculation()
-                            nuevalayer = QgsRasterLayer(output_raster, "Pixels similares")
-                            # cargo el raster de pendientes
-                            #nuevalayer.renderer().setOpacity(0.2)
-                            nuevalayer.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar.qml')
-                            QgsProject.instance().addMapLayers([nuevalayer])
-                            return nuevalayer
 
                         def multiplica_rasters(suffix_input):
                             output_raster = carpeta + "/multilpicado.tif"

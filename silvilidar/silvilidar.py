@@ -2279,4 +2279,3 @@ class Silvilidar:
                         vectorizar(raster, carpeta + "similar3.shp")
 
 
-

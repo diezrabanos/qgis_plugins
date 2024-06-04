@@ -271,12 +271,27 @@ class Silvilidar:
 
         def version_fusion_4_40():
             """Para ver si ejecuto el profile area que solo esta a partir de esa version"""
-            with open('c:/FUSION/fusionnotes.txt', 'r') as f:
-                primera_linea = f.readline()
-            if '4.40' in primera_linea:
-                return True
-            else:
-                return False
+            versiones_validas= ['4.40', '4.41', '4.42', '4.43', '4.44','4.45','4.46','4.47','4.48','4.49','4.50','4.51','5.52','5.53','5.54','5.55']
+            try:
+                with open('c:/FUSION/fusionnotes.txt', 'r') as f:
+                    primera_linea = f.readline()
+                #if '4.40' in primera_linea or '4.41' in primera_linea or '4.42' in primera_linea or '4.43' in primera_linea:
+                resultados = [expresion for expresion in versiones_validas if expresion in primera_linea]
+                if resultados:
+
+                    return True
+                else:
+                    return False
+            except:
+                with open('c:/FUSION/doc/fusionnotes.txt', 'r') as f:
+                    primera_linea = f.readline()
+                # if '4.40' in primera_linea or '4.41' in primera_linea or '4.42' in primera_linea or '4.43' in primera_linea:
+                resultados = [expresion for expresion in versiones_validas if expresion in primera_linea]
+                if resultados:
+
+                    return True
+                else:
+                    return False
 
         def bits64():
             # para ver si ejecuto las funciones de 32 o 64 bits
@@ -440,8 +455,8 @@ class Silvilidar:
             os.system(total100)
 
             # paso5 genera un grid del csv anterior de fcc
-            # total5 = funcion4 + " " + entrada4 + " " + str(parametros5) + " " + salida5
-            # os.system(total5)
+            total5 = funcion4 + " " + entrada4 + " " + str(parametros5) + " " + salida5
+            os.system(total5)
 
             # paso5 genera un grid de profile area solo funciona a partir de la version 4.4 de fusion
             if version_fusion_4_40():
@@ -486,7 +501,7 @@ class Silvilidar:
 
             # empieza lo nuevo para calcular la fcc total
             # print2("voy a crear el matorral")
-            funcion_fcc = "c:/fusion/Cover"
+            """funcion_fcc = "c:/fusion/Cover"
             salida_fcc = os.path.join(carpeta, tronco + "_fcc.dtm")
             h_min = '0.5'
             total_fcc_ = funcion_fcc + " " + salida2 + " " + salida_fcc + " " + h_min + " " + parametros2 + " " + entrada1
@@ -498,7 +513,7 @@ class Silvilidar:
             print(total_fcc2_)
             os.system(total_fcc2_)
             # cargo  raster fcc
-            """fileName = total_fcc2_
+            fileName = total_fcc2_
             Layer = QgsRasterLayer(fileName, "fcc")
             # QgsProject.instance().addMapLayers([Layer])
             # nuevo para convertir nodata a fcc de 0
@@ -586,14 +601,14 @@ class Silvilidar:
                     time.sleep(10)
 
             # cargo  raster fcc
-            """fileName = salida5
+            fileName = salida5
             Layer = QgsRasterLayer(fileName, "fcc")
             QgsProject.instance().addMapLayers([Layer])
             if not Layer:
                 print("fallo carga de capa")
 
                 # creo lista vacia entries
-            entries = []"""
+            entries = []
 
             # cargo  raster fcc_
             """fileName = salida5_
@@ -822,6 +837,7 @@ class Silvilidar:
                     # del(selection)
                     # del(selecionado)
             def agregado2(rasterdeentrada, radio, filtro):
+
                         # filtro para rellenar huecos
                         print("empieza agregado")
                         # horaempiezaagregado = time.time()
@@ -1064,9 +1080,9 @@ class Silvilidar:
             print("empieza calculo las variables basicas sin proyectar")
             # horaepiezacalculovariabesbasicas = time.time()
             print("horaepiezacalculovariabesbasicas")
-            StringToRaster(salida_fcc_ascii_, "fcc")
+            StringToRaster(salida5, "fcc")
             calculo('fcc@1', "fcc")
-            # StringToRaster(salida5_, "fcc_")
+            #StringToRaster(salida5_, "fcc_")
             # calculo('fcc_@1', "fcc_")
             StringToRaster(salida4, "hm")
             calculo('hm@1', "hm")
@@ -1379,7 +1395,7 @@ class Silvilidar:
         if result:
             # compruebo que este activo el plugin de processing y saga
             QSettings().setValue('/PythonPlugins/processing', 'true')
-            QSettings().setValue('/PythonPlugins/sagaprovider', 'true')
+            #QSettings().setValue('/PythonPlugins/sagaprovider', 'true')
 
             index = self.dlg.tab.currentIndex()
             if index == 0:
@@ -2002,6 +2018,90 @@ class Silvilidar:
                             # QgsProject.instance().addMapLayers([rlayer4])
                             return rlayer4
 
+                        def agrega2(rlayer, radio, filtro):
+                            # filtro para rellenar huecos
+                            print("empieza agregado")
+                            # horaempiezaagregado = time.time()
+                            #A puntos
+                            input1 = rlayer.source()
+                            output1 = carpeta + "/suavizado.shp"
+                            apuntos=processing.run("native:pixelstopoints", {
+                                'INPUT_RASTER': input1,
+                                'RASTER_BAND': 1, 'FIELD_NAME': 'VALUE', 'OUTPUT': output1})['OUTPUT']
+                            #mapa de calor
+                            output2 = os.path.join(carpeta, "suavizado_seleccionado.tif")
+                            mapacalor=processing.run("qgis:heatmapkerneldensityestimation", {
+                                'INPUT': output1,
+                                'RADIUS': radio, 'RADIUS_FIELD': '', 'PIXEL_SIZE': 2, 'WEIGHT_FIELD': 'VALUE', 'KERNEL': 3,
+                                'DECAY': None, 'OUTPUT_VALUE': 0, 'OUTPUT': output2})['OUTPUT']
+                            rlayer0 = QgsRasterLayer(mapacalor, "mapacalor")
+
+
+                            entries = []
+                            layer5 = QgsRasterCalculatorEntry()
+                            layer5.ref = 'layer5@1'
+                            layer5.raster = rlayer0
+                            layer5.bandNumber = 1
+                            entries.append(layer5)
+                            #mayor de 1
+                            # mayor de umbral
+                            output44 = os.path.join(carpeta, "suavizado_seleccionado1.tif")
+                            calc = QgsRasterCalculator('(layer5@1 > {} )'.format(filtro), output44, 'GTiff', rlayer0.extent(),
+                                                       rlayer0.width(),
+                                                       rlayer0.height(), entries)
+                            calc.processCalculation()
+                            rlayer44 = QgsRasterLayer(output44, "mapacalor_seleccionado")
+                            return rlayer44
+
+
+
+
+
+
+                            """# suavizado
+                            parametros = {'INPUT': rlayer.source(), 'METHOD': 0, 'MODE': 1, 'RADIUS': 4,
+                                          'RESULT': carpeta + "/suavizado.sdat"}
+                            suavizado = processing.run('saga:simplefilter', parametros)['RESULT']
+                            rlayer1 = QgsRasterLayer(suavizado, "suavizado")
+                            # QgsProject.instance().addMapLayers([rlayer1])
+                            # filtrado
+                            entries = []
+                            layer1 = QgsRasterCalculatorEntry()
+                            layer1.ref = 'layer1@1'
+                            layer1.raster = rlayer1
+                            layer1.bandNumber = 1
+                            entries.append(layer1)
+                            # mayor de umbral
+                            output_raster = carpeta + "/suavizado_seleccionado.tif"
+                            calc = QgsRasterCalculator('(layer1@1 > 0.2 )', output_raster, 'GTiff', rlayer1.extent(),
+                                                       rlayer1.width(),
+                                                       rlayer1.height(), entries)
+                            calc.processCalculation()
+                            rlayer2 = QgsRasterLayer(output_raster, "suavizado_seleccionado")
+                            # QgsProject.instance().addMapLayers([rlayer2])
+                            # suavizado2
+                            parametros = {'INPUT': rlayer2.source(), 'METHOD': 0, 'MODE': 1, 'RADIUS': 2,
+                                          'RESULT': carpeta + "/suavizado2.sdat"}
+                            suavizado2 = processing.run('saga:simplefilter', parametros)['RESULT']
+                            rlayer3 = QgsRasterLayer(suavizado2, "suavizado2")
+                            # QgsProject.instance().addMapLayers([rlayer3])
+                            # filtrado2
+                            entries = []
+                            layer2 = QgsRasterCalculatorEntry()
+                            layer2.ref = 'layer2@1'
+                            layer2.raster = rlayer3
+                            layer2.bandNumber = 1
+                            entries.append(layer2)
+                            # mayor de umbral
+                            output_raster = carpeta + "/suavizado_seleccionado2.tif"
+                            calc = QgsRasterCalculator('(layer2@1 > 0.5 )', output_raster, 'GTiff', rlayer3.extent(),
+                                                       rlayer3.width(),
+                                                       rlayer3.height(), entries)
+                            calc.processCalculation()
+                            rlayer4 = QgsRasterLayer(output_raster, "suavizado_seleccionado2")
+                            # QgsProject.instance().addMapLayers([rlayer4])
+                            return rlayer4"""
+
                         def saca_valores_raster(nombre_raster, feats):
                             print('empiezo saca valores raster')
                             resultado = []  # lista con todos los valores
@@ -2174,7 +2274,9 @@ class Silvilidar:
 
                         # busca las celdas que encuentran lo anterior (multiplica)
                         multiplicado = multiplica_rasters(filtrado_de_interes)
-                        raster = agrega(multiplicado)
+                        #raster = agrega(multiplicado)
+                        raster = agrega2(multiplicado,10,0.49)
                         vectorizar(raster, carpeta + "similar3.shp")
+
 
 

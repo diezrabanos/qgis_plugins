@@ -1550,7 +1550,7 @@ class Silvilidar:
                 if lenguaje_informe == "es":
                     subtexto1 = "Clara"
                     subtexto2 = "Regeneración"
-                    subtexto3 = "Clareo Resalveo"
+                    subtexto3 = "Resalveo"
                 else:
                     subtexto1 = "Thinning"
                     subtexto2 = "Regeneration"

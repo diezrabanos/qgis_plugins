@@ -64,7 +64,7 @@ import tempfile
 import numpy as np
 import matplotlib.pyplot as plt
 
-
+tamano = 10
 class Salida:
     def __init__(self, iface):
         self.dlg4 = SalidaDialog()
@@ -229,6 +229,7 @@ class Silvilidar:
         self.dlg3.crecimientofcc.setText(str(8 * float(self.dlg3.crecimiento.text())))
 
     def select_shp(self):
+        global tamano
         """seleciono el shp con los datos con los poligonos que quiero buscar similares"""
         rutaarchivomuestra = QFileDialog.getOpenFileName(self.dlg, "Capa de polígonos con las zonas de muestra", None,
                                                          'SHP(*.shp)')
@@ -237,6 +238,15 @@ class Silvilidar:
         layervectorial = QgsVectorLayer(rutaarchivomuestra[0], "Capa con zonas de muestra", "ogr")
         feats = [feat for feat in layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]
         # print(rutaarchivomuestra[0])
+        #calculo la superficie media de los poligonos que se van a usar para buscar similares
+        superficie = 0
+        for feat in feats:
+            superficie += feat.geometry().area()
+        #superficie = superficie / 10000
+        #saco el tamano de la ventana a usar para que sea proporcional a la superficie de los poligonos siendo un cuadrado
+        tamano = round(np.sqrt(superficie)/10,0)
+        print("tamano resultante de ventana",tamano)
+
         return rutaarchivomuestra[0], feats
 
     def unload(self):
@@ -328,9 +338,7 @@ class Silvilidar:
 
         # defino la funcion que busca los archivos las o laz que existan y le paso los parametros resultantes
         # del formulario
-        def buscalidaryejecuta(carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe, hmontebravo,
-                               hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo,
-                               longitudcopaminima, crecimientofcc):
+        def buscalidaryejecuta(carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas , rcminresalveoencinarlatizaldesarrollado , hbcpodabaja ,rcminresalveoencinarfustal ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado):
             print("empieza busca y ejecuta")
             print(carpeta)
             for base, dirs, files in os.walk(carpeta):
@@ -343,23 +351,13 @@ class Silvilidar:
                         if a[0][-5:] == '.copc':
                             if os.path.isfile(carpeta + '/' + a[0][:-5] + '.laz') == False:
                                 las = os.path.join(a[0] + a[1])
-                                exprimelidar(las, carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta,
-                                             hmontebravoe,
-                                             hmontebravo, hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado,
-                                             rcclaras,
-                                             rcextremo, longitudcopaminima, crecimientofcc)
+                                exprimelidar(las, carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas , rcminresalveoencinarlatizaldesarrollado , hbcpodabaja ,rcminresalveoencinarfustal ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
                         else:
                             las = os.path.join(a[0] + a[1])
-                            exprimelidar(las, carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta,
-                                         hmontebravoe,
-                                         hmontebravo, hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado,
-                                         rcclaras,
-                                         rcextremo, longitudcopaminima, crecimientofcc)
+                            exprimelidar(las, carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas , rcminresalveoencinarlatizaldesarrollado , hbcpodabaja ,rcminresalveoencinarfustal ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
 
         # defino la funcion que lo hace todo con un archivo las o laz concreto
-        def exprimelidar(las, carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe, hmontebravo,
-                         hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo,
-                         longitudcopaminima, crecimientofcc):
+        def exprimelidar(las, carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas , rcminresalveoencinarlatizaldesarrollado , hbcpodabaja ,rcminresalveoencinarfustal ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado):
             fcstring = ""
             print("empieza exprime lidar")
             # horaepiezaexprimelidar = time.time()
@@ -478,13 +476,13 @@ class Silvilidar:
             # empieza lo nuevo para volver a calcular gridmetrics con otros parametros de corte para calcular el fcc total 0.5 de hmin
             # paso3 saca los parametros de ese grid
             # renombro el archivo  carpeta + "/metric_all_returns_elevation_stats_" + tronco + ".csv"
-
-            """os.rename(carpeta + "/metric_all_returns_elevation_stats_" + tronco + ".csv",
+            #DESDE AQUI ESTABA COMENTADO OJO_________________________________________________________________________________________________________________________
+            os.rename(carpeta + "/metric_all_returns_elevation_stats_" + tronco + ".csv",
                       carpeta + "/metric_all_returns_elevation_stats_" + tronco + "_.csv")
             os.rename(carpeta + "/metric_all_returns_elevation_stats_" + tronco + "_ascii_header.txt",
                       carpeta + "/metric_all_returns_elevation_stats_" + tronco + "_ascii_header_.txt")
-            parametros3_1_ = "/minht:0.5 /nointensity"  # "/minht:{hcorte} /nointensity".format(hcorte=hcorte2)
-            parametros3_2_ = "0.5 10"  # hcorte2 + " 10"  # "0.5 10"
+            parametros3_1_ = "/minht:2 /nointensity"  # "/minht:{hcorte} /nointensity".format(hcorte=hcorte2)#CAMBIADO 2 POR 0.5
+            parametros3_2_ = "2 10"  # hcorte2 + " 10"  # "0.5 10" #CAMBIADO 2 POR 0.5
             salida3_ = os.path.join(carpeta, "metric.csv")
             salida5_ = os.path.join(carpeta, tronco + "_cover_grid_.asc")
             total3_ = funcion3 + " " + str(parametros3_1_) + " " + entrada3_1 + " " + str(
@@ -497,7 +495,8 @@ class Silvilidar:
 
             # paso5 genera un grid del csv anterior de fcc
             total5_ = funcion4 + " " + entrada4 + " " + str(parametros5) + " " + salida5_
-            os.system(total5_)"""
+            os.system(total5_)
+            #HASTA AQUI ESTABA COMENTADO OJO----------------------------------------------------------------------------------------------------------------------------
 
             # empieza lo nuevo para calcular la fcc total
             # print2("voy a crear el matorral")
@@ -549,13 +548,13 @@ class Silvilidar:
                 time.sleep(10)"""
 
             # nuevo matorral 0.5-2   OJO_____________________________________________________________________________________________________________
-            # ____________________para que no pierda tiempo se podia hacer que solo lo cree si lo tienes puesto como salida.
+            # ____________________para que no pierda tiempo s solo lo crea si lo tienes puesto como salida.
             if self.dlg4.checkBox_matorral.isChecked():
-                # print2("voy a crear el matorral")
+                #print2("voy a crear el matorral")
                 funcion_fcc = "c:/fusion/Cover"
                 salida_fcc = os.path.join(carpeta, tronco + "_fcc_matorral.dtm")
-                h_min_matorral = '0.5'
-                h_max_matorral = '2'
+                h_min_matorral = '0.5'#'0.5'  OJO DESHACER
+                h_max_matorral = '2'#'2' OJO DESHACER
                 config_upper = "/upper:{h_max_matorral}".format(h_max_matorral=h_max_matorral)
                 total_fcc = funcion_fcc + " " + config_upper + " " + salida2 + " " + salida_fcc + " " + h_min_matorral + " " + parametros2 + " " + entrada1
                 print(total_fcc)
@@ -1123,7 +1122,7 @@ class Silvilidar:
 
             # introduzco los condicionantes para cada tipo de masa
 
-            calculo('(fccp@1 <= ' + str(fccbaja) + ') * 1 ', 'C1')
+            """calculo('(fccp@1 <= ' + str(fccbaja) + ') * 1 ', 'C1')
             calculo('(fccp@1 > ' + str(fccbaja) + ')*(hmp@1 < ' + str(hmontebravoe) + ')*2', 'C2')
             calculo('(fccp@1 >= ' + str(fccmedia) + ')*(hmp@1 >= ' + str(hmontebravoe) + ')*(hmp@1 < ' + str(
                 hmontebravo) + ')*(rcp@1 <= ' + str(rcclaras) + ')*51', 'C3')
@@ -1255,7 +1254,36 @@ class Silvilidar:
             # lo vectorizo
             parameters = {'INPUT': os.path.join(carpeta, troncoresumido + '_suma.tif'), 'BAND': 1, 'FIELD': "DN",
                           'EIGHT_CONNECTEDNESS': False, 'OUTPUT': os.path.join(carpeta,
-                                                                               troncoresumido + '_suma.shp')}  # ojo mirar si hay que quitar el eight connectedness
+                                                                             troncoresumido + '_suma.shp')}"""  # ojo mirar si hay que quitar el eight connectedness
+            # METODO ALEJANDRO
+            """fccminarbolado=str(10)
+            alturadesconocida=str(2)
+            hmaxmontebravo=str(3.5)
+            hmaxbajolatizal=str(5)
+            rcminresalveoencinarlatizalpocodesarrollado=str(40)
+            fccmincompetenciaencinarlatizalpocodesarrollado=str(50)
+            hmaxselvicolas=str(7.5)
+            rcminresalveoencinarlatizaldesarrollado=str(50)
+            hbcpodabaja=str(3)
+            hbcdesconocido=str(5.5)
+            rcminresalveoencinarfustal=str(60)
+            fccmincompetenciamasadiscontinua_fustalencinares=str(57.5)
+            rcminclara=str(35)
+            longitudcopaminclara=str(3.25)
+            fcccompetenciaelevada=str(95)
+            hmaxsegundaclara=str(16.5)
+            hbcminclarasnormales=str(5.5)
+            fccmincompetenciaencinarlatizaldesarrollado=str(55)
+            hmaxprimeraclara=str(12)
+            rccoronado=str(17)"""
+
+
+
+            calculo( 'if (fccp@1 <= 0, 0, if ( fccp@1 < '+fccminarbolado+', 1, if ( hmp@1 < '+alturadesconocida+', 11, if ( hmp@1 < '+hmaxmontebravo+', 2, if ( hmp@1 < '+hmaxbajolatizal+', if ( rcp@1 <= '+rcminresalveoencinarlatizalpocodesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizalpocodesarrollado+', 51, 61), 17), if (hmp@1 <= '+hmaxselvicolas+', if ( rcp@1 <= '+rcminresalveoencinarlatizaldesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizaldesarrollado+', 52, 62) , if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcpodabaja+', 3, 4)), if ( hmp@1 <= '+hmaxprimeraclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <='+hbcminclarasnormales+' , if ( rcp@1 <= '+rcminresalveoencinarfustal+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 7), 7), if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 81, if ( fccp@1 >= '+fcccompetenciaelevada+', 81, 10)), 7), 7), if ( fccp@1 >= '+fcccompetenciaelevada+', 9, if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 10)))), if ( hmp@1 <= '+hmaxsegundaclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcminclarasnormales+', 111, if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 82, if ( fccp@1 >= '+fcccompetenciaelevada+', 82, 111)), 111), 111), if ( fccp@1 >= '+fcccompetenciaelevada+', 121, 141))), if ( rcp@1 <= '+rccoronado+', if ( fccp@1 >= '+fcccompetenciaelevada+', 13, 15), if ( rcp@1 < '+rcminclara+', if ( fccp@1 >= '+fcccompetenciaelevada+', 122, 142), 112))))))))))', 'suma')
+            StringToRaster(os.path.join(carpeta, troncoresumido + '_suma.tif'), "suma")
+            parameters = {'INPUT': os.path.join(carpeta, troncoresumido + '_suma.tif'), 'BAND': 1, 'FIELD': "DN",
+                          'EIGHT_CONNECTEDNESS': False, 'OUTPUT': os.path.join(carpeta,
+                                                                               troncoresumido + '_suma.shp')}
             try:
                 processing.run("gdal:polygonize", parameters)
             except:
@@ -1407,23 +1435,46 @@ class Silvilidar:
                 # la carpeta la he cogido al pulsar el boton de la carpeta
 
                 # meto aqui variables que luego deberan estar en la cajita   OJO
-                hcorte2 = self.dlg2.hcorte2.text()  # 2
+                #ANTIGUAS
+                #hcorte2 = self.dlg2.hcorte2.text()  # 2
                 crecimiento = self.dlg3.crecimiento.text()  ##displayText()1.5
-                fccbaja = self.dlg2.fccbaja.text()  ##displayText()20.0
-                fccterrazas = self.dlg2.fccterrazas.text()  ##displayText()57.5
-                fccmedia = self.dlg2.fccmedia.text()  ##displayText()46.0
-                fccalta = self.dlg2.fccalta.text()  ##displayText()95.0
-                hmontebravoe = self.dlg2.hmontebravoe.text()  ##displayText()3.5
-                hmontebravo = self.dlg2.hmontebravo.text()  ##displayText()5.0
-                hselvicolas = self.dlg2.hselvicolas.text()  ##displayText()7.5
-                hclaras = self.dlg2.hclaras.text()  # displayText()12.0
-                hclaras2 = self.dlg2.hclaras2.text()  # displayText()16.5
-                hbcminima = self.dlg2.hbcminima.text()  # displayText()3.0
-                hbcdesarrollado = self.dlg2.hbcdesarrollado.text()  # displayText()5.5
-                rcclaras = self.dlg2.rcclaras.text()  # displayText()35.0
-                rcextremo = self.dlg2.rcextremo.text()  # displayText()17.0
-                longitudcopaminima = self.dlg2.longitudcopaminima.text()  ##displayText()3.25
+                #fccbaja = self.dlg2.fccbaja.text()  ##displayText()20.0
+                #fccterrazas = self.dlg2.fccterrazas.text()  ##displayText()57.5
+                #fccmedia = self.dlg2.fccmedia.text()  ##displayText()46.0
+                #fccalta = self.dlg2.fccalta.text()  ##displayText()95.0
+                #hmontebravoe = self.dlg2.hmontebravoe.text()  ##displayText()3.5
+                #hmontebravo = self.dlg2.hmontebravo.text()  ##displayText()5.0
+                #hselvicolas = self.dlg2.hselvicolas.text()  ##displayText()7.5
+                #hclaras = self.dlg2.hclaras.text()  # displayText()12.0
+                #hclaras2 = self.dlg2.hclaras2.text()  # displayText()16.5
+                #hbcminima = self.dlg2.hbcminima.text()  # displayText()3.0
+                #hbcdesarrollado = self.dlg2.hbcdesarrollado.text()  # displayText()5.5
+                #rcclaras = self.dlg2.rcclaras.text()  # displayText()35.0
+                #rcextremo = self.dlg2.rcextremo.text()  # displayText()17.0
+                #longitudcopaminima = self.dlg2.longitudcopaminima.text()  ##displayText()3.25
                 crecimientofcc = self.dlg3.crecimientofcc.text()  ##displayText()12.5
+                #NUEVAS
+                # METODO ALEJANDRO
+                fccminarbolado =self.dlg2.fccminarbolado.text()  # 10
+                alturadesconocida = self.dlg2.alturadesconocida.text()  # 2
+                hmaxmontebravo = self.dlg2.hmaxmontebravo.text()  # 3.5
+                hmaxbajolatizal = self.dlg2.hmaxbajolatizal.text()  # 5
+                rcminresalveoencinarlatizalpocodesarrollado = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado.text()  # 40
+                fccmincompetenciaencinarlatizalpocodesarrollado = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado.text()  # 50
+                hmaxselvicolas = self.dlg2.hmaxselvicolas.text()  # 7.5
+                rcminresalveoencinarlatizaldesarrollado = self.dlg2.rcminresalveoencinarlatizaldesarrollado.text()  # 50
+                hbcpodabaja = self.dlg2.hbcpodabaja.text()  # 3
+                rcminresalveoencinarfustal = self.dlg2.rcminresalveoencinarfustal.text()  # 60
+                fccmincompetenciamasadiscontinua_fustalencinares = self.dlg2.fccmincompetenciamasadiscontinua_fustalencinares.text()  # 57.5
+                rcminclara = self.dlg2.rcminclara.text()  # 35
+                longitudcopaminclara = self.dlg2.longitudcopaminclara.text()  # 3.25
+                fcccompetenciaelevada = self.dlg2.fcccompetenciaelevada.text()  # 95
+                hmaxsegundaclara = self.dlg2.hmaxsegundaclara.text()  # 16.5
+                hbcminclarasnormales = self.dlg2.hbcminclarasnormales.text()  # 5.5
+                fccmincompetenciaencinarlatizaldesarrollado = self.dlg2.fccmincompetenciaencinarlatizaldesarrollado.text()  # 55
+                hmaxprimeraclara = self.dlg2.hmaxprimeraclara.text()  # 12
+                rccoronado = self.dlg2.rccoronado.text()  # 17
+
 
                 # compruebo que capas estan cargadas en el proyecto al iniciar el script
                 capasoriginales = QgsProject.instance().mapLayers()
@@ -1434,10 +1485,7 @@ class Silvilidar:
                 # canvas.freeze(True)
 
                 # ejecuto la busqueda de archivos las
-                buscalidaryejecuta(carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe,
-                                   hmontebravo,
-                                   hselvicolas, hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo,
-                                   longitudcopaminima, crecimientofcc)
+                buscalidaryejecuta(carpeta, crecimiento, crecimientofcc, fccminarbolado, alturadesconocida, hmaxmontebravo,  hmaxbajolatizal, rcminresalveoencinarlatizalpocodesarrollado, fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas, rcminresalveoencinarlatizaldesarrollado, hbcpodabaja, rcminresalveoencinarfustal, fccmincompetenciamasadiscontinua_fustalencinares, rcminclara, longitudcopaminclara, fcccompetenciaelevada, hmaxsegundaclara, hbcminclarasnormales, fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
 
                 # uno en una capa todas las hojas de claras, regeneracion, resalveo y teselas
                 juntoshapes(os.path.join(carpeta, "p", "*clara3.shp"), "Clara_merged")
@@ -1492,14 +1540,16 @@ class Silvilidar:
 
                 if self.dlg4.checkBox_teselas.isChecked():
                     teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged.shp'), "Teselas", "ogr")
-                    teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'),
+                    """teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'),
                                               "Teselas Proyectado1",
                                               "ogr")
                     teselas2 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado2.shp'),
                                               "Teselas Proyectado2",
-                                              "ogr")
+                                              "ogr")"""
+                    #aplicar estilo a las teselas cargando un qml con el mismo nombre que la capa
+                    teselas.loadNamedStyle(os.path.dirname(__file__) + '/styles/Teselas.qml')#(r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\styles/teselas.qml")#os.path.dirname(__file__) + '/styles""/Teselas_merged.qml')
 
-                    # coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
+                    """# coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
 
                     # ordeno los elementos de teselas ojo ojo
                     # ordenados=coloresteselas.items()
@@ -1546,7 +1596,8 @@ class Silvilidar:
                     field = "DN"
                     renderer = QgsCategorizedSymbolRenderer(field, categorias)
                     teselas.setRenderer(renderer)
-                    QgsProject.instance().addMapLayer(teselas)
+                    QgsProject.instance().addMapLayer(teselas)"""
+                QgsProject.instance().addMapLayer(teselas)
                 if lenguaje_informe == "es":
                     subtexto1 = "Clara"
                     subtexto2 = "Regeneración"
@@ -1590,10 +1641,7 @@ class Silvilidar:
                 # self.dlg.close()
                 # print (capasoriginales)
 
-                print(carpeta, crecimiento, fccbaja, fccterrazas, fccmedia, fccalta, hmontebravoe, hmontebravo,
-                      hselvicolas,
-                      hclaras, hclaras2, hbcminima, hbcdesarrollado, rcclaras, rcextremo, longitudcopaminima,
-                      crecimientofcc)
+                print(carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas , rcminresalveoencinarlatizaldesarrollado , hbcpodabaja ,rcminresalveoencinarfustal ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
 
                 pass
 
@@ -1830,6 +1878,224 @@ class Silvilidar:
                             webbrowser.open_new(carpeta + "/Datos_Muestra.html")
                             # return texto
 
+                        def compara_histogramas(data1,data2):
+                            import numpy as np
+                            from scipy.spatial.distance import euclidean
+                            from scipy.stats import pearsonr
+                            import matplotlib.pyplot as plt
+
+                            import random
+                            # Crear dos conjuntos de datos con diferentes tamaños, de 0 a 10 o 12
+                            #data1 = np.array([random.randint(0, 10) for _ in range(100)])  # np.random.exponential(scale=1.0, size=1000)
+                            #data2 = np.array([random.randint(0, 12) for _ in range(50)])  # np.random.gamma(shape=2.0, scale=1.0, size=1500)
+                            data1=np.array(data1)
+                            data2=np.array(data2)
+                            # Calcular los histogramas con los mismos bins, en 20 grupos   a masnumero de grupos mas tardara en hacerlo y sera mas preciso en el resultado
+                            bins = np.linspace(0, max(np.max(data1), np.max(data2)), 10)
+                            hist1, _ = np.histogram(data1, bins=bins)
+                            hist2, _ = np.histogram(data2, bins=bins)
+
+                            # Normalizar los histogramas
+                            hist1 = hist1 / np.sum(hist1)
+                            hist2 = hist2 / np.sum(hist2)
+
+                            # Graficar los histogramas
+                            plt.figure(figsize=(10, 6))
+                            plt.hist(data1, bins=bins, alpha=0.5, label='Data 1', density=True)
+                            plt.hist(data2, bins=bins, alpha=0.5, label='Data 2', density=True)
+                            plt.legend(loc='upper right')
+                            #plt.show()
+
+                            # Calcular la distancia Euclidiana
+                            dist_euclidiana = euclidean(hist1, hist2)
+                            #print(f'Distancia Euclidiana: {dist_euclidiana}')
+
+                            # Calcular el coeficiente de correlación de Pearson
+                            coef_pearson, _ = pearsonr(hist1, hist2)
+                            #print(f'Coeficiente de correlación de Pearson: {coef_pearson}')
+
+                            # Definir umbrales para la similitud
+                            umbral_dist_euclidiana = 0.10
+                            umbral_coef_pearson = 0.80
+
+                            # Interpretación combinada
+                            if dist_euclidiana < umbral_dist_euclidiana and coef_pearson > umbral_coef_pearson:
+                                #print(                                    "Los histogramas son similares: pequeñas diferencias absolutas y diferencias en el mismo sentido.")
+
+                                return True
+                            elif dist_euclidiana < umbral_dist_euclidiana and coef_pearson < -umbral_coef_pearson:
+                                #print(                                    "Los histogramas son similares: pequeñas diferencias absolutas pero diferencias en sentido opuesto.")
+                                return False
+                            elif dist_euclidiana >= umbral_dist_euclidiana and coef_pearson > umbral_coef_pearson:
+                                #print(                                    "Los histogramas tienen grandes diferencias absolutas, pero las diferencias son en el mismo sentido.")
+                                return False
+                            else:
+                                #print(                                    "Los histogramas tienen grandes diferencias absolutas y las diferencias son en sentido opuesto.")
+                                return False
+
+                        def quemaventanas(raster_layer, lista_ventanas):
+                            from qgis.core import QgsRasterLayer, QgsRectangle, QgsRaster, QgsRasterPipe, \
+                                QgsRasterFileWriter, QgsRasterDataProvider, QgsProject
+                            import numpy as np
+                            from osgeo import gdal, osr
+                            # Obtener la extensión de la capa
+                            extent = raster_layer.extent()
+                            #Obtener el nombre de la capa
+                            nombre_raster = raster_layer.name()
+                            xmin = extent.xMinimum()
+                            xmax = extent.xMaximum()
+                            ymin = extent.yMinimum()
+                            ymax = extent.yMaximum()
+
+                            # Crear la expresión de la extensión para el procesamiento
+                            extent_str = f"{xmin},{xmax},{ymin},{ymax} [EPSG:25830]"
+                            pixel_size = 10
+                            miresultado=processing.run("native:createconstantrasterlayer", {
+                                'EXTENT': extent_str ,
+                                'TARGET_CRS': QgsCoordinateReferenceSystem('EPSG:25830'), 'PIXEL_SIZE': pixel_size, 'NUMBER': 0,
+                                'OUTPUT_TYPE': 5, 'OUTPUT': 'TEMPORARY_OUTPUT'})
+
+                            #creo un shape con las ventanas
+                            from qgis.core import (
+                                QgsRectangle,
+                                QgsVectorLayer,
+                                QgsFeature,
+                                QgsGeometry,
+                                QgsField,
+                                QgsFields,
+                                QgsVectorFileWriter,
+                                QgsProject
+                            )
+                            from qgis.PyQt.QtCore import QVariant
+                            # Crear una capa vectorial temporal
+                            vlayer = QgsVectorLayer('Polygon?crs=EPSG:25830', 'rectangle_layer', 'memory')
+                            provider = vlayer.dataProvider()
+
+                            # Definir campos (si es necesario)
+                            fields = QgsFields()
+                            fields.append(QgsField('id', QVariant.Int))
+                            provider.addAttributes(fields)
+                            vlayer.updateFields()
+
+
+                            # Iterar sobre la lista de rectángulos y añadir cada uno como una característica
+                            for i, rect in enumerate(lista_ventanas):
+                                polygon = QgsGeometry.fromRect(rect)
+                                feature = QgsFeature()
+                                feature.setGeometry(polygon)
+                                feature.setAttributes([1])  # Asignar un id único a cada polígono
+                                provider.addFeature(feature)
+
+                            # Asegurarse de que la capa vectorial se actualice
+                            vlayer.updateExtents()
+                            QgsProject.instance().addMapLayer(vlayer)
+                            #convertir en raster vlayer y guardarlo en una ruta dada.
+                            # Definir los parámetros de salida del ráster
+                            output_raster = f'c:/work/pruebas/similares_{nombre_raster}.tif' #OJO HABRÁ QUE HACERLO VARIABLE
+                            anchura_pixel = 10  # Tamaño de celda en la dirección X
+                            altura_pixel = 10  # Tamaño de celda en la dirección Y
+                            ext = vlayer.extent()  # Obtener la extensión de la capa vectorial
+
+                            # Ejecutar la rasterización con GDAL
+                            params = {
+                                'INPUT': vlayer,  # Capa vectorial de entrada
+
+                                'UNITS': 1,  # Opción de unidades
+                                'WIDTH': anchura_pixel,  # Tamaño de pixel X
+                                'HEIGHT': altura_pixel,  # Tamaño de pixel Y
+                                'EXTENT': ext,  # Extensión de la capa vectorial
+                                'NODATA': -9999,  # Valor para píxeles sin datos
+                                'OUTPUT': output_raster,  # Ruta de salida para el ráster generado
+                                'BURN': 1,
+                                'DATA_TYPE': 1
+
+
+                            }
+
+
+                            # Ejecutar el proceso de rasterización
+                            processing.run("gdal:rasterize", params)
+
+                            # Guardar la capa vectorial como un shapefile
+                            output_path = 'c:/work/pruebas/similares.shp'  # Reemplaza con la ruta deseada
+                            QgsVectorFileWriter.writeAsVectorFormat(vlayer, output_path, 'UTF-8', vlayer.crs(),
+                                                                    'ESRI Shapefile')
+
+                            # Añadir la capa al proyecto actual (opcional)
+                            QgsProject.instance().addMapLayer(vlayer)
+
+                        def recorre_raster_ventanas(nombre_raster):
+                            global tamano
+                            #print("tamano",tamano)
+                            from qgis.core import QgsRectangle
+                            raster_layer = QgsRasterLayer(carpeta[:-17] + '/' + nombre_raster + '.vrt', nombre_raster)
+                            # Obtener el proveedor de datos del raster
+                            provider = raster_layer.dataProvider()
+                            print(carpeta[:-17] + '/' + nombre_raster + '.vrt')
+                            # Inicializar la lista de ventanas
+                            ventanas = []
+                            # Obtener el tamaño de píxel del raster
+                            pixel_width = raster_layer.rasterUnitsPerPixelX()
+                            pixel_height = raster_layer.rasterUnitsPerPixelY()
+                            #para que haya solape entre cuadriculas
+                            step = int(tamano) // 2
+                            print("step ", step)
+                            # Extraer las ventanas de tamano x tamano
+                            for i in range(0, raster_layer.height(), step):
+                                for j in range(0, raster_layer.width(), step):
+                                    # Asegurarse de que la ventana no exceda los límites del raster
+                                    if i + int(tamano) <= raster_layer.height() and j + int(tamano) <= raster_layer.width():
+                                        # Calcular las coordenadas de la ventana
+                                        x_min = raster_layer.extent().xMinimum() + j * round(pixel_width)
+                                        y_max = raster_layer.extent().yMaximum() - i * round(pixel_height)
+                                        x_max = x_min + int(tamano) * pixel_width
+                                        y_min = y_max - int(tamano) * pixel_height
+
+                                        # Definir la ventana de tamano x tamano
+                                        window_extent = QgsRectangle(x_min, y_min, x_max, y_max)
+                                        window = provider.block(1, window_extent, int(tamano), int(tamano))
+                                        # Convertir la ventana a una lista, añadiendo la extensión de la ventana
+                                        ventana_list = [[window.value(k, l) for k in range(int(tamano)) for l in range(int(tamano))],window_extent]
+                                        ventanas.append(ventana_list)
+                            print('numero de ventanas ', len(ventanas))
+                            listabuena=[]
+                            #nombre_raster2 = nombre_raster.lower()
+                            #nombre_raster3 = f"resultado_{nombre_raster2}_simplificado"
+                            #print(nombre_raster3)
+                            if nombre_raster == 'HM':
+                                resultado=resultado_hm_simplificado
+                            if nombre_raster == 'FCC':
+                                resultado = resultado_fcc_simplificado
+                            if nombre_raster == 'HBC':
+                                resultado = resultado_hbc_simplificado
+                            if nombre_raster == 'LC':
+                                resultado = resultado_lc_simplificado
+                            if nombre_raster == 'RC':
+                                resultado = resultado_rc_simplificado
+
+                            #print(resultado_hm_simplificado)
+                            #print(eval(nombre_raster3))
+                            for idx, ventana in enumerate(ventanas):
+                                try:
+                                    nuevo2=compara_histogramas(resultado, np.array(ventana[0]))#(resultado_hm_simplificado, np.array(ventana[0]))
+                                    #print("no ha petado")
+                                    if nuevo2 == True:
+                                        print("es similar")
+                                        print(f"Ventana {idx + 1}:")
+                                        print(ventana[1])
+                                        listabuena.append(ventana[1])
+
+
+                                except:
+                                    pass
+
+                            #print(ventanas)
+                            quemaventanas(raster_layer, listabuena)#[elemento[1] for elemento in ventanas])
+
+
+
+
+
                         def filtro_raster_intervalo(nombre_raster, intervalo):
                             rlayer = QgsRasterLayer(carpeta[:-17] + '/' + nombre_raster + '.vrt', nombre_raster)
                             print(carpeta[:-17] + '/' + nombre_raster + '.vrt')
@@ -1967,7 +2233,7 @@ class Silvilidar:
                                                                             "ESRI Shapefile",
                                                                             onlySelected=True)
                                     lyr3 = QgsVectorLayer(ruta_vectorial3, "Zonas similares", "ogr")
-                                    lyr3.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar2.qml')
+                                    lyr3.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
                                     QgsProject.instance().addMapLayer(lyr3)
                             if len(ids) == 0:
                                 print('no hay nada seleccionado')
@@ -2104,6 +2370,8 @@ class Silvilidar:
 
                         def saca_valores_raster(nombre_raster, feats):
                             print('empiezo saca valores raster')
+                            global tamano
+                            #print("tamano ",tamano)
                             resultado = []  # lista con todos los valores
                             resumen = []  # lista con la media y desviacion de cada parcela.
 
@@ -2171,6 +2439,7 @@ class Silvilidar:
                             if nombre == 'HM':
                                 resultado_hm = saca_valores_raster(nombre, feats)
                                 resultado_hm_simplificado = simplificar_lista(resultado_hm[0])
+                                print("he sacado los valores de HM simplificado")
                                 tabla_hm = crea_tabla(resultado_hm)
                                 tablas_de_interes.append(tabla_hm)
                                 grafica_hm = grafica_histograma(resultado_hm_simplificado,
@@ -2183,6 +2452,11 @@ class Silvilidar:
                                                                       estadisticas_lista(resultado_hm_simplificado,
                                                                                          coef_hm)[0])
                                 filtrado_de_interes.append(filtrado_hm)
+                                #comparable=np.array([6,7,8,8,8,10,10,10,10,10,11,11,11,11])
+                                #nuevo=compara_histogramas(resultado_hm_simplificado,comparable)
+                                print("Analisis de histogramas de HM")
+                                recorre_raster_ventanas(nombre)#, 12)#a mayor numero menos numero de ventanas. es el tamano de las ventanas en numero de pixeles
+
                             if nombre == 'HBC':
                                 resultado_hbc = saca_valores_raster(nombre, feats)
                                 resultado_hbc_simplificado = simplificar_lista(resultado_hbc[0])
@@ -2198,6 +2472,8 @@ class Silvilidar:
                                                                        estadisticas_lista(resultado_hbc_simplificado,
                                                                                           coef_hbc)[0])
                                 filtrado_de_interes.append(filtrado_hbc)
+                                print("Analisis de histogramas de HBC")
+                                recorre_raster_ventanas(nombre)
                             if nombre == 'LC':
                                 resultado_lc = saca_valores_raster(nombre, feats)
                                 resultado_lc_simplificado = simplificar_lista(resultado_lc[0])
@@ -2213,6 +2489,8 @@ class Silvilidar:
                                                                       estadisticas_lista(resultado_lc_simplificado,
                                                                                          coef_lc)[0])
                                 filtrado_de_interes.append(filtrado_lc)
+                                print("Analisis de histogramas de LC")
+                                recorre_raster_ventanas(nombre)
                             if nombre == 'RC':
                                 resultado_rc = saca_valores_raster(nombre, feats)
                                 resultado_rc_simplificado = simplificar_lista(resultado_rc[0])
@@ -2228,6 +2506,8 @@ class Silvilidar:
                                                                       estadisticas_lista(resultado_rc_simplificado,
                                                                                          coef_rc)[0])
                                 filtrado_de_interes.append(filtrado_rc)
+                                print("Analisis de histogramas de LC")
+                                recorre_raster_ventanas(nombre)
                             if nombre == 'FCC':
                                 resultado_fcc = saca_valores_raster(nombre, feats)
                                 resultado_fcc_simplificado = simplificar_lista(resultado_fcc[0])
@@ -2243,6 +2523,8 @@ class Silvilidar:
                                                                        estadisticas_lista(resultado_fcc_simplificado,
                                                                                           coef_fcc)[0])
                                 filtrado_de_interes.append(filtrado_fcc)
+                                print("Analisis de histogramas de FCC")
+                                recorre_raster_ventanas(nombre)
                             if nombre == 'FCC_MATORRAL':
                                 resultado_fcc_m = saca_valores_raster(nombre, feats)
                                 resultado_fcc_m_simplificado = simplificar_lista(resultado_fcc_m[0])
@@ -2259,6 +2541,8 @@ class Silvilidar:
                                                                              resultado_fcc_m_simplificado, coef_fcc_m)[
                                                                              0])
                                 filtrado_de_interes.append(filtrado_fcc_m)
+                                print("Analisis de histogramas de FCC_MATORRAL")
+                                recorre_raster_ventanas(nombre)
                         print(capas_raster_de_interes)
                         print(filtrado_de_interes)
                         crea_html(capas_raster_de_interes, tablas_de_interes,
@@ -2277,5 +2561,6 @@ class Silvilidar:
                         #raster = agrega(multiplicado)
                         raster = agrega2(multiplicado,10,0.49)
                         vectorizar(raster, carpeta + "similar3.shp")
+
 
 

@@ -43,7 +43,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="principal">
     <attribute name="title">
@@ -281,6 +281,19 @@ desde la realización del vuelo LiDAR.</string>
       <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Silvilidar/)</string>
      </property>
     </widget>
+    <widget class="QLabel" name="label_8">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>260</y>
+       <width>211</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>FUERA DE LA JCYL</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="similar">
     <attribute name="title">
@@ -341,7 +354,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="pixel_a_pixel">
       <attribute name="title">

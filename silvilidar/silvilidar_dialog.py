@@ -27,9 +27,29 @@ import os
 from PyQt5 import uic
 from PyQt5 import QtWidgets
 
-# This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
-    os.path.dirname(__file__), 'silvilidar_dialog_base.ui'))
+def dentro_de_jcyl():
+    import socket
+    import re
+
+    try:
+        dominio = socket.getfqdn()
+        patron = re.compile(r'JMA\w{6,14}\.jcyl\.red')
+
+        if patron.match(dominio):
+            return True
+    except Exception as e:
+        # Manejar la excepción de manera adecuada
+        pass
+
+    return False
+if dentro_de_jcyl():
+    # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
+    FORM_CLASS, _ = uic.loadUiType(os.path.join(
+        os.path.dirname(__file__), 'silvilidar_dialog_base.ui'))
+else:
+    # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
+    FORM_CLASS, _ = uic.loadUiType(os.path.join(
+        os.path.dirname(__file__), 'silvilidar_dialog_base2.ui'))
 
 
 class SilvilidarDialog(QtWidgets.QDialog, FORM_CLASS):

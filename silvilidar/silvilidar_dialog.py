@@ -30,6 +30,10 @@ from PyQt5 import QtWidgets
 def dentro_de_jcyl():
     import socket
     import re
+    #ojo ojojojojojojojojojo temporal
+    print("fuera de junta")
+    return False
+    # ojo ojojojojojojojojojo temporal
 
     try:
         dominio = socket.getfqdn()

@@ -43,7 +43,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="principal">
     <attribute name="title">
@@ -281,19 +281,6 @@ desde la realización del vuelo LiDAR.</string>
       <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Silvilidar/)</string>
      </property>
     </widget>
-    <widget class="QLabel" name="label_8">
-     <property name="geometry">
-      <rect>
-       <x>40</x>
-       <y>260</y>
-       <width>211</width>
-       <height>41</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>FUERA DE LA JCYL</string>
-     </property>
-    </widget>
    </widget>
    <widget class="QWidget" name="similar">
     <attribute name="title">
@@ -354,7 +341,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pixel_a_pixel">
       <attribute name="title">
@@ -653,6 +640,87 @@ desde la realización del vuelo LiDAR.</string>
        </property>
        <property name="text">
         <string>Capas raster a considerar </string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>30</y>
+         <width>411</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Diferencia con la muestra (entre 0,05 y 0,30)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>130</y>
+         <width>411</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cuanto mayor más lento
+ y más solape entre
+ ventanas</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="solape">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>140</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>2</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="coeficiente_correlacion">
+       <property name="geometry">
+        <rect>
+         <x>240</x>
+         <y>60</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0,1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>310</x>
+         <y>50</y>
+         <width>411</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cuanto más alto más
+ diferente a la muestra</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_12">
+       <property name="geometry">
+        <rect>
+         <x>220</x>
+         <y>100</y>
+         <width>411</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Solape entre ventanas (entre 1 y 3)</string>
        </property>
       </widget>
      </widget>

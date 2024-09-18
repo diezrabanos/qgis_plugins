@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>496</width>
-    <height>421</height>
+    <height>537</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -279,6 +279,51 @@ desde la realización del vuelo LiDAR.</string>
      </property>
      <property name="text">
       <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Silvilidar/)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_select_shp_3">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>290</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="ruta_zona_de_trabajo">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>290</y>
+       <width>261</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_23">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>260</y>
+       <width>411</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Capa de polígonos con la zona de trabajo</string>
      </property>
     </widget>
    </widget>
@@ -642,6 +687,87 @@ desde la realización del vuelo LiDAR.</string>
         <string>Capas raster a considerar </string>
        </property>
       </widget>
+      <widget class="QLabel" name="label_8">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>30</y>
+         <width>411</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Diferencia con la muestra (entre 0,05 y 0,30)</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="coeficiente_correlacion">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>60</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>0,1</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_9">
+       <property name="geometry">
+        <rect>
+         <x>230</x>
+         <y>100</y>
+         <width>411</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Solape entre ventanas (entre 1 y 3)</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="solape">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>140</y>
+         <width>51</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>2</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_10">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>50</y>
+         <width>411</width>
+         <height>41</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cuanto más alto más
+ diferente a la muestra</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_11">
+       <property name="geometry">
+        <rect>
+         <x>320</x>
+         <y>130</y>
+         <width>411</width>
+         <height>51</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Cuanto mayor más lento
+ y más solape entre
+ ventanas</string>
+       </property>
+      </widget>
      </widget>
     </widget>
    </widget>
@@ -649,8 +775,8 @@ desde la realización del vuelo LiDAR.</string>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>290</x>
-     <y>380</y>
+     <x>300</x>
+     <y>490</y>
      <width>171</width>
      <height>32</height>
     </rect>

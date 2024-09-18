@@ -108,6 +108,27 @@ class Silvilidar:
 
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
+        def dentro_de_jcyl():
+            import socket
+            import re
+            # ojo esto es para que no FUNCIONE DE MOMENTO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO eliminarlo cuando queramos que sea interactivo, eliminar
+            print("devuelvo false porque se supone que estoy fuera de jcyl")
+            return False
+            # ojo esto es para que no FUNCIONE DE MOMENTO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO eliminarlo cuando queramos que sea interactivo, eliminar
+            try:
+                dominio = socket.getfqdn()
+                patron = re.compile(r'JMA\w{6,14}\.jcyl\.red')
+
+                if patron.match(dominio):
+                    return True
+            except Exception as e:
+                # Manejar la excepción de manera adecuada
+                pass
+
+            return False
+
+
+        self.dentro= dentro_de_jcyl()
 
         self.dlg = SilvilidarDialog()
         self.dlg2 = ConfigDialog()
@@ -131,23 +152,10 @@ class Silvilidar:
         self.dlg3.crecimiento.textChanged.connect(self.datosenlazados)
 
         self.dlg.pushButton_select_shp.clicked.connect(self.select_shp)
+        if self.dentro:
+            self.dlg.pushButton_select_shp_3.clicked.connect(self.select_shp_zona_trabajo)
 
-        def dentro_de_jcyl():
-            import socket
-            import re
 
-            try:
-                dominio = socket.getfqdn()
-                patron = re.compile(r'JMA\w{6,14}\.jcyl\.red')
-
-                if patron.match(dominio):
-                    return False
-            except Exception as e:
-                # Manejar la excepción de manera adecuada
-                pass
-
-            return True
-        self.dentro= dentro_de_jcyl()
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -266,6 +274,18 @@ class Silvilidar:
 
         return rutaarchivomuestra[0], feats
 
+    def select_shp_zona_trabajo(self):
+        """seleciono el shp con los datos con las zonas de trabajo"""
+        rutaarchivomuestra = QFileDialog.getOpenFileName(self.dlg, "Capa de polígonos con las zonas de trabajo", None,
+                                                         'SHP(*.shp)')
+        self.dlg.ruta_zona_de_trabajo.setText(rutaarchivomuestra[0])
+        # capa vectorial
+        layervectorial = QgsVectorLayer(rutaarchivomuestra[0], "Capa con zonas de trabajo", "ogr")
+        feats = [feat for feat in layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]
+        # print(rutaarchivomuestra[0])
+
+        return rutaarchivomuestra[0], feats
+
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
@@ -376,14 +396,16 @@ class Silvilidar:
         # defino la funcion que lo hace todo con un archivo las o laz concreto
         def exprimelidar(las, carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas , rcminresalveoencinarlatizaldesarrollado , hbcpodabaja ,rcminresalveoencinarfustal ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado):
             fcstring = ""
-            print("empieza exprime lidar")
-            # horaepiezaexprimelidar = time.time()
-            # print(horaepiezaexprimelidar)
+
             # defino un par de variables con el nombre del archivo y su abreviatura. Pensado para la denominacion estandar de los archivos LiDAR del PNOA
             tronco = las[:-4]
             patron = re.compile(('\d{3}\_\d{4}|\d{3}\-\d{4}|\d{4}\_\d{1}\-\d{1}'))
             troncoresumido = patron.findall(las)[0].replace("-", "_")
-
+            print("empieza exprime lidar con los archivos laz")
+            # horaepiezaexprimelidar = time.time()
+            # print(horaepiezaexprimelidar)
+            #if self.dentro == False:
+            # puesto tabulador de linea 407 a 659
             # definicion de parametros funciones y rutas
             funcion1 = "c:/fusion/groundfilter"  # 64
             funcion2 = "c:/fusion/gridsurfacecreate"  # 64
@@ -635,7 +657,7 @@ class Silvilidar:
 
                 # creo lista vacia entries
             entries = []"""
-
+            entries = []
             # funcion que carga una capa y prepara la banda para operar con ella
             def StringToRaster(raster, banda):
                 fileInfo = QFileInfo(raster)
@@ -1093,6 +1115,7 @@ class Silvilidar:
             # except:
             #   pass
             # calculo las variables basicas sin proyectar
+            #if self.dentro == False:
             print("empieza calculo las variables basicas sin proyectar")
             # horaepiezacalculovariabesbasicas = time.time()
             print("horaepiezacalculovariabesbasicas")
@@ -1119,14 +1142,57 @@ class Silvilidar:
             if self.dentro:
                 #defino lo que esta en los servidores de scayle
                 print("dentro de la junta")
-                #cargo el raster de la junta
+                #cargo el shape con la zona de interes
+                ruta_zona_trabajo = self.dlg.ruta_zona_de_trabajo.text()
+                layervectorial = QgsVectorLayer(ruta_zona_trabajo, "zona de trabajo", "ogr")
+
+                #cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
                 fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
                 Layer = QgsRasterLayer(fileName, "altura de red")
-                QgsProject.instance().addMapLayers([Layer])
+                #recortar raster con el shape
+                layer2=processing.run("gdal:cliprasterbymasklayer", {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None, 'ALPHA_BAND': False, 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, troncoresumido + '_Alt95_m_PNOA2.tif')})['OUTPUT']
+                #QgsProject.instance().addMapLayers([Layer])
+                print(layer2)
+                print("cargado el raster recortado de la junta")
+                StringToRaster(os.path.join(carpeta, troncoresumido + '_Alt95_m_PNOA2.tif'),
+                               'hm')  # en teoria se sobre escribiria el raster hm@1
+                print("creado el string to raster de h")
+                # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                Layer = QgsRasterLayer(fileName, "FCC DE RED")
+                # recortar raster con el shape
+                layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                        {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None, 'ALPHA_BAND': False,
+                                         'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
+                                         'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                         'OUTPUT': os.path.join(carpeta, troncoresumido + '_Cob3m_PRT_PNOA2.tif')})[
+                    'OUTPUT']
+                # QgsProject.instance().addMapLayers([Layer])
+                print(layer2)
+                print("cargado el raster recortado de la junta")
+                StringToRaster(os.path.join(carpeta, troncoresumido + '_Cob3m_PRT_PNOA2.tif'),
+                               'fcc')  # en teoria se sobre escribiria el raster fcc@1
+                print("creado el string to raster de fcc")
+                # cargo el raster de la junta FCC de MATORRAL NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/CobEstr_050cm_200cm_TLR_PNOA2.tif"
+                Layer = QgsRasterLayer(fileName, "FCC DE RED")
+                # recortar raster con el shape
+                layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                        {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None, 'ALPHA_BAND': False,
+                                         'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
+                                         'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                         'OUTPUT': os.path.join(carpeta, troncoresumido + '_CobEstr_050cm_200cm_TLR_PNOA2.tif')})[
+                    'OUTPUT']
+                # QgsProject.instance().addMapLayers([Layer])
+                print(layer2)
+                print("cargado el raster recortado de la junta")
+                StringToRaster(os.path.join(carpeta, troncoresumido + '_CobEstr_050cm_200cm_TLR_PNOA2.tif'),
+                               'fccmatorral')  # en teoria se sobre escribiria el raster fcc@1
+                print("creado el string to raster de fccmatorral")
                 
 
 
-
+            print("voy a proyectar")
             # genero una carpeta para los datos intermedios
             carpetap = os.path.join(carpeta, "p")
             carpeta = carpetap
@@ -1476,9 +1542,9 @@ class Silvilidar:
                     # defino lo que esta en los servidores de scayle
                     print("dentro de la junta")
                     # cargo el raster de la junta
-                    fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
-                    Layer = QgsRasterLayer(fileName, "altura de red")
-                    QgsProject.instance().addMapLayers([Layer])
+                    #fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
+                    #Layer = QgsRasterLayer(fileName, "altura de red")
+                    #QgsProject.instance().addMapLayers([Layer])
                 # Do something useful here - delete the line containing pass and
                 # substitute with your code.
                 # print ("lo imprime si le doy a aceptar en el dialogo")
@@ -1711,14 +1777,28 @@ class Silvilidar:
 
                 carpeta = self.dlg.carpetalaz.text()
 
-                def crea_carpeta(carpeta, carpeta_nueva):
+                """def crea_carpeta(carpeta, carpeta_nueva):
                     if os.path.isdir(carpeta_nueva):
-                        crea_carpeta(carpeta, carpeta + '/Busca_similar' + str(random.randint(0, 1000)))
+                        crea_carpeta(carpeta, carpeta + '/Busca_similar' + str(random.randint(100, 1000)))
 
                     else:
-                        carpeta_nueva = carpeta + '/Busca_similar' + str(random.randint(0, 1000))
+                        carpeta_nueva = carpeta + '/Busca_similar' + str(random.randint(100, 1000))
                         os.makedirs(carpeta_nueva, exist_ok=True)
                         print("creo carpeta nueva")
+                    return carpeta_nueva"""
+                #de estar cadena cadena="D:\pruebas\lidar\new23\Busca_similar_20240916_125417" me quiero quedar con lo anterior a la ultima barra
+                #cadena_nueva = carpeta.rsplit('/', 1)[0]
+                #print('cadena_nueva',cadena_nueva)
+
+
+
+
+                def crea_carpeta(carpeta, carpeta_nueva):
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    carpeta_nueva = os.path.join(carpeta, f'Busca_similar_{timestamp}')
+                    os.makedirs(carpeta_nueva, exist_ok=True)
+                    print("creo carpeta nueva")
                     return carpeta_nueva
 
                 # para sacar las estadisticas de todos los poligonos juntos
@@ -1904,22 +1984,25 @@ class Silvilidar:
                     # print(f'Coeficiente de correlación de Pearson: {coef_pearson}')
 
                     # Definir umbrales para la similitud
-                    umbral_dist_euclidiana = 0.10
+                    umbral_dist_euclidiana = correlacion#0.10
                     umbral_coef_pearson = 0.80
+                    #print("umbral_coef_pearson " , umbral_coef_pearson)
 
                     # Interpretación combinada
+                    #son similares si la distancia euclidiana es menor que el umbral
+                    #van en el mismo sentido si el coeficiente de pearson es mayor que el umbral
                     if dist_euclidiana < umbral_dist_euclidiana and coef_pearson > umbral_coef_pearson:
-                        # print(                                    "Los histogramas son similares: pequeñas diferencias absolutas y diferencias en el mismo sentido.")
+                        #print(                                    f"Los histogramas son similares: pequeñas diferencias absolutas y diferencias en el mismo sentido.{coef_pearson} ")
 
                         return True
-                    elif dist_euclidiana < umbral_dist_euclidiana and coef_pearson < -umbral_coef_pearson:
-                        # print(                                    "Los histogramas son similares: pequeñas diferencias absolutas pero diferencias en sentido opuesto.")
-                        return False
-                    elif dist_euclidiana >= umbral_dist_euclidiana and coef_pearson > umbral_coef_pearson:
-                        # print(                                    "Los histogramas tienen grandes diferencias absolutas, pero las diferencias son en el mismo sentido.")
-                        return False
+                    #elif dist_euclidiana < umbral_dist_euclidiana and coef_pearson < -umbral_coef_pearson:
+                        #print(                                    "Los histogramas son similares: pequeñas diferencias absolutas pero diferencias en sentido opuesto.")
+                        #return False
+                    #elif dist_euclidiana >= umbral_dist_euclidiana and coef_pearson > umbral_coef_pearson:
+                        #print(                                    f"Los histogramas tienen grandes diferencias absolutas, pero las diferencias son en el mismo sentido.{coef_pearson} ")
+                        #return False
                     else:
-                        # print(                                    "Los histogramas tienen grandes diferencias absolutas y las diferencias son en sentido opuesto.")
+                        #print(                                    "Los histogramas tienen grandes diferencias absolutas y las diferencias son en sentido opuesto.")
                         return False
 
                 def quemaventanas(raster_layer, lista_ventanas):
@@ -2015,17 +2098,17 @@ class Silvilidar:
                     global tamano
                     # print("tamano",tamano)
                     from qgis.core import QgsRectangle
-                    raster_layer = QgsRasterLayer(carpeta[:-17] + '/' + nombre_raster + '.vrt', nombre_raster)
+                    raster_layer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
                     # Obtener el proveedor de datos del raster
                     provider = raster_layer.dataProvider()
-                    print(carpeta[:-17] + '/' + nombre_raster + '.vrt')
+                    print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
                     # Inicializar la lista de ventanas
                     ventanas = []
                     # Obtener el tamaño de píxel del raster
                     pixel_width = raster_layer.rasterUnitsPerPixelX()
                     pixel_height = raster_layer.rasterUnitsPerPixelY()
                     # para que haya solape entre cuadriculas
-                    step = int(tamano) // 2
+                    step = int(tamano // solape)#2
                     print("step ", step)
                     # Extraer las ventanas de tamano x tamano
                     for i in range(0, raster_layer.height(), step):
@@ -2083,8 +2166,8 @@ class Silvilidar:
                     quemaventanas(raster_layer, listabuena)  # [elemento[1] for elemento in ventanas])
 
                 def filtro_raster_intervalo(nombre_raster, intervalo):
-                    rlayer = QgsRasterLayer(carpeta[:-17] + '/' + nombre_raster + '.vrt', nombre_raster)
-                    print(carpeta[:-17] + '/' + nombre_raster + '.vrt')
+                    rlayer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
+                    print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
                     # QgsProject.instance().addMapLayer(rlayer)
                     minimo = intervalo[0]
                     maximo = intervalo[1]
@@ -2355,8 +2438,8 @@ class Silvilidar:
                     resultado = []  # lista con todos los valores
                     resumen = []  # lista con la media y desviacion de cada parcela.
 
-                    rlayer = QgsRasterLayer(carpeta[:-17] + '/' + nombre_raster + '.vrt', nombre_raster)
-                    print(carpeta[:-17] + '/' + nombre_raster + '.vrt')
+                    rlayer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
+                    print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
                     QgsProject.instance().addMapLayer(rlayer)
                     # for layer in QgsProject.instance().mapLayers().values():
                     # print(layer.name())
@@ -2643,7 +2726,8 @@ class Silvilidar:
 
 
                                 carpeta = crea_carpeta(carpeta, carpeta_nueva)
-                                print(carpeta)
+                                print("carpeta", carpeta)
+                                print("carpeta-29", carpeta[:-29])
                                 #lo quito porque aqui no hay coeficientes, me servira despues para configurar el grado de similitud
                                 coef_hm = 1#float(self.dlg.coef_hm2.text().replace(',', '.'))
                                 coef_hbc = 1#float(self.dlg.coef_hbc2.text().replace(',', '.'))
@@ -2652,6 +2736,8 @@ class Silvilidar:
                                 coef_fcc = 1#float(self.dlg.coef_fcc2.text().replace(',', '.'))
                                 coef_fcc_m = 1#float(self.dlg.coef_matorral2.text().replace(',', '.'))
                                 ruta_muestra = self.dlg.ruta_muestra_similar.text()
+                                correlacion=float(self.dlg.coeficiente_correlacion.text().replace(',', '.'))
+                                solape=float(self.dlg.solape.text().replace(',', '.'))
                                 capas_raster_de_interes2 = []  # para comparacion de pixeles
                                 if self.dlg.checkBox_hm2.isChecked():
                                     capas_raster_de_interes2.append('HM')
@@ -2826,7 +2912,7 @@ class Silvilidar:
                                 print(rutas_capas_salida[0])
 
                                 resultado0 = QgsVectorLayer(rutas_capas_salida[0], "Zonas similares por histograma", "ogr")
-                                #ojo ahora debería disolver  OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+
                                 disuelto = processing.run("native:dissolve",
                                                           {'INPUT': resultado0,
                                                            'FIELD': ['DN'],
@@ -2856,7 +2942,7 @@ class Silvilidar:
                                                                         "ESRI Shapefile")
                                 resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
                                                            "Zonas similares por histograma", "ogr")
-                            if len(rutas_capas_salida)==3:
+                            """if len(rutas_capas_salida)==3:
                                 print("hago interseccion de tres capas")
                                 capa1 = QgsVectorLayer(rutas_capas_salida[0], "capa1", "ogr")
                                 capa2 = QgsVectorLayer(rutas_capas_salida[1], "capa2", "ogr")
@@ -2877,7 +2963,31 @@ class Silvilidar:
                                     'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
                                 QgsVectorFileWriter.writeAsVectorFormat(disuelto, carpeta + '/Zonas_similares_por_histograma.shp', "CP120", capa1.crs(),
                                                                         "ESRI Shapefile")
-                                resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp', "Zonas similares por histograma", "ogr")
+                                resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp', "Zonas similares por histograma", "ogr")"""
+                            if 3 <= len(rutas_capas_salida) <= 6:
+                                print(f"hago interseccion de {len(rutas_capas_salida)} capas")
+                                capas = [QgsVectorLayer(ruta, f"capa{i + 1}", "ogr") for i, ruta in
+                                         enumerate(rutas_capas_salida)]
+
+                                interseccion = capas[0]
+                                for i in range(1, len(capas)):
+                                    interseccion = processing.run("native:intersection", {
+                                        'INPUT': interseccion,
+                                        'OVERLAY': capas[i],
+                                        'OUTPUT': 'TEMPORARY_OUTPUT'
+                                    })['OUTPUT']
+
+                                disuelto = processing.run("native:dissolve", {
+                                    'INPUT': interseccion,
+                                    'FIELD': ['DN'],
+                                    'OUTPUT': 'TEMPORARY_OUTPUT'
+                                })['OUTPUT']
+
+                                QgsVectorFileWriter.writeAsVectorFormat(disuelto,
+                                                                        carpeta + '/Zonas_similares_por_histograma.shp',
+                                                                        "CP120", capas[0].crs(), "ESRI Shapefile")
+                                resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
+                                                           "Zonas similares por histograma", "ogr")
 
 
 

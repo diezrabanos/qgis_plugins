@@ -436,7 +436,7 @@ class Silvilidar:
             # salida102 = os.path.join(carpeta, tronco + "_skewness.txt")
 
             parametros1 = 10
-            parametros1_0 = ""  # "/median:3 /wparam:2.5 /aparam:4 /bparam:4"
+            parametros1_0 = "/class:2"  # "/median:3 /wparam:2.5 /aparam:4 /bparam:4"#solo considera los puntos clasificados como suelo
             parametros2 = "10 M M 0 0 0 0"
 
             # parametros3_1 = "/minht:2 /nointensity"
@@ -1199,7 +1199,7 @@ class Silvilidar:
             if not os.path.exists(carpetap):
                 os.mkdir(carpetap)
             # proyecto la altura con el crecimiento
-            calculo('(hm@1 < 5) * hm@1 + (hm@1 >= 5) * (hm@1 + ' + str(crecimiento) + ')', 'hmp')
+            calculo('(hm@1 < 6) * hm@1 + (hm@1 >= 6) * (hm@1 + ' + str(crecimiento) + ')', 'hmp')
             StringToRaster(os.path.join(carpeta, troncoresumido + '_hmp.tif'), "hmp")
             # proyecto la altura  de la base de la copa con el crecimiento
             calculo('(hm@1 < 7.5) * hbc@1 + (hm@1 >= 7.5) * (hbc@1 + ' + str(crecimiento) + ')', 'hbcp')
@@ -1373,10 +1373,13 @@ class Silvilidar:
             rccoronado=str(17)"""
 
             #OJO PARA METER LA FORMULA PARA UNA VARIABLE
-            hmaxprimeraclara='hmaxprimeraclara+5'.replace('hmaxprimeraclara',str(hmaxprimeraclara))
+            #hmaxprimeraclara='hmaxprimeraclara+5'.replace('hmaxprimeraclara',str(hmaxprimeraclara))
+            #if not isinstance(rcminresalveoencinarlatizalpocodesarrollado, (int, float)):
+            #    rcminresalveoencinarlatizalpocodesarrollado=rcminresalveoencinarlatizalpocodesarrollado.replace('HM',str('hmp@1'))#-0, 485950210654347 * HM ^ 2 + 10, 9071549372235 * HM + 2, 62451053947642
             #hmaxprimeraclara=str(eval(cadena))
 
-            print('hmaxprimeraclara nueva = ',hmaxprimeraclara)
+
+            print('if (fccp@1 <= 0, 0, if ( fccp@1 < '+fccminarbolado+', 1, if ( hmp@1 < '+alturadesconocida+', 11, if ( hmp@1 < '+hmaxmontebravo+', 2, if ( hmp@1 < '+hmaxbajolatizal+', if ( rcp@1 <= '+rcminresalveoencinarlatizalpocodesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizalpocodesarrollado+', 51, 61), 17), if (hmp@1 <= '+hmaxselvicolas+', if ( rcp@1 <= '+rcminresalveoencinarlatizaldesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizaldesarrollado+', 52, 62) , if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcpodabaja+', 3, 4)), if ( hmp@1 <= '+hmaxprimeraclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <='+hbcminclarasnormales+' , if ( rcp@1 <= '+rcminresalveoencinarfustal+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 7), 7), if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 81, if ( fccp@1 >= '+fcccompetenciaelevada+', 81, 10)), 7), 7), if ( fccp@1 >= '+fcccompetenciaelevada+', 9, if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 10)))), if ( hmp@1 <= '+hmaxsegundaclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcminclarasnormales+', 111, if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 82, if ( fccp@1 >= '+fcccompetenciaelevada+', 82, 111)), 111), 111), if ( fccp@1 >= '+fcccompetenciaelevada+', 121, 141))), if ( rcp@1 <= '+rccoronado+', if ( fccp@1 >= '+fcccompetenciaelevada+', 13, 15), if ( rcp@1 < '+rcminclara+', if ( fccp@1 >= '+fcccompetenciaelevada+', 122, 142), 112))))))))))')
             calculo( 'if (fccp@1 <= 0, 0, if ( fccp@1 < '+fccminarbolado+', 1, if ( hmp@1 < '+alturadesconocida+', 11, if ( hmp@1 < '+hmaxmontebravo+', 2, if ( hmp@1 < '+hmaxbajolatizal+', if ( rcp@1 <= '+rcminresalveoencinarlatizalpocodesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizalpocodesarrollado+', 51, 61), 17), if (hmp@1 <= '+hmaxselvicolas+', if ( rcp@1 <= '+rcminresalveoencinarlatizaldesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizaldesarrollado+', 52, 62) , if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcpodabaja+', 3, 4)), if ( hmp@1 <= '+hmaxprimeraclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <='+hbcminclarasnormales+' , if ( rcp@1 <= '+rcminresalveoencinarfustal+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 7), 7), if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 81, if ( fccp@1 >= '+fcccompetenciaelevada+', 81, 10)), 7), 7), if ( fccp@1 >= '+fcccompetenciaelevada+', 9, if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 10)))), if ( hmp@1 <= '+hmaxsegundaclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcminclarasnormales+', 111, if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 82, if ( fccp@1 >= '+fcccompetenciaelevada+', 82, 111)), 111), 111), if ( fccp@1 >= '+fcccompetenciaelevada+', 121, 141))), if ( rcp@1 <= '+rccoronado+', if ( fccp@1 >= '+fcccompetenciaelevada+', 13, 15), if ( rcp@1 < '+rcminclara+', if ( fccp@1 >= '+fcccompetenciaelevada+', 122, 142), 112))))))))))', 'suma')
             StringToRaster(os.path.join(carpeta, troncoresumido + '_suma.tif'), "suma")
             parameters = {'INPUT': os.path.join(carpeta, troncoresumido + '_suma.tif'), 'BAND': 1, 'FIELD': "DN",
@@ -1548,6 +1551,11 @@ class Silvilidar:
                 # Do something useful here - delete the line containing pass and
                 # substitute with your code.
                 # print ("lo imprime si le doy a aceptar en el dialogo")
+                else:
+                    print("no esta dentro de la junta")
+                    #fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
+                    #Layer = QgsRasterLayer(fileName, "altura de red")
+                    #QgsProject.instance().addMapLayers([Layer])
                 carpeta = self.dlg.carpetalaz.text()  # displayText()
                 # la carpeta la he cogido al pulsar el boton de la carpeta
 
@@ -1577,7 +1585,14 @@ class Silvilidar:
                 hmaxmontebravo = self.dlg2.hmaxmontebravo.text()  # 3.5
                 hmaxbajolatizal = self.dlg2.hmaxbajolatizal.text()  # 5
                 rcminresalveoencinarlatizalpocodesarrollado = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado.text()  # 40
+                rcminresalveoencinarlatizalpocodesarrollado_2 = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado_2.text()  # -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
+                if not isinstance(rcminresalveoencinarlatizalpocodesarrollado, (int, float)):
+                    rcminresalveoencinarlatizalpocodesarrollado = rcminresalveoencinarlatizalpocodesarrollado_2.replace('SI','if').replace('FCC',str('fccp@1')).replace('RC',str('rcp@1')).replace('HM',str('hmp@1')).replace(',','.').replace(';',',')# -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
+
                 fccmincompetenciaencinarlatizalpocodesarrollado = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado.text()  # 50
+                fccmincompetenciaencinarlatizalpocodesarrollado_2 = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado_2.text() #SI(FCC>46;SI(FCC>16/45,4150013475952/(1-RC/100)*100;52;62);62)
+                if not isinstance(fccmincompetenciaencinarlatizalpocodesarrollado, (int, float)):
+                    fccmincompetenciaencinarlatizalpocodesarrollado = fccmincompetenciaencinarlatizalpocodesarrollado_2.replace('SI','if').replace('FCC',str('fccp@1')).replace('RC',str('rcp@1')).replace('HM',str('hmp@1')).replace(',','.').replace(';',',')
                 hmaxselvicolas = self.dlg2.hmaxselvicolas.text()  # 7.5
                 rcminresalveoencinarlatizaldesarrollado = self.dlg2.rcminresalveoencinarlatizaldesarrollado.text()  # 50
                 hbcpodabaja = self.dlg2.hbcpodabaja.text()  # 3

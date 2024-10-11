@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>649</width>
+    <width>1046</width>
     <height>786</height>
    </rect>
   </property>
@@ -163,7 +163,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>50</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLineEdit" name="hmaxselvicolas">
@@ -215,7 +215,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>5</string>
+    <string>6</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="rcminresalveoencinarlatizalpocodesarrollado">
@@ -228,7 +228,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>40</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLineEdit" name="rcminresalveoencinarlatizaldesarrollado">
@@ -384,7 +384,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Rc mínima para Resalveo en Encinar Latizal poco desarrolladoo ......................</string>
+    <string>Rc mínima para Resalveo en Encinar Latizal poco desarrolladoo ..............¿40%?</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_43">
@@ -410,7 +410,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Fcc mínima de competencia en Latizal Xérico (L Encinar) poco desarrollado............</string>
+    <string>Fcc mínima de competencia en Latizal Xérico (L Encinar) poco desarrollado....¿50%?.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_45">
@@ -418,12 +418,12 @@
     <rect>
      <x>130</x>
      <y>136</y>
-     <width>381</width>
+     <width>391</width>
      <height>25</height>
     </rect>
    </property>
    <property name="text">
-    <string>Altura desconocida.......................................................................</string>
+    <string>Altura desconocida...........................................................................</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_46">
@@ -462,7 +462,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Fcc mínima de arbolado...............................................</string>
+    <string>Fcc mínima de arbolado..........................................................................</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_49">
@@ -573,7 +573,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>240</y>
+     <y>250</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -801,6 +801,45 @@
    </property>
    <property name="text">
     <string>m</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="rcminresalveoencinarlatizalpocodesarrollado_2">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>220</y>
+     <width>401</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>-0,485950210654347 * HM^2 + 10,9071549372235 * HM + 2,62451053947642</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="fccmincompetenciaencinarlatizalpocodesarrollado_2">
+   <property name="geometry">
+    <rect>
+     <x>630</x>
+     <y>250</y>
+     <width>381</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>SI ( FCC &gt; 46 ; 16 / 45,4150013475952 / ( 100 - RC ) * 100 * 100  ; 46)</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_75">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>90</y>
+     <width>239</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>A emplear en las formulas HM, FCC,RC,HBC,LC</string>
    </property>
   </widget>
  </widget>

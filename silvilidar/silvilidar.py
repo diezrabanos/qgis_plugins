@@ -1886,10 +1886,19 @@ class Silvilidar:
                     return texto
 
                 def grafica_histograma(datos, intervalo_min, intervalo_max, nombre):
+                    print("nombre ", nombre)
                     fig, ax = plt.subplots()
                     ax.hist(datos, 10)  # np.arange(0,np.amax(datos)))
                     ax.axvline(intervalo_min, color='red', linestyle='dashed', linewidth=1)
                     ax.axvline(intervalo_max, color='red', linestyle='dashed', linewidth=1)
+                    #ojo nuevo empieza
+                    if nombre in ['hm', 'hbc', 'lc']:
+                        ax.set_xlabel('Metros')
+                    elif nombre in ['fcc', 'rc']:
+                        ax.set_xlabel('%')
+
+                    ax.set_ylabel('Número de píxeles')
+                    #ojo nuevo acaba
                     # plt.show()
                     plt.savefig(carpeta + '/' + nombre + '.png')
                     print(carpeta + '/' + nombre + '.png')
@@ -1947,10 +1956,11 @@ class Silvilidar:
                     n = 0
                     if len(lista_elementos) > 0:
                         for i in range(0, len(lista_elementos)):
+                            print(lista_elementos[i])
                             texto += '<h2>{} </h2> \
                                      {}  \
                                      <br>\
-                                     <img src={}>'.format(lista_elementos[i], lista_tablas[i],
+                                     <img src={}>'.format(lista_elementos[i].replace('HM','Altura Lidar').replace('FCC','Fracción de Cabida Cubierta Lidar').replace('RC','Razón de Copa Lidar').replace('LC','Longitud de Copa Lidar').replace('FCC_Matorral','Fracción de Cabida Cubierta de Matorral'), lista_tablas[i],
                                                           lista_graficas[i])
                             n = n + 1
                     texto += '</body></html>'

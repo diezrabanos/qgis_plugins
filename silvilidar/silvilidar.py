@@ -436,7 +436,7 @@ class Silvilidar:
             # salida102 = os.path.join(carpeta, tronco + "_skewness.txt")
 
             parametros1 = 10
-            parametros1_0 = "/class:2"  # "/median:3 /wparam:2.5 /aparam:4 /bparam:4"#solo considera los puntos clasificados como suelo
+            parametros1_0 = "/class:2"#""#"/median:3 /wparam:2.5 /aparam:4 /bparam:4"# con esto solo considerara los puntos clasificados como suelo "/class:2"  #
             parametros2 = "10 M M 0 0 0 0"
 
             # parametros3_1 = "/minht:2 /nointensity"
@@ -516,7 +516,7 @@ class Silvilidar:
             # paso3 saca los parametros de ese grid
             # renombro el archivo  carpeta + "/metric_all_returns_elevation_stats_" + tronco + ".csv"
             #DESDE AQUI ESTABA COMENTADO OJO_________________________________________________________________________________________________________________________
-            os.rename(carpeta + "/metric_all_returns_elevation_stats_" + tronco + ".csv",
+            """os.rename(carpeta + "/metric_all_returns_elevation_stats_" + tronco + ".csv",
                       carpeta + "/metric_all_returns_elevation_stats_" + tronco + "_.csv")
             os.rename(carpeta + "/metric_all_returns_elevation_stats_" + tronco + "_ascii_header.txt",
                       carpeta + "/metric_all_returns_elevation_stats_" + tronco + "_ascii_header_.txt")
@@ -534,7 +534,7 @@ class Silvilidar:
 
             # paso5 genera un grid del csv anterior de fcc
             total5_ = funcion4 + " " + entrada4 + " " + str(parametros5) + " " + salida5_
-            os.system(total5_)
+            os.system(total5_)"""
             #HASTA AQUI ESTABA COMENTADO OJO----------------------------------------------------------------------------------------------------------------------------
 
             # empieza lo nuevo para calcular la fcc total
@@ -1400,22 +1400,26 @@ class Silvilidar:
 
             # filtro para quedarme con la clara
             if self.dlg4.checkBox_claras.isChecked():
-                calculo(
-                    'c11@1 / 81 + c14@1 / 9  + c15@1 / 81 + c19@1 / 82 + c20@1 / 121 + c21@1 / 82 + c25@1 / 122 + c26@1 / 13',
-                    'clara1')
+                #"calculo(
+                    #'c11@1 / 81 + c14@1 / 9  + c15@1 / 81 + c19@1 / 82 + c20@1 / 121 + c21@1 / 82 + c25@1 / 122 + c26@1 / 13',
+                    #'clara1')
+                calculo('("suma@1" = 81 OR "suma@1" = 9 OR "suma@1" = 82 OR "suma@1" = 121 OR "suma@1" = 122 OR "suma@1" = 13) * 1','clara1')  #ojo comprobar si sigue siendo así despues de lo de los encinares
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_clara1.tif'), "clara1")
                 agregado2("clara", 20,1)
 
 
             # filtro para quedarme con la regeneracion
             if self.dlg4.checkBox_regeneracion.isChecked():
-                calculo('c28@1 / 15 ', 'regeneracion1')
+                #calculo('c28@1 / 15 ', 'regeneracion1')
+                calculo(
+                    '("suma@1" = 15 ) * 1', 'regeneracion1')
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_regeneracion1.tif'), "regeneracion1")
                 agregado2("regeneracion", 10,1)
 
             # filtro para quedarme con el resalveo
             if self.dlg4.checkBox_resalveo.isChecked():
-                calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
+                #calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
+                calculo('("suma@1" = 51 OR "suma@1" = 52 ) * 1','resalveo1')
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_resalveo1.tif'), "resalveo1")
                 agregado2("resalveo", 30,0.85)
 

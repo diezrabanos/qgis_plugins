@@ -480,7 +480,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Alturamínima arbolado...........................................................................</string>
+    <string>Altura estrato inferior...........................................................................</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_46">

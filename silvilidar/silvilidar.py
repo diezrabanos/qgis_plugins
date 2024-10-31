@@ -1378,7 +1378,7 @@ class Silvilidar:
             #    rcminresalveoencinarlatizalpocodesarrollado=rcminresalveoencinarlatizalpocodesarrollado.replace('HM',str('hmp@1'))#-0, 485950210654347 * HM ^ 2 + 10, 9071549372235 * HM + 2, 62451053947642
             #hmaxprimeraclara=str(eval(cadena))
 
-
+            #ojo posible version no actualizada
             print('if (fccp@1 <= 0, 0, if ( fccp@1 < '+fccminarbolado+', 1, if ( hmp@1 < '+alturadesconocida+', 11, if ( hmp@1 < '+hmaxmontebravo+', 2, if ( hmp@1 < '+hmaxbajolatizal+', if ( rcp@1 <= '+rcminresalveoencinarlatizalpocodesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizalpocodesarrollado+', 51, 61), 17), if (hmp@1 <= '+hmaxselvicolas+', if ( rcp@1 <= '+rcminresalveoencinarlatizaldesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizaldesarrollado+', 52, 62) , if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcpodabaja+', 3, 4)), if ( hmp@1 <= '+hmaxprimeraclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <='+hbcminclarasnormales+' , if ( rcp@1 <= '+rcminresalveoencinarfustal+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 7), 7), if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 81, if ( fccp@1 >= '+fcccompetenciaelevada+', 81, 10)), 7), 7), if ( fccp@1 >= '+fcccompetenciaelevada+', 9, if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 10)))), if ( hmp@1 <= '+hmaxsegundaclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcminclarasnormales+', 111, if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 82, if ( fccp@1 >= '+fcccompetenciaelevada+', 82, 111)), 111), 111), if ( fccp@1 >= '+fcccompetenciaelevada+', 121, 141))), if ( rcp@1 <= '+rccoronado+', if ( fccp@1 >= '+fcccompetenciaelevada+', 13, 15), if ( rcp@1 < '+rcminclara+', if ( fccp@1 >= '+fcccompetenciaelevada+', 122, 142), 112))))))))))')
             calculo( 'if (fccp@1 <= 0, 0, if ( fccp@1 < '+fccminarbolado+', 1, if ( hmp@1 < '+alturadesconocida+', 11, if ( hmp@1 < '+hmaxmontebravo+', 2, if ( hmp@1 < '+hmaxbajolatizal+', if ( rcp@1 <= '+rcminresalveoencinarlatizalpocodesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizalpocodesarrollado+', 51, 61), 17), if (hmp@1 <= '+hmaxselvicolas+', if ( rcp@1 <= '+rcminresalveoencinarlatizaldesarrollado+', if ( fccp@1 > '+fccmincompetenciaencinarlatizaldesarrollado+', 52, 62) , if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcpodabaja+', 3, 4)), if ( hmp@1 <= '+hmaxprimeraclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <='+hbcminclarasnormales+' , if ( rcp@1 <= '+rcminresalveoencinarfustal+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 7), 7), if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 81, if ( fccp@1 >= '+fcccompetenciaelevada+', 81, 10)), 7), 7), if ( fccp@1 >= '+fcccompetenciaelevada+', 9, if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', 77, 10)))), if ( hmp@1 <= '+hmaxsegundaclara+', if ( hmp@1 - hmp@1 * rcp@1 / 100 <= '+hbcminclarasnormales+', 111, if ( rcp@1 >= '+rcminclara+', if ( hmp@1 * rcp@1 / 100 > '+longitudcopaminclara+', if ( fccp@1 > '+fccmincompetenciamasadiscontinua_fustalencinares+', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 82, if ( fccp@1 >= '+fcccompetenciaelevada+', 82, 111)), 111), 111), if ( fccp@1 >= '+fcccompetenciaelevada+', 121, 141))), if ( rcp@1 <= '+rccoronado+', if ( fccp@1 >= '+fcccompetenciaelevada+', 13, 15), if ( rcp@1 < '+rcminclara+', if ( fccp@1 >= '+fcccompetenciaelevada+', 122, 142), 112))))))))))', 'suma')
             StringToRaster(os.path.join(carpeta, troncoresumido + '_suma.tif'), "suma")
@@ -1629,6 +1629,13 @@ class Silvilidar:
                 juntoshapes(os.path.join(carpeta, "p", "*resalveo3.shp"), "Resalveo_merged")
                 juntoshapes(os.path.join(carpeta, "p", "*suma.shp"), "Teselas_merged")
 
+                def join_tables(csv_path, layer_path):
+                    res = processing.run("qgis:joinattributestable", { 'DISCARD_NONMATCHING' : False, 'FIELD' : 'DN', 'FIELDS_TO_COPY' : ['texto','foto'], 'FIELD_2' : 'cod', 'INPUT' : layer_path, 'INPUT_2' : csv_path+'|layername=Hoja1', 'METHOD' : 1, 'OUTPUT' : os.path.join(carpeta, "Teselas_merged_Final.shp"), 'PREFIX' : '' })
+                    layer = QgsVectorLayer(res['OUTPUT'], "joined layer", "ogr")
+                    QgsProject.instance().addMapLayer(layer)
+                print("intento hacer la union")
+                join_tables(os.path.dirname(__file__) + '/fotos/tabla.xlsx', os.path.join(carpeta, "Teselas_merged.shp"))
+                print(" la union esta hecha")
                 # elimino las capas que he cargado durante el proceso
                 capas = QgsProject.instance().mapLayers()
                 for capa in capas:
@@ -1675,7 +1682,10 @@ class Silvilidar:
                 # cargo las capas finales vectoriales
 
                 if self.dlg4.checkBox_teselas.isChecked():
-                    teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged.shp'), "Teselas", "ogr")
+                    #ojojojojoj
+                    import shutil
+                    shutil.copytree(os.path.dirname(__file__) + '/fotos', carpeta+'/fotos')
+                    teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_Final.shp'), "Teselas", "ogr")
                     """teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'),
                                               "Teselas Proyectado1",
                                               "ogr")
@@ -1964,7 +1974,7 @@ class Silvilidar:
                             texto += '<h2>{} </h2> \
                                      {}  \
                                      <br>\
-                                     <img src={}>'.format(lista_elementos[i].replace('HM','Altura Lidar').replace('FCC','Fracción de Cabida Cubierta Lidar').replace('RC','Razón de Copa Lidar').replace('LC','Longitud de Copa Lidar').replace('FCC_Matorral','Fracción de Cabida Cubierta de Matorral'), lista_tablas[i],
+                                     <img src={}>'.format(lista_elementos[i].replace('HM','Altura Lidar').replace('FCC','Fracción de Cabida Cubierta Lidar').replace('RC','Razón de Copa Lidar').replace('LC','Longitud de Copa Lidar').replace('_MATORRAL',' de Matorral'), lista_tablas[i],
                                                           lista_graficas[i])
                             n = n + 1
                     texto += '</body></html>'
@@ -2254,7 +2264,7 @@ class Silvilidar:
                     QgsProject.instance().addMapLayers([nuevalayer])
                     return nuevalayer
 
-                def vectorizar(raster, salida):
+                """def vectorizar(raster, salida):
                     parameters = {'INPUT': raster.source(), 'BAND': 1, 'EXTRA': '', 'FIELD': "DN",
                                   'EIGHT_CONNECTEDNESS': False,
                                   'OUTPUT': carpeta + '/vectorizado.shp'}
@@ -2330,6 +2340,145 @@ class Silvilidar:
                             QgsVectorFileWriter.writeAsVectorFormat(lyr2, output_path, "CP120", lyr.crs(),
                                                                     "ESRI Shapefile",
                                                                     onlySelected=True)
+                            lyr3 = QgsVectorLayer(ruta_vectorial3, "Zonas similares", "ogr")
+                            lyr3.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
+                            QgsProject.instance().addMapLayer(lyr3)
+                    if len(ids) == 0:
+                        print('no hay nada seleccionado')"""
+
+                def vectorizar(raster, salida):
+                    parameters = {'INPUT': raster.source(), 'BAND': 1, 'EXTRA': '', 'FIELD': "DN",
+                                  'EIGHT_CONNECTEDNESS': False,
+                                  'OUTPUT': carpeta + '/vectorizado.shp'}
+                    processing.run("gdal:polygonize",
+                                   parameters)  # .runAndLoadResults("gdal:polygonize",parameters)
+                    # seleciono lo que me interesa
+                    lyr = QgsVectorLayer(carpeta + '/vectorizado.shp', "nombre", "ogr")
+                    # delete holes
+                    deleteholes = processing.run("native:deleteholes", {
+                        'INPUT': os.path.join(carpeta, 'vectorizado' + '.shp'),
+                        'MIN_AREA': 800,
+                        'OUTPUT': os.path.join(carpeta, 'vectorizado' + '000.shp')})['OUTPUT']
+                    lyr = QgsVectorLayer(os.path.join(carpeta, 'vectorizado' + '000.shp'),
+                                         'rasterdeentrada', "ogr")
+
+                    # SUAVIZA
+                    processing.run("native:smoothgeometry", {
+                        'INPUT': os.path.join(carpeta, 'vectorizado' + '000.shp'),
+                        'ITERATIONS': 2, 'OFFSET': 0.4, 'MAX_ANGLE': 180,
+                        'OUTPUT': os.path.join(carpeta, 'vectorizado99' + '.shp')})
+                    lyr = QgsVectorLayer(os.path.join(carpeta, 'vectorizado99' + '.shp'),
+                                         'rasterdeentrada', "ogr")
+
+                    # hago una selecion de los elementos con dn=1, anado la informacion a la tabla y creo una capa nueva  ojo deberia hacer una funcion para emplearlo mas veces.
+                    layer = lyr  # iface.activeLayer()
+                    print("paso11 de agregado")
+                    expression = QgsExpression(u'"DN" = 1')
+                    print("paso12 de agregado")
+                    # Added / changed lines ##########
+                    context = QgsExpressionContext()
+                    scope = QgsExpressionContextScope()
+                    context.appendScope(scope)
+                    print("paso13 de agregado")
+                    layer = lyr
+                    feats = []
+                    ids = []
+                    for feat in layer.getFeatures():
+                        scope.setFeature(feat)
+                        result = expression.evaluate(context)
+                        if result:
+                            feats.append(feat)
+                            ids.append(feat.id())
+                            # areas.append(feat.geometry().area() )
+
+                    if len(ids) > 0:
+
+                        print("paso14 de agregado")
+
+                        lyr.selectByIds(ids)
+                        # lyr es la capa de entrada, la origen ue contiene todos los elementos
+                        output_path = os.path.join(carpeta, 'vectorizado' + '2.shp')
+                        QgsVectorFileWriter.writeAsVectorFormat(lyr, output_path, "CP120", lyr.crs(),
+                                                                "ESRI Shapefile",
+                                                                onlySelected=True)
+                        lyr2 = QgsVectorLayer(
+                            os.path.join(carpeta, 'vectorizado' + '2.shp'),
+                            'rasterdeentrada' + str("2"), "ogr")
+                        #QgsProject.instance().addMapLayer(lyr2)
+                        print("en teoria ha hecho la seleccion")
+
+                        # calcula la superficie de esta capa pero no en todos los registros
+                        layer = QgsVectorLayer(
+                            os.path.join(carpeta, 'vectorizado' + '2.shp'),
+                            'rasterdeentrada' + str("2"), "ogr")
+                        # layer=lyr2
+                        provider = layer.dataProvider()
+                        print("layer get features")
+                        areas = [feat.geometry().area() for feat in layer.getFeatures()]
+                        indice = [feat.id() for feat in layer.getFeatures()]
+                        # print (indice)
+                        field = QgsField("area", QVariant.Int)
+                        provider.addAttributes([field])
+                        layer.updateFields()
+                        idx = layer.fields().indexFromName('area')  ###ojo aqui es donde da cero el indice
+                        long = len(indice)
+                        print("long")
+                        print(long)
+                        i = 0
+                        print("pasa por aqui2")
+                        while i < long:
+                            new_values = {idx: float(areas[i])}
+                            # print ("pasa por aqui3")
+                            provider.changeAttributeValues({indice[i]: new_values})
+                            # print ("pasa por aqui4")
+                            i = i + 1
+                        layer.updateFields()
+                        print("pasa por aqui5")
+
+                        # selecciono las teselas mayor de una superficie dada.
+
+                        print("paso11 de agregado")
+                        expression = QgsExpression(u'"area" > 2500')
+                        print("paso12 de agregado")
+                        context = QgsExpressionContext()
+                        scope = QgsExpressionContextScope()
+                        context.appendScope(scope)
+
+                        feats = []
+                        ids = []
+                        for feat in layer.getFeatures():
+                            scope.setFeature(feat)
+                            result = expression.evaluate(context)
+                            if result:
+                                feats.append(feat)
+                                ids.append(feat.id())
+                                # areas.append(feat.geometry().area() )
+
+                        if len(ids) > 0:
+                            # print ("len feats")
+                            # print( len( feats))
+                            print("paso14 de agregado")
+                            # prov.addFeatures(feats)
+                            lyr2.selectByIds(ids)
+                            # lyr es la capa de entrada, la origen ue contiene todos los elementos
+                            output_path = os.path.join(carpeta, 'vectorial' + '3.shp')
+                            QgsVectorFileWriter.writeAsVectorFormat(lyr2, output_path, "CP120", lyr.crs(),
+                                                                    "ESRI Shapefile",
+                                                                    onlySelected=True)
+
+                            #QgsProject.instance().addMapLayer(lyr3)
+                            print("en teoria ha hecho la seleccion2")
+
+
+
+
+
+
+
+
+
+                    #ESTO ES EL RESULTADO DE VECTORIAL .
+                            ruta_vectorial3=os.path.join(carpeta, 'vectorial' + '3.shp')
                             lyr3 = QgsVectorLayer(ruta_vectorial3, "Zonas similares", "ogr")
                             lyr3.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
                             QgsProject.instance().addMapLayer(lyr3)
@@ -2731,7 +2880,9 @@ class Silvilidar:
                             # busca las celdas que encuentran lo anterior (multiplica)
                             multiplicado = multiplica_rasters(filtrado_de_interes)
                             #raster = agrega(multiplicado)
-                            raster = agrega2(multiplicado,10,0.49)
+
+                            #ojo deshacer si falla el agregado de buscar cosas similares. son 2 lineas.
+                            raster = agrega2(multiplicado,30,1)#10,0.49)
                             vectorizar(raster, carpeta + "similar3.shp")
 
                             #lo mismo pero para las zonas similares segun histogramas

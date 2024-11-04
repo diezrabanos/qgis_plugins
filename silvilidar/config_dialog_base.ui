@@ -16,8 +16,8 @@
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>440</x>
-     <y>720</y>
+     <x>410</x>
+     <y>680</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -78,22 +78,6 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="rcminresalveoencinarfustal">
-   <property name="geometry">
-    <rect>
-     <x>540</x>
-     <y>376</y>
-     <width>59</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>60</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="hmaxmontebravo">
    <property name="geometry">
     <rect>
@@ -114,7 +98,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>342</y>
+     <y>322</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -130,13 +114,13 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>500</y>
+     <y>510</y>
      <width>59</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>95</string>
+    <string>75</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -146,7 +130,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>438</y>
+     <y>388</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -162,7 +146,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>469</y>
+     <y>419</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -210,7 +194,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>407</y>
+     <y>357</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -270,27 +254,11 @@
     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLineEdit" name="rcminresalveoencinarlatizaldesarrollado">
-   <property name="geometry">
-    <rect>
-     <x>540</x>
-     <y>311</y>
-     <width>59</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>50</string>
-   </property>
-   <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-   </property>
-  </widget>
   <widget class="QLineEdit" name="hbcminclarasnormales">
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>557</y>
+     <y>477</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -306,7 +274,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>619</y>
+     <y>450</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -322,7 +290,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>526</y>
+     <y>536</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -338,7 +306,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>650</y>
+     <y>610</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -354,7 +322,7 @@
    <property name="geometry">
     <rect>
      <x>540</x>
-     <y>588</y>
+     <y>578</y>
      <width>59</width>
      <height>20</height>
     </rect>
@@ -370,7 +338,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>405</y>
+     <y>355</y>
      <width>411</width>
      <height>25</height>
     </rect>
@@ -383,7 +351,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>468</y>
+     <y>418</y>
      <width>401</width>
      <height>25</height>
     </rect>
@@ -396,26 +364,13 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>499</y>
+     <y>509</y>
      <width>401</width>
      <height>26</height>
     </rect>
    </property>
    <property name="text">
     <string>Fcc de Competencia Elevada.............................................................</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_40">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>319</y>
-     <width>401</width>
-     <height>25</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Rc mínima para Resalveo en Encinar Latizal desarrollados.................................</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_41">
@@ -500,7 +455,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>436</y>
+     <y>386</y>
      <width>401</width>
      <height>26</height>
     </rect>
@@ -522,24 +477,11 @@
     <string>Fcc mínima de arbolado..........................................................................</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_49">
-   <property name="geometry">
-    <rect>
-     <x>130</x>
-     <y>373</y>
-     <width>391</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Rc mínima para Resalveo en Encinar Fustal............................................</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_50">
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>350</y>
+     <y>320</y>
      <width>391</width>
      <height>26</height>
     </rect>
@@ -552,7 +494,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>528</y>
+     <y>538</y>
      <width>411</width>
      <height>26</height>
     </rect>
@@ -565,7 +507,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>654</y>
+     <y>614</y>
      <width>401</width>
      <height>26</height>
     </rect>
@@ -578,7 +520,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>591</y>
+     <y>581</y>
      <width>401</width>
      <height>26</height>
     </rect>
@@ -591,7 +533,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>623</y>
+     <y>453</y>
      <width>401</width>
      <height>25</height>
     </rect>
@@ -604,7 +546,7 @@
    <property name="geometry">
     <rect>
      <x>130</x>
-     <y>560</y>
+     <y>480</y>
      <width>391</width>
      <height>25</height>
     </rect>
@@ -652,37 +594,11 @@
     <string>%</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_59">
-   <property name="geometry">
-    <rect>
-     <x>610</x>
-     <y>310</y>
-     <width>239</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>%</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_60">
-   <property name="geometry">
-    <rect>
-     <x>610</x>
-     <y>370</y>
-     <width>239</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>%</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_61">
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>400</y>
+     <y>350</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -695,7 +611,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>430</y>
+     <y>380</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -708,7 +624,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>500</y>
+     <y>510</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -721,7 +637,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>580</y>
+     <y>570</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -734,7 +650,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>640</y>
+     <y>610</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -786,7 +702,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>340</y>
+     <y>320</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -799,7 +715,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>460</y>
+     <y>410</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -812,7 +728,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>520</y>
+     <y>530</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -825,7 +741,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>550</y>
+     <y>470</y>
      <width>239</width>
      <height>26</height>
     </rect>
@@ -838,7 +754,7 @@
    <property name="geometry">
     <rect>
      <x>610</x>
-     <y>610</y>
+     <y>450</y>
      <width>239</width>
      <height>26</height>
     </rect>

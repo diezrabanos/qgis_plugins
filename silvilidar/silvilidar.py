@@ -1414,7 +1414,7 @@ class Silvilidar:
                 calculo(
                     '("suma@1" = 15 ) * 1', 'regeneracion1')
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_regeneracion1.tif'), "regeneracion1")
-                agregado2("regeneracion", 10,1)
+                agregado2("regeneracion", 40,1)#10,1
 
             # filtro para quedarme con el resalveo
             if self.dlg4.checkBox_resalveo.isChecked():
@@ -1630,7 +1630,7 @@ class Silvilidar:
                 juntoshapes(os.path.join(carpeta, "p", "*suma.shp"), "Teselas_merged")
 
                 def join_tables(csv_path, layer_path):
-                    res = processing.run("qgis:joinattributestable", { 'DISCARD_NONMATCHING' : False, 'FIELD' : 'DN', 'FIELDS_TO_COPY' : ['texto','foto'], 'FIELD_2' : 'cod', 'INPUT' : layer_path, 'INPUT_2' : csv_path+'|layername=Hoja1', 'METHOD' : 1, 'OUTPUT' : os.path.join(carpeta, "Teselas_merged_Final.shp"), 'PREFIX' : '' })
+                    res = processing.run("qgis:joinattributestable", { 'DISCARD_NONMATCHING' : False, 'FIELD' : 'DN', 'FIELDS_TO_COPY' : ['texto','foto','foto2'], 'FIELD_2' : 'cod', 'INPUT' : layer_path, 'INPUT_2' : csv_path+'|layername=Hoja1', 'METHOD' : 1, 'OUTPUT' : os.path.join(carpeta, "Teselas_merged_Final.shp"), 'PREFIX' : '' })
                     layer = QgsVectorLayer(res['OUTPUT'], "joined layer", "ogr")
                     QgsProject.instance().addMapLayer(layer)
                 print("intento hacer la union")
@@ -1642,25 +1642,38 @@ class Silvilidar:
                     if capa not in capasoriginales:
                         QgsProject.instance().removeMapLayers([capa])
                 del (capas)
-
+                import shutil
                 # cargo los rasters virtuales si chekeado en la salidas
                 if self.dlg4.checkBox_altura.isChecked():
                     juntarasters("hm")
+                    shutil.copy(os.path.dirname(__file__) + '/styles/hm.qml',
+                                os.path.join(carpeta, "HM.qml"))
                 if self.dlg4.checkBox_fcc.isChecked():
                     juntarasters("fcc")
+                    shutil.copy(os.path.dirname(__file__) + '/styles/fcc.qml',
+                                os.path.join(carpeta, "FCC.qml"))
                 if self.dlg4.checkBox_rc.isChecked():
                     juntarasters("rc")
+                    shutil.copy(os.path.dirname(__file__) + '/styles/rc.qml',
+                                os.path.join(carpeta, "RC.qml"))
                 if self.dlg4.checkBox_lc.isChecked():
                     juntarasters("lc")
+                    shutil.copy(os.path.dirname(__file__) + '/styles/lc.qml',
+                                os.path.join(carpeta, "LC.qml"))
                 if self.dlg4.checkBox_hbc.isChecked():
                     juntarasters("hbc")
+                    shutil.copy(os.path.dirname(__file__) + '/styles/hbc.qml',
+                                os.path.join(carpeta, "HBC.qml"))
                 if self.dlg4.checkBox_matorral.isChecked():
                     juntarasters("fcc_matorral")
+                    shutil.copy(os.path.dirname(__file__) + '/styles/fcc_matorral.qml',
+                                os.path.join(carpeta, "FCC_MATORRAL.qml"))
+
                     if lenguaje_informe == "es":
                         pass
                     else:
                         # copio el fcc matorral y lo renombro como fcc_scrub
-                        import shutil
+
                         shutil.copy(os.path.join(carpeta, "FCC_MATORRAL.vrt"), os.path.join(carpeta, "FCC_SCRUB.vrt"))
                         # cargo la capa fcc_scrub
                         layer = QgsRasterLayer(os.path.join(carpeta, "fcc_scrub.vrt"), "FCC_SCRUB")

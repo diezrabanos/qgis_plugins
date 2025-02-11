@@ -113,15 +113,18 @@ class Silvilidar:
             import re
             # ojo esto es para que no FUNCIONE DE MOMENTO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO eliminarlo cuando queramos que sea interactivo, eliminar
             print("devuelvo false porque se supone que estoy fuera de jcyl")
-            return False
+            #ojo la siguiente linea es un atajo para que entienda siempre que estoy fuera de la junta
+            #return False
             # ojo esto es para que no FUNCIONE DE MOMENTO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO eliminarlo cuando queramos que sea interactivo, eliminar
             try:
                 dominio = socket.getfqdn()
                 patron = re.compile(r'JMA\w{6,14}\.jcyl\.red')
 
                 if patron.match(dominio):
+                    print("dentro junta")
                     return True
             except Exception as e:
+                print("fuera junta")
                 # Manejar la excepción de manera adecuada
                 pass
 
@@ -372,6 +375,28 @@ class Silvilidar:
                 with open(filename, "a") as file:
                     file.write("No se puede imprimir")
                     file.write('\n')
+
+        # funcion que carga una capa y prepara la banda para operar con ella
+        def StringToRaster(raster, banda):
+            fileInfo = QFileInfo(raster)
+            path = fileInfo.filePath()
+            baseName = fileInfo.baseName()
+            global layerglobal
+            layerglobal = QgsRasterLayer(path, baseName)
+            QgsProject.instance().addMapLayer(layerglobal)
+            if layerglobal.isValid() is True:
+                bandaref = str(banda) + '@1'
+                # Define band1
+                banda = QgsRasterCalculatorEntry()
+                banda.ref = bandaref
+                banda.raster = layerglobal
+                banda.bandNumber = 1
+                entries.append(banda)
+            else:
+                print("Unable to read basename and file path - Your string is probably invalid" + str(
+                    baseName))
+
+                # defino funcion para hacer calculo de capas raster
 
         # defino la funcion que busca los archivos las o laz que existan y le paso los parametros resultantes
         # del formulario
@@ -1138,57 +1163,8 @@ class Silvilidar:
             # StringToRaster(salida102, "skweness")
             # calculo('skweness@1', "skweness")
 
-            #OJO AQUI PUEDE EMPEZAR EL CODIGO SI ESTAS DENTRO DE LA JUNTA
-            if self.dentro:
-                #defino lo que esta en los servidores de scayle
-                print("dentro de la junta")
-                #cargo el shape con la zona de interes
-                ruta_zona_trabajo = self.dlg.ruta_zona_de_trabajo.text()
-                layervectorial = QgsVectorLayer(ruta_zona_trabajo, "zona de trabajo", "ogr")
+            #
 
-                #cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
-                Layer = QgsRasterLayer(fileName, "altura de red")
-                #recortar raster con el shape
-                layer2=processing.run("gdal:cliprasterbymasklayer", {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None, 'ALPHA_BAND': False, 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, troncoresumido + '_Alt95_m_PNOA2.tif')})['OUTPUT']
-                #QgsProject.instance().addMapLayers([Layer])
-                print(layer2)
-                print("cargado el raster recortado de la junta")
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_Alt95_m_PNOA2.tif'),
-                               'hm')  # en teoria se sobre escribiria el raster hm@1
-                print("creado el string to raster de h")
-                # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
-                Layer = QgsRasterLayer(fileName, "FCC DE RED")
-                # recortar raster con el shape
-                layer2 = processing.run("gdal:cliprasterbymasklayer",
-                                        {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None, 'ALPHA_BAND': False,
-                                         'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
-                                         'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                         'OUTPUT': os.path.join(carpeta, troncoresumido + '_Cob3m_PRT_PNOA2.tif')})[
-                    'OUTPUT']
-                # QgsProject.instance().addMapLayers([Layer])
-                print(layer2)
-                print("cargado el raster recortado de la junta")
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_Cob3m_PRT_PNOA2.tif'),
-                               'fcc')  # en teoria se sobre escribiria el raster fcc@1
-                print("creado el string to raster de fcc")
-                # cargo el raster de la junta FCC de MATORRAL NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/CobEstr_050cm_200cm_TLR_PNOA2.tif"
-                Layer = QgsRasterLayer(fileName, "FCC DE RED")
-                # recortar raster con el shape
-                layer2 = processing.run("gdal:cliprasterbymasklayer",
-                                        {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None, 'ALPHA_BAND': False,
-                                         'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
-                                         'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                         'OUTPUT': os.path.join(carpeta, troncoresumido + '_CobEstr_050cm_200cm_TLR_PNOA2.tif')})[
-                    'OUTPUT']
-                # QgsProject.instance().addMapLayers([Layer])
-                print(layer2)
-                print("cargado el raster recortado de la junta")
-                StringToRaster(os.path.join(carpeta, troncoresumido + '_CobEstr_050cm_200cm_TLR_PNOA2.tif'),
-                               'fccmatorral')  # en teoria se sobre escribiria el raster fcc@1
-                print("creado el string to raster de fccmatorral")
                 
 
 
@@ -1544,63 +1520,34 @@ class Silvilidar:
             #if index == 0:
             if nombre_pestaña=='Ejecución de SILVILIDAR                                 ':
                 print(self.tr(u'EMPEZAMOS'))
-                # OJO AQUI PUEDE EMPEZAR EL CODIGO SI ESTAS DENTRO DE LA JUNTA
-                if self.dentro:
-                    # defino lo que esta en los servidores de scayle
-                    print("dentro de la junta")
-                    # cargo el raster de la junta
-                    #fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
-                    #Layer = QgsRasterLayer(fileName, "altura de red")
-                    #QgsProject.instance().addMapLayers([Layer])
-                # Do something useful here - delete the line containing pass and
-                # substitute with your code.
-                # print ("lo imprime si le doy a aceptar en el dialogo")
-                else:
-                    print("no esta dentro de la junta")
-                    #fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
-                    #Layer = QgsRasterLayer(fileName, "altura de red")
-                    #QgsProject.instance().addMapLayers([Layer])
-                carpeta = self.dlg.carpetalaz.text()  # displayText()
-                # la carpeta la he cogido al pulsar el boton de la carpeta
-
                 # meto aqui variables que luego deberan estar en la cajita   OJO
-                #ANTIGUAS
-                #hcorte2 = self.dlg2.hcorte2.text()  # 2
+
                 crecimiento = self.dlg3.crecimiento.text()  ##displayText()1.5
-                #fccbaja = self.dlg2.fccbaja.text()  ##displayText()20.0
-                #fccterrazas = self.dlg2.fccterrazas.text()  ##displayText()57.5
-                #fccmedia = self.dlg2.fccmedia.text()  ##displayText()46.0
-                #fccalta = self.dlg2.fccalta.text()  ##displayText()95.0
-                #hmontebravoe = self.dlg2.hmontebravoe.text()  ##displayText()3.5
-                #hmontebravo = self.dlg2.hmontebravo.text()  ##displayText()5.0
-                #hselvicolas = self.dlg2.hselvicolas.text()  ##displayText()7.5
-                #hclaras = self.dlg2.hclaras.text()  # displayText()12.0
-                #hclaras2 = self.dlg2.hclaras2.text()  # displayText()16.5
-                #hbcminima = self.dlg2.hbcminima.text()  # displayText()3.0
-                #hbcdesarrollado = self.dlg2.hbcdesarrollado.text()  # displayText()5.5
-                #rcclaras = self.dlg2.rcclaras.text()  # displayText()35.0
-                #rcextremo = self.dlg2.rcextremo.text()  # displayText()17.0
-                #longitudcopaminima = self.dlg2.longitudcopaminima.text()  ##displayText()3.25
                 crecimientofcc = self.dlg3.crecimientofcc.text()  ##displayText()12.5
-                #NUEVAS
                 # METODO ALEJANDRO
-                fccminarbolado =self.dlg2.fccminarbolado.text()  # 10
+                fccminarbolado = self.dlg2.fccminarbolado.text()  # 10
                 alturadesconocida = self.dlg2.alturadesconocida.text()  # 2
                 hmaxmontebravo = self.dlg2.hmaxmontebravo.text()  # 3.5
                 hmaxbajolatizal = self.dlg2.hmaxbajolatizal.text()  # 5
                 rcminresalveoencinarlatizalpocodesarrollado = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado.text()  # 40
                 rcminresalveoencinarlatizalpocodesarrollado_2 = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado_2.text()  # -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
                 if not isinstance(rcminresalveoencinarlatizalpocodesarrollado, (int, float)):
-                    rcminresalveoencinarlatizalpocodesarrollado = rcminresalveoencinarlatizalpocodesarrollado_2.replace('SI','if').replace('FCC',str('fccp@1')).replace('RC',str('rcp@1')).replace('HM',str('hmp@1')).replace(',','.').replace(';',',')# -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
+                    rcminresalveoencinarlatizalpocodesarrollado = rcminresalveoencinarlatizalpocodesarrollado_2.replace(
+                        'SI', 'if').replace('FCC', str('fccp@1')).replace('RC', str('rcp@1')).replace('HM',
+                                                                                                      str('hmp@1')).replace(
+                        ',', '.').replace(';', ',')  # -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
 
                 fccmincompetenciaencinarlatizalpocodesarrollado = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado.text()  # 50
-                fccmincompetenciaencinarlatizalpocodesarrollado_2 = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado_2.text() #SI(FCC>46;SI(FCC>16/45,4150013475952/(1-RC/100)*100;52;62);62)
+                fccmincompetenciaencinarlatizalpocodesarrollado_2 = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado_2.text()  # SI(FCC>46;SI(FCC>16/45,4150013475952/(1-RC/100)*100;52;62);62)
                 if not isinstance(fccmincompetenciaencinarlatizalpocodesarrollado, (int, float)):
-                    fccmincompetenciaencinarlatizalpocodesarrollado = fccmincompetenciaencinarlatizalpocodesarrollado_2.replace('SI','if').replace('FCC',str('fccp@1')).replace('RC',str('rcp@1')).replace('HM',str('hmp@1')).replace(',','.').replace(';',',')
+                    fccmincompetenciaencinarlatizalpocodesarrollado = fccmincompetenciaencinarlatizalpocodesarrollado_2.replace(
+                        'SI', 'if').replace('FCC', str('fccp@1')).replace('RC', str('rcp@1')).replace('HM',
+                                                                                                      str('hmp@1')).replace(
+                        ',', '.').replace(';', ',')
                 hmaxselvicolas = self.dlg2.hmaxselvicolas.text()  # 7.5
-               #rcminresalveoencinarlatizaldesarrollado = self.dlg2.rcminresalveoencinarlatizaldesarrollado.text()  # 50
+                # rcminresalveoencinarlatizaldesarrollado = self.dlg2.rcminresalveoencinarlatizaldesarrollado.text()  # 50
                 hbcpodabaja = self.dlg2.hbcpodabaja.text()  # 3
-                #rcminresalveoencinarfustal = self.dlg2.rcminresalveoencinarfustal.text()  # 60
+                # rcminresalveoencinarfustal = self.dlg2.rcminresalveoencinarfustal.text()  # 60
                 fccmincompetenciamasadiscontinua_fustalencinares = self.dlg2.fccmincompetenciamasadiscontinua_fustalencinares.text()  # 57.5
                 rcminclara = self.dlg2.rcminclara.text()  # 35
                 longitudcopaminclara = self.dlg2.longitudcopaminclara.text()  # 3.25
@@ -1610,200 +1557,565 @@ class Silvilidar:
                 fccmincompetenciaencinarlatizaldesarrollado = self.dlg2.fccmincompetenciaencinarlatizaldesarrollado.text()  # 55
                 hmaxprimeraclara = self.dlg2.hmaxprimeraclara.text()  # 12
                 rccoronado = self.dlg2.rccoronado.text()  # 17
+                # OJO AQUI PUEDE EMPEZAR EL CODIGO SI ESTAS DENTRO DE LA JUNTA
+                if self.dentro:
+                    # defino lo que esta en los servidores de scayle
+                    print("dentro de la junta")
+                    entries = []
+                    carpeta = os.path.dirname(self.dlg.ruta_zona_de_trabajo.text())
 
 
-                # compruebo que capas estan cargadas en el proyecto al iniciar el script
-                capasoriginales = QgsProject.instance().mapLayers()
-                a = ["nombre de archivo", "extension"]
+                    print("carpeta", carpeta)
+                    ruta_zona_trabajo = self.dlg.ruta_zona_de_trabajo.text()
+                    layervectorial = QgsVectorLayer(ruta_zona_trabajo, "zona de trabajo", "ogr")
 
-                # congelo la vista  para ahorrar memoria  #ojo lo descongelo de momento   ojo ojo
-                canvas = iface.mapCanvas()
-                # canvas.freeze(True)
 
-                # ejecuto la busqueda de archivos las
-                buscalidaryejecuta(carpeta, crecimiento, crecimientofcc, fccminarbolado, alturadesconocida, hmaxmontebravo,  hmaxbajolatizal, rcminresalveoencinarlatizalpocodesarrollado, fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas,  hbcpodabaja, fccmincompetenciamasadiscontinua_fustalencinares, rcminclara, longitudcopaminclara, fcccompetenciaelevada, hmaxsegundaclara, hbcminclarasnormales, fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
+                    # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  # r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
+                    Layer = QgsRasterLayer(fileName, "altura de red")
+                    print("ok, layer de altura 95 de la red")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False, 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                             'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None,
+                                             'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'Alt95_m_PNOA2.tif')})[
+                        'OUTPUT']
 
-                # uno en una capa todas las hojas de claras, regeneracion, resalveo y teselas
-                juntoshapes(os.path.join(carpeta, "p", "*clara3.shp"), "Clara_merged")
-                juntoshapes(os.path.join(carpeta, "p", "*regeneracion3.shp"), "Regeneracion_merged")
-                juntoshapes(os.path.join(carpeta, "p", "*resalveo3.shp"), "Resalveo_merged")
-                juntoshapes(os.path.join(carpeta, "p", "*suma.shp"), "Teselas_merged")
+                    #QgsProject.instance().addMapLayers([Layer])
+                    layer2 = QgsRasterLayer(layer2, "altura de red")
+                    #QgsProject.instance().addMapLayers([layer2])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    StringToRaster(os.path.join(carpeta, 'Alt95_m_PNOA2.tif'),
+                                   'hm')  # en teoria se sobre escribiria el raster hm@1
+                    print("creado el string to raster de h")
 
-                def join_tables(csv_path, layer_path):
-                    res = processing.run("qgis:joinattributestable", { 'DISCARD_NONMATCHING' : False, 'FIELD' : 'DN', 'FIELDS_TO_COPY' : ['texto','foto','foto2'], 'FIELD_2' : 'cod', 'INPUT' : layer_path, 'INPUT_2' : csv_path+'|layername=Hoja1', 'METHOD' : 1, 'OUTPUT' : os.path.join(carpeta, "Teselas_merged_Final.shp"), 'PREFIX' : '' })
-                    layer = QgsVectorLayer(res['OUTPUT'], "joined layer", "ogr")
-                    QgsProject.instance().addMapLayer(layer)
-                print("intento hacer la union")
-                join_tables(os.path.dirname(__file__) + '/fotos/tabla.xlsx', os.path.join(carpeta, "Teselas_merged.shp"))
-                print(" la union esta hecha")
-                # elimino las capas que he cargado durante el proceso
-                capas = QgsProject.instance().mapLayers()
-                for capa in capas:
-                    if capa not in capasoriginales:
-                        QgsProject.instance().removeMapLayers([capa])
-                del (capas)
-                import shutil
-                # cargo los rasters virtuales si chekeado en la salidas
-                if self.dlg4.checkBox_altura.isChecked():
-                    juntarasters("hm")
-                    shutil.copy(os.path.dirname(__file__) + '/styles/hm.qml',
-                                os.path.join(carpeta, "HM.qml"))
-                if self.dlg4.checkBox_fcc.isChecked():
-                    juntarasters("fcc")
-                    shutil.copy(os.path.dirname(__file__) + '/styles/fcc.qml',
-                                os.path.join(carpeta, "FCC.qml"))
-                if self.dlg4.checkBox_rc.isChecked():
-                    juntarasters("rc")
-                    shutil.copy(os.path.dirname(__file__) + '/styles/rc.qml',
-                                os.path.join(carpeta, "RC.qml"))
-                if self.dlg4.checkBox_lc.isChecked():
-                    juntarasters("lc")
-                    shutil.copy(os.path.dirname(__file__) + '/styles/lc.qml',
-                                os.path.join(carpeta, "LC.qml"))
-                if self.dlg4.checkBox_hbc.isChecked():
-                    juntarasters("hbc")
-                    shutil.copy(os.path.dirname(__file__) + '/styles/hbc.qml',
-                                os.path.join(carpeta, "HBC.qml"))
-                if self.dlg4.checkBox_matorral.isChecked():
-                    juntarasters("fcc_matorral")
-                    shutil.copy(os.path.dirname(__file__) + '/styles/fcc_matorral.qml',
-                                os.path.join(carpeta, "FCC_MATORRAL.qml"))
+                    # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"
+                    Layer = QgsRasterLayer(fileName, "altura de red")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False,
+                                             'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
+                                             'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                             'OUTPUT': os.path.join(carpeta, 'Alt20_m_PNOA2.tif')})[
+                        'OUTPUT']
+                    layer2 = QgsRasterLayer(layer2, "base copa de red")
+                    # QgsProject.instance().addMapLayers([Layer])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    StringToRaster(os.path.join(carpeta, 'Alt20_m_PNOA2.tif'),
+                                   'hbc')  # en teoria se sobre escribiria el raster hm@1
+                    print("creado el string to raster de hbc")
 
-                    if lenguaje_informe == "es":
-                        pass
-                    else:
-                        # copio el fcc matorral y lo renombro como fcc_scrub
+                    # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                    Layer = QgsRasterLayer(fileName, "FCC DE RED")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False,
+                                             'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
+                                             'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                             'OUTPUT': os.path.join(carpeta, 'Cob2m_PRT_PNOA2.tif')})[
+                        'OUTPUT']
+                    layer2 = QgsRasterLayer(layer2, "fcc de red")
+                    # QgsProject.instance().addMapLayers([Layer])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    StringToRaster(os.path.join(carpeta, 'Cob2m_PRT_PNOA2.tif'),
+                                   'fcc')  # en teoria se sobre escribiria el raster fcc@1
+                    print("creado el string to raster de fcc")
 
-                        shutil.copy(os.path.join(carpeta, "FCC_MATORRAL.vrt"), os.path.join(carpeta, "FCC_SCRUB.vrt"))
-                        # cargo la capa fcc_scrub
-                        layer = QgsRasterLayer(os.path.join(carpeta, "fcc_scrub.vrt"), "FCC_SCRUB")
-                        QgsProject.instance().addMapLayer(layer)
-                        # coloreo
-                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/fcc_matorral.qml')
-                        layer.triggerRepaint()
-                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+                    #calculo en base a la hbc la rc
 
-                        # elimino de la vista la capa fcc_matorral
-                        def remove_layer_by_name(name):
-                            layers = QgsProject.instance().mapLayersByName(name)
-                            if len(layers) > 0:
-                                layer = layers[0]
-                                QgsProject.instance().removeMapLayer(layer)
 
-                        remove_layer_by_name('FCC_MATORRAL')
+                    def calculo(expresion, capa):
+                        calc = QgsRasterCalculator(expresion,
+                                                   os.path.join(carpeta, capa + '.tif'),
+                                                   'GTiff',
+                                                   layerglobal.extent(),
+                                                   layerglobal.width(),
+                                                   layerglobal.height(),
+                                                   entries)
 
-                # cargo las capas finales vectoriales
+                        calc.processCalculation()
+                        del (calc)
 
-                if self.dlg4.checkBox_teselas.isChecked():
-                    #ojojojojoj
-                    import shutil
-                    shutil.copytree(os.path.dirname(__file__) + '/fotos', carpeta+'/fotos')
-                    shutil.copy(os.path.dirname(__file__) + '/styles/Teselas.qml', os.path.join(carpeta, "Teselas_merged_Final.qml"))
-                    teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_Final.shp'), "Teselas", "ogr")
-                    """teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'),
-                                              "Teselas Proyectado1",
-                                              "ogr")
-                    teselas2 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado2.shp'),
-                                              "Teselas Proyectado2",
-                                              "ogr")"""
-                    #aplicar estilo a las teselas cargando un qml con el mismo nombre que la capa
-                    teselas.loadNamedStyle(os.path.dirname(__file__) + '/styles/Teselas.qml')#(r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\styles/teselas.qml")#os.path.dirname(__file__) + '/styles""/Teselas_merged.qml')
+                    def agregado2(rasterdeentrada, radio, filtro):
+                        # filtro para rellenar huecos
+                        print("empieza agregado")
 
-                    """# coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
+                        # A puntos
+                        input1 = os.path.join(carpeta, rasterdeentrada + '1.tif')
+                        output1 = os.path.join(carpeta, rasterdeentrada + '0.shp')
+                        apuntos = processing.runAndLoadResults("native:pixelstopoints", {
+                            'INPUT_RASTER': input1,
+                            'RASTER_BAND': 1, 'FIELD_NAME': 'VALUE', 'OUTPUT': output1})['OUTPUT']
+                        # mapa de calor
+                        output2 = os.path.join(carpeta,  rasterdeentrada + '2.tif')
+                        mapacalor = processing.run("qgis:heatmapkerneldensityestimation", {
+                            'INPUT': output1,
+                            'RADIUS': radio, 'RADIUS_FIELD': '', 'PIXEL_SIZE': 2, 'WEIGHT_FIELD': 'VALUE', 'KERNEL': 3,
+                            'DECAY': None, 'OUTPUT_VALUE': 0, 'OUTPUT': output2})['OUTPUT']
+                        rlayer0 = QgsRasterLayer(mapacalor, "mapacalor")
+                        StringToRaster(output2, 'rlayer0')
 
-                    # ordeno los elementos de teselas ojo ojo
-                    # ordenados=coloresteselas.items()
-                    # ordenados.sort(key=lambda clave: str(clave[1][3]))
-                    # me salto el orden del diccionario
-                    ordenados = [('1', ('solid', '255,255,204,255', 'Raso o Regenerado', '001')),
-                                 ('2', ('solid', '255,255,0,255', 'Menor (Monte Bravo)', '002')),
-                                 ('17',
-                                  ('solid', 'orange', 'Bajo Latizal No Concurrente o Latizal Encinar no Denso', '003')),
-                                 (
-                                     '3', (
-                                         'vertical', '255,192,0,255',
-                                         'Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)',
-                                         '004')),
-                                 ('4', ('solid', '255,204,153,255', 'Bajo Latizal Desarrollado', '005')),
-                                 (
-                                     '51',
-                                     ('b_diagonal', '255,0,255,255', 'Resalveo en Latizal poco desarrollado', '006')),
-                                 ('52', ('f_diagonal', '255,0,0,255', 'Resalveo o clareo en Latizal', '007')),
-                                 ('61', ('solid', '255,153,255,255', 'Latizal poco desarrollado Tratado', '008')),
-                                 ('62', ('solid', '255,124,128,255', 'Latizal Tratado', '009')),
-                                 ('7', ('solid', '204,255,153,255', 'Alto Latizal Claro', '010')),
-                                 ('81', ('b_diagonal', '146,208,80,255', 'Poda Alta y Clara Suave en Latizal', '011')),
-                                 ('9', ('f_diagonal', '0,176,80,255', 'Primera Clara y Poda Alta', '012')),
-                                 ('10', ('solid', '102,255,153,255', 'Alto Latizal Aclarado', '013')),
-                                 ('111', ('solid', '102,255,255,255', 'Fustal Claro', '014')), ('82', (
-                            'b_diagonal', '51,204,204,255', 'Poda Alta y Clara Suave en Monte Desarrollado', '015')),
-                                 ('121', ('f_diagonal', '0,176,255,240', 'Clara en Fustal', '016')),
-                                 ('141', ('solid', '204,236,255,255', 'Fustal Aclarado', '017')),
-                                 ('112', ('solid', '139,139,232,255', 'Fustal Maduro Claro', '018')),
-                                 ('122', ('b_diagonal', '65,51,162,255', 'Clara en Fustal Maduro', '019')),
-                                 ('13', ('cross', '0,112,192,255', 'Clara Urgente en Fustal Maduro', '020')),
-                                 ('142', ('solid', '166,166,207,255', 'Fustal Maduro Aclarado', '021')),
-                                 ('15', ('horizontal', '112,48,160,255', 'Posibilidad de Regeneracion', '022'))]
+                        # mayor de 1
+                        # mayor de umbral
+                        output44 = os.path.join(carpeta, rasterdeentrada + '44.tif')
+                        calc = QgsRasterCalculator('(rlayer0@1 > {} )'.format(filtro), output44, 'GTiff',
+                                                   rlayer0.extent(),
+                                                   rlayer0.width(),
+                                                   rlayer0.height(), entries)
+                        calc.processCalculation()
+                        rlayer44 = QgsRasterLayer(output44, "mapacalor_seleccionado")
 
-                    categorias = []
+                        # lo vectorizo
+                        print("paso9 de agregado")
+                        parameters = {'INPUT': os.path.join(carpeta,  rasterdeentrada + '44.tif'),
+                                      'BAND': 1, 'FIELD': "DN", 'EIGHT_CONNECTEDNESS': True,
+                                      'OUTPUT': os.path.join(carpeta, rasterdeentrada + '00.shp')}
+                        processing.runAndLoadResults("gdal:polygonize", parameters)
+                        # processing.runalg("gdalogr:polygonize",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'7.tif'),"DN",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'.shp'))
+                        # seleciono lo que me interesa
+                        print("paso10 de agregado")
+                        lyr = QgsVectorLayer(os.path.join(carpeta,  rasterdeentrada + '00.shp'),
+                                             rasterdeentrada, "ogr")
 
-                    for clase, (relleno, color, etiqueta, orden) in ordenados:
-                        props = {'style': relleno, 'color': color, 'style_border': 'no'}
-                        sym = QgsFillSymbol.createSimple(props)
-                        categoria = QgsRendererCategory(clase, sym, etiqueta)
-                        categorias.append(categoria)
+                        # delete holes
+                        deleteholes = processing.runAndLoadResults("native:deleteholes", {
+                            'INPUT': os.path.join(carpeta, rasterdeentrada + '00.shp'),
+                            'MIN_AREA': 400,
+                            'OUTPUT': os.path.join(carpeta, rasterdeentrada + '000.shp')})[
+                            'OUTPUT']
+                        lyr = QgsVectorLayer(os.path.join(carpeta,  rasterdeentrada + '000.shp'),
+                                             rasterdeentrada, "ogr")
 
-                    field = "DN"
-                    renderer = QgsCategorizedSymbolRenderer(field, categorias)
-                    teselas.setRenderer(renderer)
-                    QgsProject.instance().addMapLayer(teselas)"""
-                QgsProject.instance().addMapLayer(teselas)
-                if lenguaje_informe == "es":
-                    subtexto1 = "Clara"
-                    subtexto2 = "Regeneración"
-                    subtexto3 = "Resalveo"
+                        # SUAVIZA
+                        processing.runAndLoadResults("native:smoothgeometry", {
+                            'INPUT': os.path.join(carpeta,  rasterdeentrada + '000.shp'),
+                            'ITERATIONS': 2, 'OFFSET': 0.4, 'MAX_ANGLE': 180,
+                            'OUTPUT': os.path.join(carpeta, rasterdeentrada + '.shp')})
+                        lyr = QgsVectorLayer(os.path.join(carpeta,  rasterdeentrada + '.shp'),
+                                             rasterdeentrada, "ogr")
+
+
+
+                        # hago una selecion de los elementos con dn=1, anado la informacion a la tabla y creo una capa nueva  ojo deberia hacer una funcion para emplearlo mas veces.
+                        layer = lyr  # iface.activeLayer()
+                        print("paso11 de agregado")
+                        expression = QgsExpression(u'"DN" = 1')
+                        print("paso12 de agregado")
+                        # Added / changed lines ##########
+                        context = QgsExpressionContext()
+                        scope = QgsExpressionContextScope()
+                        context.appendScope(scope)
+                        print("paso13 de agregado")
+                        layer = lyr
+                        feats = []
+                        ids = []
+                        for feat in layer.getFeatures():
+                            scope.setFeature(feat)
+                            result = expression.evaluate(context)
+                            if result:
+                                feats.append(feat)
+                                ids.append(feat.id())
+                                # areas.append(feat.geometry().area() )
+                        ################
+                        # horaacabaagregado0 = time.time()
+                        # print("tiempo agregado0")
+                        # print(horaempiezaagregado - horaacabaagregado0)
+                        if len(ids) > 0:
+                            # print ("len feats")
+                            # print( len( feats))
+                            print("paso14 de agregado")
+
+                            # prov.addFeatures(feats)
+                            lyr.selectByIds(ids)
+                            # lyr es la capa de entrada, la origen ue contiene todos los elementos
+                            output_path = os.path.join(carpeta, rasterdeentrada + '2.shp')
+                            QgsVectorFileWriter.writeAsVectorFormat(lyr, output_path, "CP120", lyr.crs(),
+                                                                    "ESRI Shapefile",
+                                                                    onlySelected=True)
+                            lyr2 = QgsVectorLayer(
+                                os.path.join(carpeta,  rasterdeentrada + '2.shp'),
+                                rasterdeentrada + str("2"), "ogr")
+                            QgsProject.instance().addMapLayer(lyr2)
+                            print("en teoria ha hecho la seleccion")
+
+                            # if nbrSelected > 0:
+                            # guardo lo selecionado
+                            """print ("pasa por aqui")
+                                #params={ 'INPUT' : os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'.shp'), 'OUTPUT' : os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'2.shp')}
+                                params={ 'INPUT' : mem_layer, 'OUTPUT' : os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'2.shp')}
+                                processing.run("qgis:saveselectedfeatures",params)"""
+
+                            # calcula la superficie de esta capa pero no en todos los registros
+                            layer = QgsVectorLayer(
+                                os.path.join(carpeta, rasterdeentrada + '2.shp'),
+                                rasterdeentrada + str("2"), "ogr")
+                            # layer=lyr2
+                            provider = layer.dataProvider()
+                            print("layer get features")
+                            # for feat in layer.getFeatures():
+                            # print ("feat")
+                            # print (feat)
+                            areas = [feat.geometry().area() for feat in layer.getFeatures()]
+                            # print (areas)
+                            indice = [feat.id() for feat in layer.getFeatures()]
+                            # print (indice)
+                            field = QgsField("area", QVariant.Int)
+                            provider.addAttributes([field])
+                            layer.updateFields()
+                            # idx = layer.fieldNameIndex('area')
+                            idx = layer.fields().indexFromName('area')  ###ojo aqui es donde da cero el indice
+                            long = len(indice)
+                            print("long")
+                            print(long)
+                            i = 0
+                            print("pasa por aqui2")
+                            while i < long:
+                                new_values = {idx: float(areas[i])}
+                                # print ("pasa por aqui3")
+                                provider.changeAttributeValues({indice[i]: new_values})
+                                # print ("pasa por aqui4")
+                                i = i + 1
+                            layer.updateFields()
+                            print("pasa por aqui5")
+
+                            # selecciono las teselas mayor de una superficie dada.
+                            # hago una selecion de los elementos con dn=1, anado la informacion a la tabla y creo una capa nueva  ojo deberia hacer una funcion para emplearlo mas veces.
+                            # layer2 = layer #iface.activeLayer()
+                            print("paso11 de agregado")
+                            expression = QgsExpression(u'"area" > 2500')
+                            print("paso12 de agregado")
+                            # Added / changed lines ##########
+                            context = QgsExpressionContext()
+                            scope = QgsExpressionContextScope()
+                            context.appendScope(scope)
+
+                            feats = []
+                            ids = []
+                            for feat in layer.getFeatures():
+                                scope.setFeature(feat)
+                                result = expression.evaluate(context)
+                                if result:
+                                    feats.append(feat)
+                                    ids.append(feat.id())
+                                    # areas.append(feat.geometry().area() )
+                            ################
+                            if len(ids) > 0:
+                                # print ("len feats")
+                                # print( len( feats))
+                                print("paso14 de agregado")
+                                # prov.addFeatures(feats)
+                                lyr2.selectByIds(ids)
+                                # lyr es la capa de entrada, la origen ue contiene todos los elementos
+                                output_path = os.path.join(carpeta,  rasterdeentrada + '3.shp')
+                                QgsVectorFileWriter.writeAsVectorFormat(lyr2, output_path, "CP120", lyr.crs(),
+                                                                        "ESRI Shapefile",
+                                                                        onlySelected=True)
+                                lyr3 = QgsVectorLayer(
+                                    os.path.join(carpeta, rasterdeentrada + '3.shp'),
+                                    rasterdeentrada + str("3"), "ogr")
+                                QgsProject.instance().addMapLayer(lyr3)
+                                print("en teoria ha hecho la seleccion2")
+
+
+
+                    calculo('100 * ( hm@1   -  hbc@1  ) / ( hm@1 )', 'rc')
+
+                    StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
+
+                    #falta sacar la lc
+                    calculo(' hm@1 - hbc@1 ', "lc")
+                    StringToRaster(os.path.join(carpeta, 'lc.tif'), "lc")
+                    #falta sacar la fccmatorral
+                    #proyecto
+                    # proyecto la altura con el crecimiento
+                    calculo('(hm@1 < 6) * hm@1 + (hm@1 >= 6) * (hm@1 + ' + str(crecimiento) + ')', 'hmp')
+                    StringToRaster(os.path.join(carpeta, 'hmp.tif'), "hmp")
+                    # proyecto la altura  de la base de la copa con el crecimiento
+                    calculo('(hm@1 < 7.5) * hbc@1 + (hm@1 >= 7.5) * (hbc@1 + ' + str(crecimiento) + ')', 'hbcp')
+                    StringToRaster(os.path.join(carpeta, 'hbcp.tif'), "hbcp")
+                    # calculo  la razon de copa una vez proyectada la altura y la base de la copa
+                    calculo('100 * ( hmp@1   -  hbcp@1  ) / ( hmp@1 )', 'rcp')
+                    StringToRaster(os.path.join(carpeta, 'rcp.tif'), "rcp")
+                    # proyecto la fraccion de cabida cubierta
+                    calculo('(' + str(crecimiento) + ' > 0) * (fcc@1  + ' + str(crecimientofcc) + ') + ( ' + str(
+                        crecimiento) + ' = 0) * (fcc@1 )', 'fccp')
+                    StringToRaster(os.path.join(carpeta, 'fccp.tif'), "fccp")
+                    # proyecto la longitud de copa
+                    calculo('(hmp@1 - hbcp@1)', 'lcp')
+                    StringToRaster(os.path.join(carpeta,  'lcp.tif'), "lcp")
+                    #saco teselas
+
+
+                    calculo(
+                        'if (fccp@1 <= 0, 0, if ( fccp@1 < ' + fccminarbolado + ', 1, if ( hmp@1 < ' + alturadesconocida + ', 11, if ( hmp@1 < ' + hmaxmontebravo + ', 2, if ( hmp@1 < ' + hmaxbajolatizal + ', if ( rcp@1 <= ' + rcminresalveoencinarlatizalpocodesarrollado + ', if ( fccp@1 > ' + fccmincompetenciaencinarlatizalpocodesarrollado + ', 51, 61), 17), if (hmp@1 <= ' + hmaxselvicolas + ', if ( rcp@1 <= ' + rcminresalveoencinarlatizalpocodesarrollado + ', if ( fccp@1 > ' + fccmincompetenciaencinarlatizalpocodesarrollado + ', 52, 62) , if ( hmp@1 - hmp@1 * rcp@1 / 100 <= ' + hbcpodabaja + ', 3, 4)), if ( hmp@1 <= ' + hmaxprimeraclara + ', if ( hmp@1 - hmp@1 * rcp@1 / 100 <=' + hbcminclarasnormales + ' , if ( rcp@1 <= ' + rcminresalveoencinarlatizalpocodesarrollado + ', if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', 77, 7), 7), if ( rcp@1 >= ' + rcminclara + ', if ( hmp@1 * rcp@1 / 100 > ' + longitudcopaminclara + ', if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 81, if ( fccp@1 >= ' + fcccompetenciaelevada + ', 81, 10)), 7), 7), if ( fccp@1 >= ' + fcccompetenciaelevada + ', 9, if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', 77, 10)))), if ( hmp@1 <= ' + hmaxsegundaclara + ', if ( hmp@1 - hmp@1 * rcp@1 / 100 <= ' + hbcminclarasnormales + ', 111, if ( rcp@1 >= ' + rcminclara + ', if ( hmp@1 * rcp@1 / 100 > ' + longitudcopaminclara + ', if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 82, if ( fccp@1 >= ' + fcccompetenciaelevada + ', 82, 111)), 111), 111), if ( fccp@1 >= ' + fcccompetenciaelevada + ', 121, 141))), if ( rcp@1 <= ' + rccoronado + ', if ( fccp@1 >= ' + fcccompetenciaelevada + ', 13, 15), if ( rcp@1 < ' + rcminclara + ', if ( fccp@1 >= ' + fcccompetenciaelevada + ', 122, 142), 112))))))))))',
+                        'suma')
+                    StringToRaster(os.path.join(carpeta, 'suma.tif'), "suma")
+                    parameters = {'INPUT': os.path.join(carpeta, 'suma.tif'), 'BAND': 1,
+                                  'FIELD': "DN",
+                                  'EIGHT_CONNECTEDNESS': False, 'OUTPUT': os.path.join(carpeta,  'suma.shp')}
+                    try:
+                        processing.run("gdal:polygonize", parameters)
+                    except:
+                        iface.messageBar().pushMessage("SILVILIDAR",
+                                                       "Es necesario tener activado el complemento procesos. Si se reinicia QGIS, se activará automáticamente.",
+                                                       duration=10)
+                        time.sleep(10)
+
+                    # filtro para quedarme con la clara
+                    if self.dlg4.checkBox_claras.isChecked():
+                        # "calculo(
+                        # 'c11@1 / 81 + c14@1 / 9  + c15@1 / 81 + c19@1 / 82 + c20@1 / 121 + c21@1 / 82 + c25@1 / 122 + c26@1 / 13',
+                        # 'clara1')
+                        calculo(
+                            '("suma@1" = 81 OR "suma@1" = 9 OR "suma@1" = 82 OR "suma@1" = 121 OR "suma@1" = 122 OR "suma@1" = 13) * 1',
+                            'clara1')  # ojo comprobar si sigue siendo así despues de lo de los encinares
+                        StringToRaster(os.path.join(carpeta, 'clara1.tif'), "clara1")
+                        agregado2("clara", 20, 1)
+
+
+
                 else:
-                    subtexto1 = "Thinning"
-                    subtexto2 = "Regeneration"
-                    subtexto3 = "Precommercial thinning"
-                clara = QgsVectorLayer(os.path.join(carpeta, 'Clara_merged.shp'), subtexto1, "ogr")
-                regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion_merged.shp'), subtexto2, "ogr")
-                resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo_merged.shp'), subtexto3, "ogr")
-                # aplico simbologia a estas capas, si existen
-                try:
-                    symbolsclara = clara.renderer().symbol()
-                    sym = symbolsclara
-                    sym.setColor(QColor.fromRgb(255, 0, 0))
-                    QgsProject.instance().addMapLayer(clara)
-                except:
+                    print("no esta dentro de la junta")
+                    #fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
+                    #Layer = QgsRasterLayer(fileName, "altura de red")
+                    #QgsProject.instance().addMapLayers([Layer])
+                    carpeta = self.dlg.carpetalaz.text()  # displayText()
+                    # la carpeta la he cogido al pulsar el boton de la carpeta
+
+                    # meto aqui variables que luego deberan estar en la cajita   OJO
+
+                    #crecimiento = self.dlg3.crecimiento.text()  ##displayText()1.5
+                    #crecimientofcc = self.dlg3.crecimientofcc.text()  ##displayText()12.5
+                    #NUEVAS
+                    # METODO ALEJANDRO
+                    fccminarbolado =self.dlg2.fccminarbolado.text()  # 10
+                    alturadesconocida = self.dlg2.alturadesconocida.text()  # 2
+                    hmaxmontebravo = self.dlg2.hmaxmontebravo.text()  # 3.5
+                    hmaxbajolatizal = self.dlg2.hmaxbajolatizal.text()  # 5
+                    """rcminresalveoencinarlatizalpocodesarrollado = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado.text()  # 40
+                    rcminresalveoencinarlatizalpocodesarrollado_2 = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado_2.text()  # -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
+                    if not isinstance(rcminresalveoencinarlatizalpocodesarrollado, (int, float)):
+                        rcminresalveoencinarlatizalpocodesarrollado = rcminresalveoencinarlatizalpocodesarrollado_2.replace('SI','if').replace('FCC',str('fccp@1')).replace('RC',str('rcp@1')).replace('HM',str('hmp@1')).replace(',','.').replace(';',',')# -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
+
+                    fccmincompetenciaencinarlatizalpocodesarrollado = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado.text()  # 50
+                    fccmincompetenciaencinarlatizalpocodesarrollado_2 = self.dlg2.fccmincompetenciaencinarlatizalpocodesarrollado_2.text() #SI(FCC>46;SI(FCC>16/45,4150013475952/(1-RC/100)*100;52;62);62)
+                    if not isinstance(fccmincompetenciaencinarlatizalpocodesarrollado, (int, float)):
+                        fccmincompetenciaencinarlatizalpocodesarrollado = fccmincompetenciaencinarlatizalpocodesarrollado_2.replace('SI','if').replace('FCC',str('fccp@1')).replace('RC',str('rcp@1')).replace('HM',str('hmp@1')).replace(',','.').replace(';',',')
+                    hmaxselvicolas = self.dlg2.hmaxselvicolas.text()  # 7.5
+                   #rcminresalveoencinarlatizaldesarrollado = self.dlg2.rcminresalveoencinarlatizaldesarrollado.text()  # 50
+                    hbcpodabaja = self.dlg2.hbcpodabaja.text()  # 3
+                    #rcminresalveoencinarfustal = self.dlg2.rcminresalveoencinarfustal.text()  # 60
+                    fccmincompetenciamasadiscontinua_fustalencinares = self.dlg2.fccmincompetenciamasadiscontinua_fustalencinares.text()  # 57.5
+                    rcminclara = self.dlg2.rcminclara.text()  # 35
+                    longitudcopaminclara = self.dlg2.longitudcopaminclara.text()  # 3.25
+                    fcccompetenciaelevada = self.dlg2.fcccompetenciaelevada.text()  # 95
+                    hmaxsegundaclara = self.dlg2.hmaxsegundaclara.text()  # 16.5
+                    hbcminclarasnormales = self.dlg2.hbcminclarasnormales.text()  # 5.5
+                    fccmincompetenciaencinarlatizaldesarrollado = self.dlg2.fccmincompetenciaencinarlatizaldesarrollado.text()  # 55
+                    hmaxprimeraclara = self.dlg2.hmaxprimeraclara.text()  # 12
+                    rccoronado = self.dlg2.rccoronado.text()  """# 17
+
+
+                    # compruebo que capas estan cargadas en el proyecto al iniciar el script
+                    capasoriginales = QgsProject.instance().mapLayers()
+                    a = ["nombre de archivo", "extension"]
+
+                    # congelo la vista  para ahorrar memoria  #ojo lo descongelo de momento   ojo ojo
+                    canvas = iface.mapCanvas()
+                    # canvas.freeze(True)
+
+                    # ejecuto la busqueda de archivos las
+                    buscalidaryejecuta(carpeta, crecimiento, crecimientofcc, fccminarbolado, alturadesconocida, hmaxmontebravo,  hmaxbajolatizal, rcminresalveoencinarlatizalpocodesarrollado, fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas,  hbcpodabaja, fccmincompetenciamasadiscontinua_fustalencinares, rcminclara, longitudcopaminclara, fcccompetenciaelevada, hmaxsegundaclara, hbcminclarasnormales, fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
+
+                    # uno en una capa todas las hojas de claras, regeneracion, resalveo y teselas
+                    juntoshapes(os.path.join(carpeta, "p", "*clara3.shp"), "Clara_merged")
+                    juntoshapes(os.path.join(carpeta, "p", "*regeneracion3.shp"), "Regeneracion_merged")
+                    juntoshapes(os.path.join(carpeta, "p", "*resalveo3.shp"), "Resalveo_merged")
+                    juntoshapes(os.path.join(carpeta, "p", "*suma.shp"), "Teselas_merged")
+
+                    def join_tables(csv_path, layer_path):
+                        res = processing.run("qgis:joinattributestable", { 'DISCARD_NONMATCHING' : False, 'FIELD' : 'DN', 'FIELDS_TO_COPY' : ['texto','foto','foto2'], 'FIELD_2' : 'cod', 'INPUT' : layer_path, 'INPUT_2' : csv_path+'|layername=Hoja1', 'METHOD' : 1, 'OUTPUT' : os.path.join(carpeta, "Teselas_merged_Final.shp"), 'PREFIX' : '' })
+                        layer = QgsVectorLayer(res['OUTPUT'], "joined layer", "ogr")
+                        QgsProject.instance().addMapLayer(layer)
+                    print("intento hacer la union")
+                    join_tables(os.path.dirname(__file__) + '/fotos/tabla.xlsx', os.path.join(carpeta, "Teselas_merged.shp"))
+                    print(" la union esta hecha")
+                    # elimino las capas que he cargado durante el proceso
+                    capas = QgsProject.instance().mapLayers()
+                    for capa in capas:
+                        if capa not in capasoriginales:
+                            QgsProject.instance().removeMapLayers([capa])
+                    del (capas)
+                    import shutil
+                    # cargo los rasters virtuales si chekeado en la salidas
+                    if self.dlg4.checkBox_altura.isChecked():
+                        juntarasters("hm")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/hm.qml',
+                                    os.path.join(carpeta, "HM.qml"))
+                    if self.dlg4.checkBox_fcc.isChecked():
+                        juntarasters("fcc")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/fcc.qml',
+                                    os.path.join(carpeta, "FCC.qml"))
+                    if self.dlg4.checkBox_rc.isChecked():
+                        juntarasters("rc")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/rc.qml',
+                                    os.path.join(carpeta, "RC.qml"))
+                    if self.dlg4.checkBox_lc.isChecked():
+                        juntarasters("lc")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/lc.qml',
+                                    os.path.join(carpeta, "LC.qml"))
+                    if self.dlg4.checkBox_hbc.isChecked():
+                        juntarasters("hbc")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/hbc.qml',
+                                    os.path.join(carpeta, "HBC.qml"))
+                    if self.dlg4.checkBox_matorral.isChecked():
+                        juntarasters("fcc_matorral")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/fcc_matorral.qml',
+                                    os.path.join(carpeta, "FCC_MATORRAL.qml"))
+
+                        if lenguaje_informe == "es":
+                            pass
+                        else:
+                            # copio el fcc matorral y lo renombro como fcc_scrub
+
+                            shutil.copy(os.path.join(carpeta, "FCC_MATORRAL.vrt"), os.path.join(carpeta, "FCC_SCRUB.vrt"))
+                            # cargo la capa fcc_scrub
+                            layer = QgsRasterLayer(os.path.join(carpeta, "fcc_scrub.vrt"), "FCC_SCRUB")
+                            QgsProject.instance().addMapLayer(layer)
+                            # coloreo
+                            layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/fcc_matorral.qml')
+                            layer.triggerRepaint()
+                            iface.layerTreeView().refreshLayerSymbology(layer.id())
+
+                            # elimino de la vista la capa fcc_matorral
+                            def remove_layer_by_name(name):
+                                layers = QgsProject.instance().mapLayersByName(name)
+                                if len(layers) > 0:
+                                    layer = layers[0]
+                                    QgsProject.instance().removeMapLayer(layer)
+
+                            remove_layer_by_name('FCC_MATORRAL')
+
+                    # cargo las capas finales vectoriales
+
+                    if self.dlg4.checkBox_teselas.isChecked():
+                        #ojojojojoj
+                        import shutil
+                        shutil.copytree(os.path.dirname(__file__) + '/fotos', carpeta+'/fotos')
+                        shutil.copy(os.path.dirname(__file__) + '/styles/Teselas.qml', os.path.join(carpeta, "Teselas_merged_Final.qml"))
+                        teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_Final.shp'), "Teselas", "ogr")
+                        """teselas1 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado1.shp'),
+                                                  "Teselas Proyectado1",
+                                                  "ogr")
+                        teselas2 = QgsVectorLayer(os.path.join(carpeta, 'Teselas_merged_proyectado2.shp'),
+                                                  "Teselas Proyectado2",
+                                                  "ogr")"""
+                        #aplicar estilo a las teselas cargando un qml con el mismo nombre que la capa
+                        teselas.loadNamedStyle(os.path.dirname(__file__) + '/styles/Teselas.qml')#(r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\styles/teselas.qml")#os.path.dirname(__file__) + '/styles""/Teselas_merged.qml')
+
+                        """# coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
+    
+                        # ordeno los elementos de teselas ojo ojo
+                        # ordenados=coloresteselas.items()
+                        # ordenados.sort(key=lambda clave: str(clave[1][3]))
+                        # me salto el orden del diccionario
+                        ordenados = [('1', ('solid', '255,255,204,255', 'Raso o Regenerado', '001')),
+                                     ('2', ('solid', '255,255,0,255', 'Menor (Monte Bravo)', '002')),
+                                     ('17',
+                                      ('solid', 'orange', 'Bajo Latizal No Concurrente o Latizal Encinar no Denso', '003')),
+                                     (
+                                         '3', (
+                                             'vertical', '255,192,0,255',
+                                             'Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)',
+                                             '004')),
+                                     ('4', ('solid', '255,204,153,255', 'Bajo Latizal Desarrollado', '005')),
+                                     (
+                                         '51',
+                                         ('b_diagonal', '255,0,255,255', 'Resalveo en Latizal poco desarrollado', '006')),
+                                     ('52', ('f_diagonal', '255,0,0,255', 'Resalveo o clareo en Latizal', '007')),
+                                     ('61', ('solid', '255,153,255,255', 'Latizal poco desarrollado Tratado', '008')),
+                                     ('62', ('solid', '255,124,128,255', 'Latizal Tratado', '009')),
+                                     ('7', ('solid', '204,255,153,255', 'Alto Latizal Claro', '010')),
+                                     ('81', ('b_diagonal', '146,208,80,255', 'Poda Alta y Clara Suave en Latizal', '011')),
+                                     ('9', ('f_diagonal', '0,176,80,255', 'Primera Clara y Poda Alta', '012')),
+                                     ('10', ('solid', '102,255,153,255', 'Alto Latizal Aclarado', '013')),
+                                     ('111', ('solid', '102,255,255,255', 'Fustal Claro', '014')), ('82', (
+                                'b_diagonal', '51,204,204,255', 'Poda Alta y Clara Suave en Monte Desarrollado', '015')),
+                                     ('121', ('f_diagonal', '0,176,255,240', 'Clara en Fustal', '016')),
+                                     ('141', ('solid', '204,236,255,255', 'Fustal Aclarado', '017')),
+                                     ('112', ('solid', '139,139,232,255', 'Fustal Maduro Claro', '018')),
+                                     ('122', ('b_diagonal', '65,51,162,255', 'Clara en Fustal Maduro', '019')),
+                                     ('13', ('cross', '0,112,192,255', 'Clara Urgente en Fustal Maduro', '020')),
+                                     ('142', ('solid', '166,166,207,255', 'Fustal Maduro Aclarado', '021')),
+                                     ('15', ('horizontal', '112,48,160,255', 'Posibilidad de Regeneracion', '022'))]
+    
+                        categorias = []
+    
+                        for clase, (relleno, color, etiqueta, orden) in ordenados:
+                            props = {'style': relleno, 'color': color, 'style_border': 'no'}
+                            sym = QgsFillSymbol.createSimple(props)
+                            categoria = QgsRendererCategory(clase, sym, etiqueta)
+                            categorias.append(categoria)
+    
+                        field = "DN"
+                        renderer = QgsCategorizedSymbolRenderer(field, categorias)
+                        teselas.setRenderer(renderer)
+                        QgsProject.instance().addMapLayer(teselas)"""
+                    QgsProject.instance().addMapLayer(teselas)
+                    if lenguaje_informe == "es":
+                        subtexto1 = "Clara"
+                        subtexto2 = "Regeneración"
+                        subtexto3 = "Resalveo"
+                    else:
+                        subtexto1 = "Thinning"
+                        subtexto2 = "Regeneration"
+                        subtexto3 = "Precommercial thinning"
+                    clara = QgsVectorLayer(os.path.join(carpeta, 'Clara_merged.shp'), subtexto1, "ogr")
+                    regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion_merged.shp'), subtexto2, "ogr")
+                    resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo_merged.shp'), subtexto3, "ogr")
+                    # aplico simbologia a estas capas, si existen
+                    try:
+                        symbolsclara = clara.renderer().symbol()
+                        sym = symbolsclara
+                        sym.setColor(QColor.fromRgb(255, 0, 0))
+                        QgsProject.instance().addMapLayer(clara)
+                    except:
+                        pass
+
+                    try:
+                        symbolsregeneracion = regeneracion.renderer().symbol()
+                        sym = symbolsregeneracion
+                        sym.setColor(QColor.fromRgb(0, 255, 0))
+                        QgsProject.instance().addMapLayer(regeneracion)
+                    except:
+                        pass
+
+                    try:
+                        symbolsresalveo = resalveo.renderer().symbol()
+                        sym = symbolsresalveo
+                        sym.setColor(QColor.fromRgb(0, 0, 255))
+                        QgsProject.instance().addMapLayer(resalveo)
+                    except:
+                        pass
+
+                    # repinto todo refrescando la vista
+                    canvas.freeze(False)
+                    canvas.refresh()
+                    # self.dlg.pushButton_select_path.setEnabled(False)
+                    # self.dlg.close()
+                    # print (capasoriginales)
+
+                    print(carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas ,  hbcpodabaja ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
+
                     pass
-
-                try:
-                    symbolsregeneracion = regeneracion.renderer().symbol()
-                    sym = symbolsregeneracion
-                    sym.setColor(QColor.fromRgb(0, 255, 0))
-                    QgsProject.instance().addMapLayer(regeneracion)
-                except:
-                    pass
-
-                try:
-                    symbolsresalveo = resalveo.renderer().symbol()
-                    sym = symbolsresalveo
-                    sym.setColor(QColor.fromRgb(0, 0, 255))
-                    QgsProject.instance().addMapLayer(resalveo)
-                except:
-                    pass
-
-                # repinto todo refrescando la vista
-                canvas.freeze(False)
-                canvas.refresh()
-                # self.dlg.pushButton_select_path.setEnabled(False)
-                # self.dlg.close()
-                # print (capasoriginales)
-
-                print(carpeta, crecimiento, crecimientofcc,fccminarbolado , alturadesconocida,hmaxmontebravo ,  hmaxbajolatizal , rcminresalveoencinarlatizalpocodesarrollado ,fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas ,  hbcpodabaja ,fccmincompetenciamasadiscontinua_fustalencinares ,rcminclara ,longitudcopaminclara,fcccompetenciaelevada ,hmaxsegundaclara ,hbcminclarasnormales ,fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
-
-                pass
 
             # empiezo aqui con la segunda pestana, busca zonas similares  OJO
             #if index == 1:
@@ -3188,6 +3500,9 @@ class Silvilidar:
                                 #lyr = QgsVectorLayer(carpeta + '/disuelto.shp', "Zonas similares", "ogr")
                                 #lyr.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
                             QgsProject.instance().addMapLayer(resultado)
+
+
+
 
 
 

@@ -1520,11 +1520,20 @@ class Silvilidar:
             #if index == 0:
             if nombre_pestaña=='Ejecución de SILVILIDAR                                 ':
                 print(self.tr(u'EMPEZAMOS'))
+                # compruebo que capas estan cargadas en el proyecto al iniciar el script
+                capasoriginales = QgsProject.instance().mapLayers()
+                a = ["nombre de archivo", "extension"]
+
+                # congelo la vista  para ahorrar memoria  #ojo lo descongelo de momento   ojo ojo
+                canvas = iface.mapCanvas()
+                # canvas.freeze(True)
+
                 # meto aqui variables que luego deberan estar en la cajita   OJO
 
                 crecimiento = self.dlg3.crecimiento.text()  ##displayText()1.5
                 crecimientofcc = self.dlg3.crecimientofcc.text()  ##displayText()12.5
                 # METODO ALEJANDRO
+
                 fccminarbolado = self.dlg2.fccminarbolado.text()  # 10
                 alturadesconocida = self.dlg2.alturadesconocida.text()  # 2
                 hmaxmontebravo = self.dlg2.hmaxmontebravo.text()  # 3.5
@@ -1629,7 +1638,25 @@ class Silvilidar:
                                    'fcc')  # en teoria se sobre escribiria el raster fcc@1
                     print("creado el string to raster de fcc")
 
-                    #calculo en base a la hbc la rc
+                    #cargo el fcc de matorral
+                    # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                    Layer = QgsRasterLayer(fileName, "FCC MATORRAL DE RED")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False,
+                                             'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
+                                             'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                             'OUTPUT': os.path.join(carpeta, 'Cob05_2m_TLR_PNOA2.tif')})[
+                        'OUTPUT']
+                    layer2 = QgsRasterLayer(layer2, "fcc de red")
+                    # QgsProject.instance().addMapLayers([Layer])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    StringToRaster(os.path.join(carpeta, 'Cob05_2m_TLR_PNOA2.tif'),
+                                   'fccmatorral')  # en teoria se sobre escribiria el raster fcc@1
+                    print("creado el string to raster de fcc matorral")
 
 
                     def calculo(expresion, capa):
@@ -1868,8 +1895,7 @@ class Silvilidar:
                                                        "Es necesario tener activado el complemento procesos. Si se reinicia QGIS, se activará automáticamente.",
                                                        duration=10)
                         time.sleep(10)
-
-                    # filtro para quedarme con la clara
+                        # filtro para quedarme con la clara
                     if self.dlg4.checkBox_claras.isChecked():
                         # "calculo(
                         # 'c11@1 / 81 + c14@1 / 9  + c15@1 / 81 + c19@1 / 82 + c20@1 / 121 + c21@1 / 82 + c25@1 / 122 + c26@1 / 13',
@@ -1879,6 +1905,112 @@ class Silvilidar:
                             'clara1')  # ojo comprobar si sigue siendo así despues de lo de los encinares
                         StringToRaster(os.path.join(carpeta, 'clara1.tif'), "clara1")
                         agregado2("clara", 20, 1)
+
+                        subtexto1 = "Clara"
+                        subtexto2 = "Regeneración"
+                        subtexto3 = "Resalveo"
+                        clara = QgsVectorLayer(os.path.join(carpeta, 'Clara3.shp'), subtexto1, "ogr")
+
+                        # filtro para quedarme con la regeneracion
+                    if self.dlg4.checkBox_regeneracion.isChecked():
+                        # calculo('c28@1 / 15 ', 'regeneracion1')
+                        calculo(
+                            '("suma@1" = 15 ) * 1', 'regeneracion1')
+                        StringToRaster(os.path.join(carpeta, 'regeneracion1.tif'),
+                                       "regeneracion1")
+                        agregado2("regeneracion", 20, 1)  # 40,1
+
+                    # filtro para quedarme con el resalveo
+                    if self.dlg4.checkBox_resalveo.isChecked():
+                        # calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
+                        calculo('("suma@1" = 51 OR "suma@1" = 52 ) * 1', 'resalveo1')
+                        StringToRaster(os.path.join(carpeta, 'resalveo1.tif'), "resalveo1")
+                        agregado2("resalveo", 20, 1)#30,0.85
+                    # elimino las capas que he cargado durante el proceso
+                    capas = QgsProject.instance().mapLayers()
+                    for capa in capas:
+                        if capa not in capasoriginales:
+                            QgsProject.instance().removeMapLayers([capa])
+                    del (capas)
+                    import shutil
+                    if self.dlg4.checkBox_altura.isChecked():
+                        shutil.copy(os.path.dirname(__file__) + '/styles/hm.qml',
+                                    os.path.join(carpeta, "HM.qml"))
+                        layer = QgsRasterLayer(os.path.join(carpeta, 'hmp.tif'),"HM")
+                        QgsProject.instance().addMapLayer(layer)
+                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/'+ 'hm.qml')
+                        layer.triggerRepaint()
+                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+                    if self.dlg4.checkBox_fcc.isChecked():
+                        layer = QgsRasterLayer(os.path.join(carpeta, 'fccp.tif'), "FCC")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/fcc.qml',
+                                    os.path.join(carpeta, "FCC.qml"))
+                        QgsProject.instance().addMapLayer(layer)
+                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + 'fcc.qml')
+                        layer.triggerRepaint()
+                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+                    if self.dlg4.checkBox_rc.isChecked():
+                        layer = QgsRasterLayer(os.path.join(carpeta, 'rcp.tif'), "RC")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/rc.qml',
+                                    os.path.join(carpeta, "RC.qml"))
+                        QgsProject.instance().addMapLayer(layer)
+                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + 'rc.qml')
+                        layer.triggerRepaint()
+                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+                    if self.dlg4.checkBox_lc.isChecked():
+                        layer = QgsRasterLayer(os.path.join(carpeta, 'lcp.tif'), "LC")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/lc.qml',
+                                    os.path.join(carpeta, "LC.qml"))
+                        QgsProject.instance().addMapLayer(layer)
+                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + 'lc.qml')
+                        layer.triggerRepaint()
+                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+                    if self.dlg4.checkBox_hbc.isChecked():
+                        layer = QgsRasterLayer(os.path.join(carpeta, 'hbcp.tif'), "HBC")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/hbc.qml',
+                                    os.path.join(carpeta, "HBC.qml"))
+                        QgsProject.instance().addMapLayer(layer)
+                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + 'hbc.qml')
+                        layer.triggerRepaint()
+                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+                    if self.dlg4.checkBox_matorral.isChecked():
+                        layer = QgsRasterLayer(os.path.join(carpeta, 'Cob05_2m_TLR_PNOA2.tif'), "FCC_MATORRAL")
+                        shutil.copy(os.path.dirname(__file__) + '/styles/fcc_matorral.qml',
+                                    os.path.join(carpeta, "FCC_MATORRAL.qml"))
+                        QgsProject.instance().addMapLayer(layer)
+                        layer.loadNamedStyle(os.path.dirname(__file__) + '/styles/' + 'fcc_matorral.qml')
+                        layer.triggerRepaint()
+                        iface.layerTreeView().refreshLayerSymbology(layer.id())
+                    if self.dlg4.checkBox_teselas.isChecked():
+                        #shutil.copytree(os.path.dirname(__file__) + '/fotos', carpeta + '/fotos')
+                        shutil.copy(os.path.dirname(__file__) + '/styles/Teselas.qml',
+                                    os.path.join(carpeta, "Teselas.qml"))
+                        teselas = QgsVectorLayer(os.path.join(carpeta, 'suma.shp'), "Teselas", "ogr")
+                        # aplicar estilo a las teselas cargando un qml con el mismo nombre que la capa
+                        teselas.loadNamedStyle(os.path.dirname(__file__) + '/styles/Teselas.qml')
+                        QgsProject.instance().addMapLayer(teselas)
+
+                    if self.dlg4.checkBox_claras.isChecked():
+                            subtexto1 = "Clara"
+                            clara = QgsVectorLayer(os.path.join(carpeta, 'Clara3.shp'), subtexto1, "ogr")
+                            # aplico simbologia a estas capas, si existen
+                            try:
+                                symbolsclara = clara.renderer().symbol()
+                                sym = symbolsclara
+                                sym.setColor(QColor.fromRgb(255, 0, 0))
+                                QgsProject.instance().addMapLayer(clara)
+                            except:
+                                pass
+
+                    if self.dlg4.checkBox_regeneracion.isChecked():
+                        subtexto2 = "Regeneración"
+                        regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion3.shp'), subtexto2,
+                                                      "ogr")
+
+                    if self.dlg4.checkBox_resalveo.isChecked():
+                        subtexto3 = "Resalveo"
+                        resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo3.shp'), subtexto3, "ogr")
+
 
 
 
@@ -1896,10 +2028,10 @@ class Silvilidar:
                     #crecimientofcc = self.dlg3.crecimientofcc.text()  ##displayText()12.5
                     #NUEVAS
                     # METODO ALEJANDRO
-                    fccminarbolado =self.dlg2.fccminarbolado.text()  # 10
+                    """fccminarbolado =self.dlg2.fccminarbolado.text()  # 10
                     alturadesconocida = self.dlg2.alturadesconocida.text()  # 2
                     hmaxmontebravo = self.dlg2.hmaxmontebravo.text()  # 3.5
-                    hmaxbajolatizal = self.dlg2.hmaxbajolatizal.text()  # 5
+                    hmaxbajolatizal = self.dlg2.hmaxbajolatizal.text()  # 5"""
                     """rcminresalveoencinarlatizalpocodesarrollado = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado.text()  # 40
                     rcminresalveoencinarlatizalpocodesarrollado_2 = self.dlg2.rcminresalveoencinarlatizalpocodesarrollado_2.text()  # -0,485950210654347*HM^2+10,9071549372235*HM+2,62451053947642
                     if not isinstance(rcminresalveoencinarlatizalpocodesarrollado, (int, float)):
@@ -1924,13 +2056,13 @@ class Silvilidar:
                     rccoronado = self.dlg2.rccoronado.text()  """# 17
 
 
-                    # compruebo que capas estan cargadas en el proyecto al iniciar el script
+                    """# compruebo que capas estan cargadas en el proyecto al iniciar el script
                     capasoriginales = QgsProject.instance().mapLayers()
                     a = ["nombre de archivo", "extension"]
 
                     # congelo la vista  para ahorrar memoria  #ojo lo descongelo de momento   ojo ojo
                     canvas = iface.mapCanvas()
-                    # canvas.freeze(True)
+                    # canvas.freeze(True)"""
 
                     # ejecuto la busqueda de archivos las
                     buscalidaryejecuta(carpeta, crecimiento, crecimientofcc, fccminarbolado, alturadesconocida, hmaxmontebravo,  hmaxbajolatizal, rcminresalveoencinarlatizalpocodesarrollado, fccmincompetenciaencinarlatizalpocodesarrollado , hmaxselvicolas,  hbcpodabaja, fccmincompetenciamasadiscontinua_fustalencinares, rcminclara, longitudcopaminclara, fcccompetenciaelevada, hmaxsegundaclara, hbcminclarasnormales, fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
@@ -2019,7 +2151,7 @@ class Silvilidar:
                                                   "Teselas Proyectado2",
                                                   "ogr")"""
                         #aplicar estilo a las teselas cargando un qml con el mismo nombre que la capa
-                        teselas.loadNamedStyle(os.path.dirname(__file__) + '/styles/Teselas.qml')#(r"C:\Users\dierabfr\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\silvilidar\styles/teselas.qml")#os.path.dirname(__file__) + '/styles""/Teselas_merged.qml')
+                        teselas.loadNamedStyle(os.path.dirname(__file__) + '/styles/Teselas.qml')
 
                         """# coloresteselas={"1":("solid","255,255,204,255","Raso o Regenerado","001"),"2":("solid","255,255,0,255","Menor (Monte Bravo)","002"),"3":("vertical","255,192,0,255","Poda Baja (y Clareo) en Bajo Latizal (Posibilidad si C elevada)","004"),"4":("solid","255,204,153,255","Bajo Latizal Desarrollado","005"),"51":("b_diagonal","255,0,255,255","Resalveo en Latizal poco desarrollado","006"),"52":("f_diagonal","255,0,0,255","Resalveo en Latizal","007"),"61":("solid","255,153,255,255","Latizal poco desarrollado Tratado","008"),"62":("solid","255,124,128,255","Latizal Tratado","009"),"7":("solid","204,255,153,255","Alto Latizal Claro","010"),"81":("b_diagonal","146,208,80,255","Poda Alta y Clara Suave en Latizal","011"),"82":("b_diagonal","51,204,204,255","Poda Alta y Clara Suave en Monte Desarrollado","015"),"9":("f_diagonal","0,176,80,255","Primera Clara y Poda Alta","012"),"10":("solid","102,255,153,255","Alto Latizal Aclarado","013"),"111":("solid","102,255,255,255","Fustal Claro","014"),"112":("solid","139,139,232,255","Fustal Maduro Claro","018"),"121":("f_diagonal","0,176,255,240","Clara en Fustal","016"),"122":("b_diagonal","65,51,162,255","Clara en Fustal Maduro","019"),"13":("cross","0,112,192,255","Clara Urgente en Fustal Maduro","020"),"141":("solid","204,236,255,255","Fustal Aclarado","017"),"142":("solid","166,166,207,255","Fustal Maduro Aclarado","021"),"15":("horizontal","112,48,160,255","Posibilidad de Regeneracion","022"),"17":("solid","orange","Bajo Latizal No Concurrente o Latizal Encinar no Denso","003")}
     
@@ -3500,6 +3632,9 @@ class Silvilidar:
                                 #lyr = QgsVectorLayer(carpeta + '/disuelto.shp', "Zonas similares", "ogr")
                                 #lyr.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
                             QgsProject.instance().addMapLayer(resultado)
+
+
+
 
 
 

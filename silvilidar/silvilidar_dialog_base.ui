@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>496</width>
-    <height>537</height>
+    <height>468</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -127,25 +127,6 @@ que se tendrán en cuenta para clasificar
 cada tesela en el arbol de decisión.</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_select_path">
-     <property name="geometry">
-      <rect>
-       <x>330</x>
-       <y>30</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="text">
-      <string>...</string>
-     </property>
-    </widget>
     <widget class="Line" name="line_3">
      <property name="geometry">
       <rect>
@@ -188,19 +169,6 @@ desde la realización del vuelo LiDAR.</string>
      </property>
      <property name="text">
       <string>CONFIGURACIÓN DE PARAMETROS</string>
-     </property>
-    </widget>
-    <widget class="QLineEdit" name="carpetalaz">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>30</y>
-       <width>261</width>
-       <height>20</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
      </property>
     </widget>
     <widget class="Line" name="line_2">
@@ -268,24 +236,11 @@ desde la realización del vuelo LiDAR.</string>
       <enum>Qt::Vertical</enum>
      </property>
     </widget>
-    <widget class="QLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>0</y>
-       <width>411</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Carpeta que contiene los datos Lidar, LAS o LAZ. (por ejemplo C:/Datos_Silvilidar/)</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="pushButton_select_shp_3">
      <property name="geometry">
       <rect>
-       <x>340</x>
-       <y>290</y>
+       <x>350</x>
+       <y>40</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -303,8 +258,8 @@ desde la realización del vuelo LiDAR.</string>
     <widget class="QLineEdit" name="ruta_zona_de_trabajo">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>290</y>
+       <x>40</x>
+       <y>40</y>
        <width>261</width>
        <height>20</height>
       </rect>
@@ -316,8 +271,8 @@ desde la realización del vuelo LiDAR.</string>
     <widget class="QLabel" name="label_23">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>260</y>
+       <x>20</x>
+       <y>10</y>
        <width>411</width>
        <height>16</height>
       </rect>
@@ -775,8 +730,8 @@ desde la realización del vuelo LiDAR.</string>
   <widget class="QDialogButtonBox" name="button_box">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>490</y>
+     <x>290</x>
+     <y>410</y>
      <width>171</width>
      <height>32</height>
     </rect>
@@ -790,8 +745,6 @@ desde la realización del vuelo LiDAR.</string>
   </widget>
  </widget>
  <tabstops>
-  <tabstop>carpetalaz</tabstop>
-  <tabstop>pushButton_select_path</tabstop>
   <tabstop>pushButton_proyectar</tabstop>
   <tabstop>pushButton_parametros</tabstop>
   <tabstop>pushButton_salida</tabstop>

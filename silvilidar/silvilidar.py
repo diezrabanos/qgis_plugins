@@ -147,7 +147,8 @@ class Silvilidar:
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
         self.first_start = None
-        self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
+        if self.dentro == False:
+            self.dlg.pushButton_select_path.clicked.connect(self.select_laz_folder)
         self.dlg.help_button.clicked.connect(self.help_pressed)
         self.dlg.pushButton_parametros.clicked.connect(self.configurar_parametros)
         self.dlg.pushButton_proyectar.clicked.connect(self.proyectar_datos_lidar)
@@ -383,6 +384,7 @@ class Silvilidar:
             baseName = fileInfo.baseName()
             global layerglobal
             layerglobal = QgsRasterLayer(path, baseName)
+            #print("ruta de global layer ",path)
             QgsProject.instance().addMapLayer(layerglobal)
             if layerglobal.isValid() is True:
                 bandaref = str(banda) + '@1'
@@ -704,6 +706,7 @@ class Silvilidar:
 
             # defino funcion para hacer calculo de capas raster
             def calculo(expresion, capa):
+                global layerglobal
                 calc = QgsRasterCalculator(expresion,
                                            os.path.join(carpeta, troncoresumido + '_' + capa + '.tif'),
                                            'GTiff',
@@ -1381,23 +1384,24 @@ class Silvilidar:
                     #'clara1')
                 calculo('("suma@1" = 81 OR "suma@1" = 9 OR "suma@1" = 82 OR "suma@1" = 121 OR "suma@1" = 122 OR "suma@1" = 13) * 1','clara1')  #ojo comprobar si sigue siendo así despues de lo de los encinares
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_clara1.tif'), "clara1")
-                agregado2("clara", 20,1)
-
-
+                agregado2("clara", 20, 1)
             # filtro para quedarme con la regeneracion
             if self.dlg4.checkBox_regeneracion.isChecked():
                 #calculo('c28@1 / 15 ', 'regeneracion1')
+                #cual es el tamaño del pixel a emplear en calculo?, o lo que es lo mismo el numero de columnas y filas
                 calculo(
                     '("suma@1" = 15 ) * 1', 'regeneracion1')
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_regeneracion1.tif'), "regeneracion1")
-                agregado2("regeneracion", 40,1)#10,1
-
+                agregado2("regeneracion", 40, 1)  # 10,1
             # filtro para quedarme con el resalveo
             if self.dlg4.checkBox_resalveo.isChecked():
                 #calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
                 calculo('("suma@1" = 51 OR "suma@1" = 52 ) * 1','resalveo1')
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_resalveo1.tif'), "resalveo1")
-                agregado2("resalveo", 30,0.85)
+                agregado2("resalveo", 30, 0.85)
+
+
+
 
             # elimino las capas que he cargado durante el proceso
             capas = QgsProject.instance().mapLayers()
@@ -1568,19 +1572,68 @@ class Silvilidar:
                 rccoronado = self.dlg2.rccoronado.text()  # 17
                 # OJO AQUI PUEDE EMPEZAR EL CODIGO SI ESTAS DENTRO DE LA JUNTA
                 if self.dentro:
+                    global layerglobal
                     # defino lo que esta en los servidores de scayle
                     print("dentro de la junta")
                     entries = []
                     carpeta = os.path.dirname(self.dlg.ruta_zona_de_trabajo.text())
+                    def crea_carpeta(carpeta, carpeta_nueva):
+                        from datetime import datetime
+                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        carpeta_nueva = os.path.join(carpeta, f'Silvilidar_{timestamp}')
+                        os.makedirs(carpeta_nueva, exist_ok=True)
+                        print("creo carpeta nueva")
+                        return carpeta_nueva
+
+                    carpeta_nueva = carpeta + '/Silvilidar'
+                    carpeta=crea_carpeta(carpeta, carpeta_nueva)
 
 
                     print("carpeta", carpeta)
                     ruta_zona_trabajo = self.dlg.ruta_zona_de_trabajo.text()
                     layervectorial = QgsVectorLayer(ruta_zona_trabajo, "zona de trabajo", "ogr")
+                    #imprimo las los parametros con los que voy a ejecutar silvilidar.
+                    print("PARAMETROS DE SILVILIDAR PARA ESTA EJECUCIÓN")
+                    print(carpeta, crecimiento, crecimientofcc, fccminarbolado, alturadesconocida, hmaxmontebravo,
+                          hmaxbajolatizal, rcminresalveoencinarlatizalpocodesarrollado,
+                          fccmincompetenciaencinarlatizalpocodesarrollado, hmaxselvicolas, hbcpodabaja,
+                          fccmincompetenciamasadiscontinua_fustalencinares, rcminclara, longitudcopaminclara,
+                          fcccompetenciaelevada, hmaxsegundaclara, hbcminclarasnormales,
+                          fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado)
+
+                    def crear_texto(ruta_archivo):
+                        # Definir variables fijas
+                        fijas = ["ruta_zona_trabajo ","carpeta ", "crecimiento ", "crecimientofcc ", "fccminarbolado ", "alturadesconocida ", "hmaxmontebravo ",
+                          "hmaxbajolatizal ", "rcminresalveoencinarlatizalpocodesarrollado ",
+                          "fccmincompetenciaencinarlatizalpocodesarrollado ", "hmaxselvicolas ", "hbcpodabaja ",
+                          "fccmincompetenciamasadiscontinua_fustalencinares ", "rcminclara ", "longitudcopaminclara ",
+                          "fcccompetenciaelevada ", "hmaxsegundaclara ", "hbcminclarasnormales ",
+                          "fccmincompetenciaencinarlatizaldesarrollado ", "hmaxprimeraclara ", "rccoronado "]
+
+                        # Definir variables dinámicas (pueden cambiar)
+                        valores = [ruta_zona_trabajo,carpeta, crecimiento, crecimientofcc, fccminarbolado, alturadesconocida, hmaxmontebravo,
+                          hmaxbajolatizal, rcminresalveoencinarlatizalpocodesarrollado,
+                          fccmincompetenciaencinarlatizalpocodesarrollado, hmaxselvicolas, hbcpodabaja,
+                          fccmincompetenciamasadiscontinua_fustalencinares, rcminclara, longitudcopaminclara,
+                          fcccompetenciaelevada, hmaxsegundaclara, hbcminclarasnormales,
+                          fccmincompetenciaencinarlatizaldesarrollado, hmaxprimeraclara, rccoronado]
+
+                        # Crear y escribir en el archivo
+                        with open(ruta_archivo, "w", encoding="utf-8") as archivo:
+                            archivo.write("PARAMETROS DE EJECUCIÓN DE SILVILIDAR\n")
+                            for fija, valor in zip(fijas, valores):
+                                archivo.write(f"{fija}: {valor}\n")
+
+                        print(f"Archivo '{ruta_archivo}' creado con éxito.")
+
+                    crear_texto(os.path.join(carpeta,"0_Parametros_SILVILIDAR.txt"))
+
+
+
 
 
                     # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  # r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"
+                    fileName =  r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
                     Layer = QgsRasterLayer(fileName, "altura de red")
                     print("ok, layer de altura 95 de la red")
                     # recortar raster con el shape
@@ -1588,7 +1641,7 @@ class Silvilidar:
                                             {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
                                              'ALPHA_BAND': False, 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
                                              'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None,
-                                             'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'Alt95_m_PNOA2.tif')})[
+                                             'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'hm.tif')})[
                         'OUTPUT']
 
                     #QgsProject.instance().addMapLayers([Layer])
@@ -1596,12 +1649,13 @@ class Silvilidar:
                     #QgsProject.instance().addMapLayers([layer2])
                     print(layer2)
                     print("cargado el raster recortado de la junta")
-                    StringToRaster(os.path.join(carpeta, 'Alt95_m_PNOA2.tif'),
+                    #StringToRaster(os.path.join(carpeta, 'Alt95_m_PNOA2.tif'),
+                    StringToRaster(os.path.join(carpeta, 'hm.tif'),
                                    'hm')  # en teoria se sobre escribiria el raster hm@1
-                    print("creado el string to raster de h")
+                    #print("creado el string to raster de h")
 
                     # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"
+                    fileName = r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
                     Layer = QgsRasterLayer(fileName, "altura de red")
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
@@ -1609,18 +1663,18 @@ class Silvilidar:
                                              'ALPHA_BAND': False,
                                              'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
                                              'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                             'OUTPUT': os.path.join(carpeta, 'Alt20_m_PNOA2.tif')})[
+                                             'OUTPUT': os.path.join(carpeta, 'hbc.tif')})[
                         'OUTPUT']
                     layer2 = QgsRasterLayer(layer2, "base copa de red")
                     # QgsProject.instance().addMapLayers([Layer])
                     print(layer2)
                     print("cargado el raster recortado de la junta")
-                    StringToRaster(os.path.join(carpeta, 'Alt20_m_PNOA2.tif'),
+                    StringToRaster(os.path.join(carpeta, 'hbc.tif'),
                                    'hbc')  # en teoria se sobre escribiria el raster hm@1
                     print("creado el string to raster de hbc")
 
                     # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                    fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
                     Layer = QgsRasterLayer(fileName, "FCC DE RED")
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
@@ -1628,13 +1682,13 @@ class Silvilidar:
                                              'ALPHA_BAND': False,
                                              'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
                                              'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                             'OUTPUT': os.path.join(carpeta, 'Cob2m_PRT_PNOA2.tif')})[
+                                             'OUTPUT': os.path.join(carpeta, 'fcc.tif')})[
                         'OUTPUT']
                     layer2 = QgsRasterLayer(layer2, "fcc de red")
                     # QgsProject.instance().addMapLayers([Layer])
                     print(layer2)
                     print("cargado el raster recortado de la junta")
-                    StringToRaster(os.path.join(carpeta, 'Cob2m_PRT_PNOA2.tif'),
+                    StringToRaster(os.path.join(carpeta, 'fcc.tif'),
                                    'fcc')  # en teoria se sobre escribiria el raster fcc@1
                     print("creado el string to raster de fcc")
 
@@ -1648,18 +1702,19 @@ class Silvilidar:
                                              'ALPHA_BAND': False,
                                              'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False, 'SET_RESOLUTION': False,
                                              'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                             'OUTPUT': os.path.join(carpeta, 'Cob05_2m_TLR_PNOA2.tif')})[
+                                             'OUTPUT': os.path.join(carpeta, 'fcc_matorral.tif')})[
                         'OUTPUT']
                     layer2 = QgsRasterLayer(layer2, "fcc de red")
                     # QgsProject.instance().addMapLayers([Layer])
                     print(layer2)
                     print("cargado el raster recortado de la junta")
-                    StringToRaster(os.path.join(carpeta, 'Cob05_2m_TLR_PNOA2.tif'),
+                    StringToRaster(os.path.join(carpeta, 'fcc_matorral.tif'),
                                    'fccmatorral')  # en teoria se sobre escribiria el raster fcc@1
                     print("creado el string to raster de fcc matorral")
 
 
                     def calculo(expresion, capa):
+                        global layerglobal
                         calc = QgsRasterCalculator(expresion,
                                                    os.path.join(carpeta, capa + '.tif'),
                                                    'GTiff',
@@ -1670,11 +1725,20 @@ class Silvilidar:
 
                         calc.processCalculation()
                         del (calc)
+                        #print("calculo ", capa, "layer global extent ", layerglobal.extent(), "layer global width ", layerglobal.width(), "layer global height ", layerglobal.height(), "layer global path ", layerglobal.source())
 
                     def agregado2(rasterdeentrada, radio, filtro):
                         # filtro para rellenar huecos
                         print("empieza agregado")
-
+                        #compruebo la resolucion para ver si es diferente a 10x10
+                        """if rasterdeentrada.rasterUnitsPerPixelX() != 10:
+                            gdal.Warp(
+                                os.path.join(carpeta, rasterdeentrada + '11.tif'),
+                                rasterdeentrada.source(),
+                                xRes=10,  # Tamaño de píxel en X
+                                yRes=10,  # Tamaño de píxel en Y
+                                resampleAlg="nearest"  # Algoritmo de remuestreo
+                            )"""
                         # A puntos
                         input1 = os.path.join(carpeta, rasterdeentrada + '1.tif')
                         output1 = os.path.join(carpeta, rasterdeentrada + '0.shp')
@@ -1701,14 +1765,14 @@ class Silvilidar:
                         rlayer44 = QgsRasterLayer(output44, "mapacalor_seleccionado")
 
                         # lo vectorizo
-                        print("paso9 de agregado")
+                        #print("paso9 de agregado")
                         parameters = {'INPUT': os.path.join(carpeta,  rasterdeentrada + '44.tif'),
                                       'BAND': 1, 'FIELD': "DN", 'EIGHT_CONNECTEDNESS': True,
                                       'OUTPUT': os.path.join(carpeta, rasterdeentrada + '00.shp')}
                         processing.runAndLoadResults("gdal:polygonize", parameters)
                         # processing.runalg("gdalogr:polygonize",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'7.tif'),"DN",os.path.join(carpeta,troncoresumido+'_'+rasterdeentrada+'.shp'))
                         # seleciono lo que me interesa
-                        print("paso10 de agregado")
+                        #print("paso10 de agregado")
                         lyr = QgsVectorLayer(os.path.join(carpeta,  rasterdeentrada + '00.shp'),
                                              rasterdeentrada, "ogr")
 
@@ -1733,14 +1797,14 @@ class Silvilidar:
 
                         # hago una selecion de los elementos con dn=1, anado la informacion a la tabla y creo una capa nueva  ojo deberia hacer una funcion para emplearlo mas veces.
                         layer = lyr  # iface.activeLayer()
-                        print("paso11 de agregado")
+                        #print("paso11 de agregado")
                         expression = QgsExpression(u'"DN" = 1')
-                        print("paso12 de agregado")
+                        #print("paso12 de agregado")
                         # Added / changed lines ##########
                         context = QgsExpressionContext()
                         scope = QgsExpressionContextScope()
                         context.appendScope(scope)
-                        print("paso13 de agregado")
+                        #print("paso13 de agregado")
                         layer = lyr
                         feats = []
                         ids = []
@@ -1758,7 +1822,7 @@ class Silvilidar:
                         if len(ids) > 0:
                             # print ("len feats")
                             # print( len( feats))
-                            print("paso14 de agregado")
+                            #print("paso14 de agregado")
 
                             # prov.addFeatures(feats)
                             lyr.selectByIds(ids)
@@ -1771,7 +1835,7 @@ class Silvilidar:
                                 os.path.join(carpeta,  rasterdeentrada + '2.shp'),
                                 rasterdeentrada + str("2"), "ogr")
                             QgsProject.instance().addMapLayer(lyr2)
-                            print("en teoria ha hecho la seleccion")
+                            #print("en teoria ha hecho la seleccion")
 
                             # if nbrSelected > 0:
                             # guardo lo selecionado
@@ -1786,7 +1850,7 @@ class Silvilidar:
                                 rasterdeentrada + str("2"), "ogr")
                             # layer=lyr2
                             provider = layer.dataProvider()
-                            print("layer get features")
+                            #print("layer get features")
                             # for feat in layer.getFeatures():
                             # print ("feat")
                             # print (feat)
@@ -1800,10 +1864,10 @@ class Silvilidar:
                             # idx = layer.fieldNameIndex('area')
                             idx = layer.fields().indexFromName('area')  ###ojo aqui es donde da cero el indice
                             long = len(indice)
-                            print("long")
-                            print(long)
+                            #print("long")
+                            #print(long)
                             i = 0
-                            print("pasa por aqui2")
+                            #print("pasa por aqui2")
                             while i < long:
                                 new_values = {idx: float(areas[i])}
                                 # print ("pasa por aqui3")
@@ -1811,14 +1875,14 @@ class Silvilidar:
                                 # print ("pasa por aqui4")
                                 i = i + 1
                             layer.updateFields()
-                            print("pasa por aqui5")
+                            #print("pasa por aqui5")
 
                             # selecciono las teselas mayor de una superficie dada.
                             # hago una selecion de los elementos con dn=1, anado la informacion a la tabla y creo una capa nueva  ojo deberia hacer una funcion para emplearlo mas veces.
                             # layer2 = layer #iface.activeLayer()
-                            print("paso11 de agregado")
+                            #print("paso11 de agregado")
                             expression = QgsExpression(u'"area" > 2500')
-                            print("paso12 de agregado")
+                            #print("paso12 de agregado")
                             # Added / changed lines ##########
                             context = QgsExpressionContext()
                             scope = QgsExpressionContextScope()
@@ -1837,7 +1901,7 @@ class Silvilidar:
                             if len(ids) > 0:
                                 # print ("len feats")
                                 # print( len( feats))
-                                print("paso14 de agregado")
+                                #print("paso14 de agregado")
                                 # prov.addFeatures(feats)
                                 lyr2.selectByIds(ids)
                                 # lyr es la capa de entrada, la origen ue contiene todos los elementos
@@ -1849,7 +1913,10 @@ class Silvilidar:
                                     os.path.join(carpeta, rasterdeentrada + '3.shp'),
                                     rasterdeentrada + str("3"), "ogr")
                                 QgsProject.instance().addMapLayer(lyr3)
-                                print("en teoria ha hecho la seleccion2")
+                                #print("en teoria ha hecho la seleccion2")
+
+
+
 
 
 
@@ -1879,8 +1946,6 @@ class Silvilidar:
                     calculo('(hmp@1 - hbcp@1)', 'lcp')
                     StringToRaster(os.path.join(carpeta,  'lcp.tif'), "lcp")
                     #saco teselas
-
-
                     calculo(
                         'if (fccp@1 <= 0, 0, if ( fccp@1 < ' + fccminarbolado + ', 1, if ( hmp@1 < ' + alturadesconocida + ', 11, if ( hmp@1 < ' + hmaxmontebravo + ', 2, if ( hmp@1 < ' + hmaxbajolatizal + ', if ( rcp@1 <= ' + rcminresalveoencinarlatizalpocodesarrollado + ', if ( fccp@1 > ' + fccmincompetenciaencinarlatizalpocodesarrollado + ', 51, 61), 17), if (hmp@1 <= ' + hmaxselvicolas + ', if ( rcp@1 <= ' + rcminresalveoencinarlatizalpocodesarrollado + ', if ( fccp@1 > ' + fccmincompetenciaencinarlatizalpocodesarrollado + ', 52, 62) , if ( hmp@1 - hmp@1 * rcp@1 / 100 <= ' + hbcpodabaja + ', 3, 4)), if ( hmp@1 <= ' + hmaxprimeraclara + ', if ( hmp@1 - hmp@1 * rcp@1 / 100 <=' + hbcminclarasnormales + ' , if ( rcp@1 <= ' + rcminresalveoencinarlatizalpocodesarrollado + ', if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', 77, 7), 7), if ( rcp@1 >= ' + rcminclara + ', if ( hmp@1 * rcp@1 / 100 > ' + longitudcopaminclara + ', if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 81, if ( fccp@1 >= ' + fcccompetenciaelevada + ', 81, 10)), 7), 7), if ( fccp@1 >= ' + fcccompetenciaelevada + ', 9, if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', 77, 10)))), if ( hmp@1 <= ' + hmaxsegundaclara + ', if ( hmp@1 - hmp@1 * rcp@1 / 100 <= ' + hbcminclarasnormales + ', 111, if ( rcp@1 >= ' + rcminclara + ', if ( hmp@1 * rcp@1 / 100 > ' + longitudcopaminclara + ', if ( fccp@1 > ' + fccmincompetenciamasadiscontinua_fustalencinares + ', if ( fccp@1 >= (0.1167 * fccp@1 +3.6667) * ( hmp@1 ^ 1.04328809) * ( hmp@1 * rcp@1 / 100) ^ (-0.49505946), 82, if ( fccp@1 >= ' + fcccompetenciaelevada + ', 82, 111)), 111), 111), if ( fccp@1 >= ' + fcccompetenciaelevada + ', 121, 141))), if ( rcp@1 <= ' + rccoronado + ', if ( fccp@1 >= ' + fcccompetenciaelevada + ', 13, 15), if ( rcp@1 < ' + rcminclara + ', if ( fccp@1 >= ' + fcccompetenciaelevada + ', 122, 142), 112))))))))))',
                         'suma')
@@ -1895,7 +1960,42 @@ class Silvilidar:
                                                        "Es necesario tener activado el complemento procesos. Si se reinicia QGIS, se activará automáticamente.",
                                                        duration=10)
                         time.sleep(10)
-                        # filtro para quedarme con la clara
+
+                    def borrar_archivos(carpeta, rasterdeentrada):
+                        import os
+                        # Ruta de la carpeta donde están los archivos
+
+                        capas_vectoriales_a_borrar = [rasterdeentrada, rasterdeentrada + '000', rasterdeentrada + '00',
+                                                      rasterdeentrada + '0', rasterdeentrada + '2']
+                        capas_raster_a_borrar = [rasterdeentrada + '1', rasterdeentrada + '2', rasterdeentrada + '44']
+
+                        # Función para eliminar archivos
+                        def eliminar_archivos(base_path, extensiones):
+                            for ext in extensiones:
+                                file_path = f"{base_path}{ext}"
+                                if os.path.exists(file_path):
+                                    os.remove(file_path)
+                                    print(f"Eliminado: {file_path}")
+
+                        # Lista de extensiones asociadas a SHP y TIF
+                        extensiones_shp = [".shp", ".shx", ".dbf", ".prj", ".cpg"]
+                        extensiones_tif = [".tif", ".tif.aux.xml"]
+
+                        for nombre_base in capas_vectoriales_a_borrar:
+                            # Eliminar archivos SHP
+                            try:
+                                eliminar_archivos(os.path.join(carpeta, nombre_base), extensiones_shp)
+                            except:
+                                pass
+                        for nombre_base in capas_raster_a_borrar:
+                            # Eliminar archivos TIFF
+                            try:
+                                eliminar_archivos(os.path.join(carpeta, nombre_base), extensiones_tif)
+                            except:
+                                pass
+
+
+                    # filtro para quedarme con la clara
                     if self.dlg4.checkBox_claras.isChecked():
                         # "calculo(
                         # 'c11@1 / 81 + c14@1 / 9  + c15@1 / 81 + c19@1 / 82 + c20@1 / 121 + c21@1 / 82 + c25@1 / 122 + c26@1 / 13',
@@ -1904,12 +2004,17 @@ class Silvilidar:
                             '("suma@1" = 81 OR "suma@1" = 9 OR "suma@1" = 82 OR "suma@1" = 121 OR "suma@1" = 122 OR "suma@1" = 13) * 1',
                             'clara1')  # ojo comprobar si sigue siendo así despues de lo de los encinares
                         StringToRaster(os.path.join(carpeta, 'clara1.tif'), "clara1")
+
+                        #print( "pixel claras ",QgsRasterLayer(os.path.join(carpeta, 'clara1.tif'), "Clara1").rasterUnitsPerPixelX())
+
                         agregado2("clara", 20, 1)
+                        layerglobal = QgsRasterLayer(os.path.join(carpeta, 'clara1.tif'), "Clara1")
 
                         subtexto1 = "Clara"
-                        subtexto2 = "Regeneración"
-                        subtexto3 = "Resalveo"
+
                         clara = QgsVectorLayer(os.path.join(carpeta, 'Clara3.shp'), subtexto1, "ogr")
+
+
 
                         # filtro para quedarme con la regeneracion
                     if self.dlg4.checkBox_regeneracion.isChecked():
@@ -1918,14 +2023,31 @@ class Silvilidar:
                             '("suma@1" = 15 ) * 1', 'regeneracion1')
                         StringToRaster(os.path.join(carpeta, 'regeneracion1.tif'),
                                        "regeneracion1")
-                        agregado2("regeneracion", 20, 1)  # 40,1
+                        #print("pixel regeneracion ",QgsRasterLayer(os.path.join(carpeta, 'regeneracion1.tif'), "Regeneracion1").rasterUnitsPerPixelX())
+                        agregado2("regeneracion", 40, 1)  # 40,1
+                        layerglobal = QgsRasterLayer(os.path.join(carpeta, 'regeneracion1.tif'), "Regeneracion1")
+                        subtexto2 = "Regeneración"
+
+                        regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion3.shp'), subtexto2, "ogr")
 
                     # filtro para quedarme con el resalveo
                     if self.dlg4.checkBox_resalveo.isChecked():
                         # calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
                         calculo('("suma@1" = 51 OR "suma@1" = 52 ) * 1', 'resalveo1')
                         StringToRaster(os.path.join(carpeta, 'resalveo1.tif'), "resalveo1")
-                        agregado2("resalveo", 20, 1)#30,0.85
+                        #print("pixel resalveo ", QgsRasterLayer(os.path.join(carpeta, 'resalveo1.tif'), "Resalveo1").rasterUnitsPerPixelX())
+                        agregado2("resalveo", 30, 0.85)#30,0.85
+                        layerglobal = QgsRasterLayer(os.path.join(carpeta, 'resalveo1.tif'), "Resalveo1")
+                        subtexto3 = "Resalveo"
+                        resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo3.shp'), subtexto3, "ogr")
+                    def join_tables(csv_path, layer_path):
+                        res = processing.run("qgis:joinattributestable", { 'DISCARD_NONMATCHING' : False, 'FIELD' : 'DN', 'FIELDS_TO_COPY' : ['texto','foto','foto2'], 'FIELD_2' : 'cod', 'INPUT' : layer_path, 'INPUT_2' : csv_path+'|layername=Hoja1', 'METHOD' : 1, 'OUTPUT' : os.path.join(carpeta, "Teselas.shp"), 'PREFIX' : '' })
+                        layer = QgsVectorLayer(res['OUTPUT'], "joined layer", "ogr")
+                        QgsProject.instance().addMapLayer(layer)
+                    print("intento hacer la union")
+                    join_tables(os.path.dirname(__file__) + '/fotos/tabla.xlsx', os.path.join(carpeta, "suma.shp"))
+                    print(" la union esta hecha")
+
                     # elimino las capas que he cargado durante el proceso
                     capas = QgsProject.instance().mapLayers()
                     for capa in capas:
@@ -1974,7 +2096,7 @@ class Silvilidar:
                         layer.triggerRepaint()
                         iface.layerTreeView().refreshLayerSymbology(layer.id())
                     if self.dlg4.checkBox_matorral.isChecked():
-                        layer = QgsRasterLayer(os.path.join(carpeta, 'Cob05_2m_TLR_PNOA2.tif'), "FCC_MATORRAL")
+                        layer = QgsRasterLayer(os.path.join(carpeta, 'fcc_matorral.tif'), "FCC_MATORRAL")
                         shutil.copy(os.path.dirname(__file__) + '/styles/fcc_matorral.qml',
                                     os.path.join(carpeta, "FCC_MATORRAL.qml"))
                         QgsProject.instance().addMapLayer(layer)
@@ -1982,15 +2104,17 @@ class Silvilidar:
                         layer.triggerRepaint()
                         iface.layerTreeView().refreshLayerSymbology(layer.id())
                     if self.dlg4.checkBox_teselas.isChecked():
-                        #shutil.copytree(os.path.dirname(__file__) + '/fotos', carpeta + '/fotos')
+                        shutil.copytree(os.path.dirname(__file__) + '/fotos', carpeta + '/fotos')
                         shutil.copy(os.path.dirname(__file__) + '/styles/Teselas.qml',
                                     os.path.join(carpeta, "Teselas.qml"))
-                        teselas = QgsVectorLayer(os.path.join(carpeta, 'suma.shp'), "Teselas", "ogr")
+                        teselas = QgsVectorLayer(os.path.join(carpeta, 'Teselas.shp'), "Teselas", "ogr")
+                        borrar_archivos(carpeta, "suma")
                         # aplicar estilo a las teselas cargando un qml con el mismo nombre que la capa
                         teselas.loadNamedStyle(os.path.dirname(__file__) + '/styles/Teselas.qml')
                         QgsProject.instance().addMapLayer(teselas)
 
                     if self.dlg4.checkBox_claras.isChecked():
+                            borrar_archivos(carpeta, "clara")
                             subtexto1 = "Clara"
                             clara = QgsVectorLayer(os.path.join(carpeta, 'Clara3.shp'), subtexto1, "ogr")
                             # aplico simbologia a estas capas, si existen
@@ -2003,13 +2127,30 @@ class Silvilidar:
                                 pass
 
                     if self.dlg4.checkBox_regeneracion.isChecked():
+                        borrar_archivos(carpeta, "regeneracion")
                         subtexto2 = "Regeneración"
-                        regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion3.shp'), subtexto2,
-                                                      "ogr")
+                        regeneracion = QgsVectorLayer(os.path.join(carpeta, 'Regeneracion3.shp'), subtexto2,  "ogr")
+                        try:
+                            symbolsregeneracion = regeneracion.renderer().symbol()
+                            sym = symbolsregeneracion
+                            sym.setColor(QColor.fromRgb(0, 255, 0))
+                            QgsProject.instance().addMapLayer(regeneracion)
+                        except:
+                            pass
+
+
 
                     if self.dlg4.checkBox_resalveo.isChecked():
+                        borrar_archivos(carpeta, "resalveo")
                         subtexto3 = "Resalveo"
                         resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo3.shp'), subtexto3, "ogr")
+                        try:
+                            symbolsresalveo = resalveo.renderer().symbol()
+                            sym = symbolsresalveo
+                            sym.setColor(QColor.fromRgb(0, 0, 255))
+                            QgsProject.instance().addMapLayer(resalveo)
+                        except:
+                            pass
 
 
 
@@ -3632,9 +3773,6 @@ class Silvilidar:
                                 #lyr = QgsVectorLayer(carpeta + '/disuelto.shp', "Zonas similares", "ogr")
                                 #lyr.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
                             QgsProject.instance().addMapLayer(resultado)
-
-
-
 
 
 

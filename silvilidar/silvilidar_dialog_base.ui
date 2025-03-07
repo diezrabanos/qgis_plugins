@@ -43,7 +43,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="principal">
     <attribute name="title">
@@ -296,14 +296,14 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="text">
-      <string>Capa de polígonos con las zonas de referencia</string>
+      <string>Capa de polígonos con las zonas de referencia (Qué buscar)</string>
      </property>
     </widget>
     <widget class="QPushButton" name="pushButton_select_shp">
      <property name="geometry">
       <rect>
-       <x>340</x>
-       <y>40</y>
+       <x>350</x>
+       <y>30</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -321,8 +321,8 @@ desde la realización del vuelo LiDAR.</string>
     <widget class="QLineEdit" name="ruta_muestra_similar">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>40</y>
+       <x>20</x>
+       <y>30</y>
        <width>261</width>
        <height>20</height>
       </rect>
@@ -335,7 +335,7 @@ desde la realización del vuelo LiDAR.</string>
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>70</y>
+       <y>140</y>
        <width>461</width>
        <height>241</height>
       </rect>
@@ -724,6 +724,51 @@ desde la realización del vuelo LiDAR.</string>
        </property>
       </widget>
      </widget>
+    </widget>
+    <widget class="QLineEdit" name="ruta_zona_de_trabajo_2">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>100</y>
+       <width>261</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_24">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>411</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Capa de polígonos con la zona de trabajo (Dónde buscar)</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_select_shp_4">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>100</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
     </widget>
    </widget>
   </widget>

@@ -158,6 +158,7 @@ class Silvilidar:
         self.dlg.pushButton_select_shp.clicked.connect(self.select_shp)
         if self.dentro:
             self.dlg.pushButton_select_shp_3.clicked.connect(self.select_shp_zona_trabajo)
+            self.dlg.pushButton_select_shp_4.clicked.connect(self.select_shp_zona_trabajo_2)
 
 
     # noinspection PyMethodMayBeStatic
@@ -283,6 +284,17 @@ class Silvilidar:
         rutaarchivomuestra = QFileDialog.getOpenFileName(self.dlg, "Capa de polígonos con las zonas de trabajo", None,
                                                          'SHP(*.shp)')
         self.dlg.ruta_zona_de_trabajo.setText(rutaarchivomuestra[0])
+        # capa vectorial
+        layervectorial = QgsVectorLayer(rutaarchivomuestra[0], "Capa con zonas de trabajo", "ogr")
+        feats = [feat for feat in layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]
+        # print(rutaarchivomuestra[0])
+
+        return rutaarchivomuestra[0], feats
+    def select_shp_zona_trabajo_2(self):
+        """seleciono el shp con los datos con las zonas de trabajo para trabajar con las zonas similares"""
+        rutaarchivomuestra = QFileDialog.getOpenFileName(self.dlg, "Capa de polígonos con las zonas de trabajo", None,
+                                                         'SHP(*.shp)')
+        self.dlg.ruta_zona_de_trabajo_2.setText(rutaarchivomuestra[0])
         # capa vectorial
         layervectorial = QgsVectorLayer(rutaarchivomuestra[0], "Capa con zonas de trabajo", "ogr")
         feats = [feat for feat in layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]
@@ -1919,7 +1931,7 @@ class Silvilidar:
 
 
 
-
+                    #obtengo los parametros derivados
                     calculo('100 * ( hm@1   -  hbc@1  ) / ( hm@1 )', 'rc')
 
                     StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
@@ -2397,37 +2409,13 @@ class Silvilidar:
                 indice_seleccionado2 = self.dlg.tab2.currentIndex()
                 nombre_pestaña2 = self.dlg.tab2.widget(indice_seleccionado2).objectName()
                 print('nombre_seleccionado2',nombre_pestaña2)
-
-
                 import random
                 # compruebo que capas estan cargadas en el proyecto al iniciar el script
                 capasoriginales = QgsProject.instance().mapLayers()
 
-                carpeta = self.dlg.carpetalaz.text()
-
-                """def crea_carpeta(carpeta, carpeta_nueva):
-                    if os.path.isdir(carpeta_nueva):
-                        crea_carpeta(carpeta, carpeta + '/Busca_similar' + str(random.randint(100, 1000)))
-
-                    else:
-                        carpeta_nueva = carpeta + '/Busca_similar' + str(random.randint(100, 1000))
-                        os.makedirs(carpeta_nueva, exist_ok=True)
-                        print("creo carpeta nueva")
-                    return carpeta_nueva"""
-                #de estar cadena cadena="D:\pruebas\lidar\new23\Busca_similar_20240916_125417" me quiero quedar con lo anterior a la ultima barra
-                #cadena_nueva = carpeta.rsplit('/', 1)[0]
-                #print('cadena_nueva',cadena_nueva)
 
 
 
-
-                def crea_carpeta(carpeta, carpeta_nueva):
-                    from datetime import datetime
-                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                    carpeta_nueva = os.path.join(carpeta, f'Busca_similar_{timestamp}')
-                    os.makedirs(carpeta_nueva, exist_ok=True)
-                    print("creo carpeta nueva")
-                    return carpeta_nueva
 
                 # para sacar las estadisticas de todos los poligonos juntos
                 def simplificar_lista(lista):
@@ -2471,27 +2459,27 @@ class Silvilidar:
                         subtexto5 = 'All polygons'
                     texto = '<table class="default">'
                     texto += ' <tr> \
-                    <th scope="row">' + subtexto1 + '</th> \
-                    <th>' + subtexto2 + '</th> \
-                    <th>' + subtexto3 + '</th> \
-                    </tr>'
+                                    <th scope="row">' + subtexto1 + '</th> \
+                                    <th>' + subtexto2 + '</th> \
+                                    <th>' + subtexto3 + '</th> \
+                                    </tr>'
                     n = 1
                     for dato in datos[1]:
                         texto += '<tr> \
-                                 <th > ' + subtexto4 + ' {} </th> \
-                                 <td > {} </' \
-                                                       'td> \
-                                                   <td > {} </td> \
-                                                   </tr >'.format(n, round(dato[0], 1), round(dato[1], 1))
+                                                 <th > ' + subtexto4 + ' {} </th> \
+                                                 <td > {} </' \
+                                                                       'td> \
+                                                                   <td > {} </td> \
+                                                                   </tr >'.format(n, round(dato[0], 1), round(dato[1], 1))
                         n = n + 1
                     if len(datos[1]) > 0:
                         # print('meter los datos finales con la media y desviacion estandar total')
                         texto += '<tr> \
-                                         <th > ' + subtexto5 + ' </th> \
-                                         <td > {} </' \
-                                                               'td> \
-                                                           <td > {} </td> \
-                                                           </tr >'.format(
+                                                         <th > ' + subtexto5 + ' </th> \
+                                                         <td > {} </' \
+                                                                               'td> \
+                                                                           <td > {} </td> \
+                                                                           </tr >'.format(
                             round(np.mean(simplificar_lista(datos[0])), 1),
                             round(np.std(simplificar_lista(datos[0])),
                                   1))  # meter la media y desviacion media del conjunto de datos.
@@ -2524,57 +2512,57 @@ class Silvilidar:
                         subtexto = 'REFERENCE ZONE DATA'
 
                     texto = '<head> \
-                    <meta charset="UTF-8"> \
-                    <title>Estadísticos de la Muestra</title>\
-                     <meta name="keywords" content="EstadÃ­sticos de la muestra">\
-                     <meta name="description" content="Resumen de datos estadÃ­sticos de la muestra">\
-                     <meta name="Author" content="Javi">\
-                     <style>\
-                        table {\
-                        table-layout: fixed;\
-                        width: 80%s;\
-                        border-collapse: collapse;\
-                        border: 3px solid black;\
-                        }\
-                    thead th:nth-child(1) {\
-                    width: 30%;\
-                    }\
-                    thead th:nth-child(2) {\
-                    width: 20%;\
-                    }\
-                    thead th:nth-child(3) {\
-                    width: 15%;\
-                    }\
-                    thead th:nth-child(4) {\
-                    width: 35%;\
-                    }\
-                    th, td {\
-                    padding: 20px;\
-                    }\
-                    th, td {\
-                    width: 25%;\
-                    text-align: left;/\
-                    vertical-align: top;\
-                    border: 1px solid ;\
-                    border-collapse: collapse;\
-                    padding: 0.3em;\
-                    caption-side: bottom;\
-                    }\
-                    </style>\
-                    <script>\
-                    </script>\
-                    </head> \
-                    <body><h1>' + subtexto + '</h1>'
+                                    <meta charset="UTF-8"> \
+                                    <title>Estadísticos de la Muestra</title>\
+                                     <meta name="keywords" content="EstadÃ­sticos de la muestra">\
+                                     <meta name="description" content="Resumen de datos estadÃ­sticos de la muestra">\
+                                     <meta name="Author" content="Javi">\
+                                     <style>\
+                                        table {\
+                                        table-layout: fixed;\
+                                        width: 80%s;\
+                                        border-collapse: collapse;\
+                                        border: 3px solid black;\
+                                        }\
+                                    thead th:nth-child(1) {\
+                                    width: 30%;\
+                                    }\
+                                    thead th:nth-child(2) {\
+                                    width: 20%;\
+                                    }\
+                                    thead th:nth-child(3) {\
+                                    width: 15%;\
+                                    }\
+                                    thead th:nth-child(4) {\
+                                    width: 35%;\
+                                    }\
+                                    th, td {\
+                                    padding: 20px;\
+                                    }\
+                                    th, td {\
+                                    width: 25%;\
+                                    text-align: left;/\
+                                    vertical-align: top;\
+                                    border: 1px solid ;\
+                                    border-collapse: collapse;\
+                                    padding: 0.3em;\
+                                    caption-side: bottom;\
+                                    }\
+                                    </style>\
+                                    <script>\
+                                    </script>\
+                                    </head> \
+                                    <body><h1>' + subtexto + '</h1>'
 
                     n = 0
                     if len(lista_elementos) > 0:
                         for i in range(0, len(lista_elementos)):
                             print(lista_elementos[i])
                             texto += '<h2>{} </h2> \
-                                     {}  \
-                                     <br>\
-                                     <img src={}>'.format(lista_elementos[i].replace('HM','Altura Lidar').replace('FCC','Fracción de Cabida Cubierta Lidar').replace('RC','Razón de Copa Lidar').replace('LC','Longitud de Copa Lidar').replace('_MATORRAL',' de Matorral'), lista_tablas[i],
-                                                          lista_graficas[i])
+                                                     {}  \
+                                                     <br>\
+                                                     <img src={}>'.format(lista_elementos[i].replace('HM','Altura Lidar').replace('FCC','Fracción de Cabida Cubierta Lidar').replace('RC','Razón de Copa Lidar').replace('LC','Longitud de Copa Lidar').replace('_MATORRAL',' de Matorral'), lista_tablas[i],
+                                                                          lista_graficas[i])
                             n = n + 1
                     texto += '</body></html>'
                     archivo_html = open(carpeta + "/Datos_Muestra.html", "w")
@@ -2634,11 +2622,11 @@ class Silvilidar:
 
                         return True
                     #elif dist_euclidiana < umbral_dist_euclidiana and coef_pearson < -umbral_coef_pearson:
-                        #print(                                    "Los histogramas son similares: pequeñas diferencias absolutas pero diferencias en sentido opuesto.")
-                        #return False
+                    #print(                                    "Los histogramas son similares: pequeñas diferencias absolutas pero diferencias en sentido opuesto.")
+                    #return False
                     #elif dist_euclidiana >= umbral_dist_euclidiana and coef_pearson > umbral_coef_pearson:
-                        #print(                                    f"Los histogramas tienen grandes diferencias absolutas, pero las diferencias son en el mismo sentido.{coef_pearson} ")
-                        #return False
+                    #print(                                    f"Los histogramas tienen grandes diferencias absolutas, pero las diferencias son en el mismo sentido.{coef_pearson} ")
+                    #return False
                     else:
                         #print(                                    "Los histogramas tienen grandes diferencias absolutas y las diferencias son en sentido opuesto.")
                         return False
@@ -2731,7 +2719,13 @@ class Silvilidar:
 
                     # Añadir la capa al proyecto actual (opcional)
                     QgsProject.instance().addMapLayer(vlayer)
-
+                def crea_carpeta(carpeta, carpeta_nueva):
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    carpeta_nueva = os.path.join(carpeta, f'Busca_similar_{timestamp}')
+                    os.makedirs(carpeta_nueva, exist_ok=True)
+                    print("creo carpeta nueva")
+                    return carpeta_nueva
                 def recorre_raster_ventanas(nombre_raster):
                     global tamano
                     # print("tamano",tamano)
@@ -2804,8 +2798,12 @@ class Silvilidar:
                     quemaventanas(raster_layer, listabuena)  # [elemento[1] for elemento in ventanas])
 
                 def filtro_raster_intervalo(nombre_raster, intervalo):
-                    rlayer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
-                    print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
+                    if self.dentro:
+                        rlayer = QgsRasterLayer(carpeta + '/' + nombre_raster + '.tif', nombre_raster)
+                        print(carpeta + '/' + nombre_raster + '.tif')
+                    else:
+                        rlayer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
+                        print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
                     # QgsProject.instance().addMapLayer(rlayer)
                     minimo = intervalo[0]
                     maximo = intervalo[1]
@@ -3214,9 +3212,12 @@ class Silvilidar:
                     # print("tamano ",tamano)
                     resultado = []  # lista con todos los valores
                     resumen = []  # lista con la media y desviacion de cada parcela.
-
-                    rlayer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
-                    print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
+                    if self.dentro:
+                        rlayer=QgsRasterLayer(carpeta + '/' + nombre_raster + '.tif', nombre_raster)
+                        print(carpeta + '/' + nombre_raster + '.tif')
+                    else:
+                        rlayer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
+                        print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
                     QgsProject.instance().addMapLayer(rlayer)
                     # for layer in QgsProject.instance().mapLayers().values():
                     # print(layer.name())
@@ -3271,6 +3272,337 @@ class Silvilidar:
                         print('   Parcela-----N Pixels: {} Media: {:.2f} Desviacion Estandar: {:.2f}'.
                               format(np.size(value), np.mean(value), np.std(value)))
                     return resultado, resumen
+
+                if self.dentro:
+                    print('dentro de la junta')
+                    if nombre_pestaña2 == 'pixel_a_pixel':
+                        print(nombre_pestaña2)
+                        # compruebo que las capas necesarias estan cargadas
+                        #como no existen las tengo que crear en tiempo real cada vez (OJO mirar si merece la pena buscar si ya existen para no tenerlo que rehacer)
+                        #creo las capas mediante recorte de las capas de la red.
+                        #hay que crear carpeta que no existe
+                        entries = []
+                        carpeta = os.path.dirname(self.dlg.ruta_zona_de_trabajo_2.text())
+                        print('carpeta1 ',carpeta)
+
+                        def crea_carpeta(carpeta, carpeta_nueva):
+                            from datetime import datetime
+                            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                            carpeta_nueva = os.path.join(carpeta, f'{carpeta_nueva}_{timestamp}')
+                            os.makedirs(carpeta_nueva, exist_ok=True)
+                            print("creo carpeta nueva")
+                            return carpeta_nueva
+
+                        carpeta_nueva = carpeta + '/Silvilidar'
+                        carpeta = crea_carpeta(carpeta, 'Silvilidar')
+
+                        print("carpeta2 ", carpeta)
+                        ruta_zona_trabajo = self.dlg.ruta_zona_de_trabajo_2.text()
+                        layervectorial = QgsVectorLayer(ruta_zona_trabajo, "zona de trabajo", "ogr")
+                        contenido = os.listdir(carpeta)
+                        #carpeta_nueva = carpeta + '/Busca_similar'
+                        carpeta2 = crea_carpeta(carpeta,'Busca_similar' )
+                        print('carpeta3 ',carpeta2)
+
+                        #debo crear las capas raster dentro de la carpeta
+                        # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                        fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
+                        Layer = QgsRasterLayer(fileName, "altura de red")
+                        print("ok, layer de altura 95 de la red")
+                        # recortar raster con el shape
+                        layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                                 'ALPHA_BAND': False, 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                                 'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None,
+                                                 'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'hm.tif')})[
+                            'OUTPUT']
+
+                        # QgsProject.instance().addMapLayers([Layer])
+                        layer2 = QgsRasterLayer(layer2, "altura de red")
+                        # QgsProject.instance().addMapLayers([layer2])
+                        print(layer2)
+                        print("cargado el raster recortado de la junta")
+                        # StringToRaster(os.path.join(carpeta, 'Alt95_m_PNOA2.tif'),
+                        StringToRaster(os.path.join(carpeta, 'hm.tif'),
+                                       'hm')  # en teoria se sobre escribiria el raster hm@1
+                        # print("creado el string to raster de h")
+
+                        # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                        fileName = r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
+                        Layer = QgsRasterLayer(fileName, "altura de red")
+                        # recortar raster con el shape
+                        layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                                 'ALPHA_BAND': False,
+                                                 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                                 'SET_RESOLUTION': False,
+                                                 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                                 'OUTPUT': os.path.join(carpeta, 'hbc.tif')})[
+                            'OUTPUT']
+                        layer2 = QgsRasterLayer(layer2, "base copa de red")
+                        # QgsProject.instance().addMapLayers([Layer])
+                        print(layer2)
+                        print("cargado el raster recortado de la junta")
+                        StringToRaster(os.path.join(carpeta, 'hbc.tif'),
+                                       'hbc')  # en teoria se sobre escribiria el raster hm@1
+                        print("creado el string to raster de hbc")
+
+                        # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                        fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
+                        Layer = QgsRasterLayer(fileName, "FCC DE RED")
+                        # recortar raster con el shape
+                        layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                                 'ALPHA_BAND': False,
+                                                 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                                 'SET_RESOLUTION': False,
+                                                 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                                 'OUTPUT': os.path.join(carpeta, 'fcc.tif')})[
+                            'OUTPUT']
+                        layer2 = QgsRasterLayer(layer2, "fcc de red")
+                        # QgsProject.instance().addMapLayers([Layer])
+                        print(layer2)
+                        print("cargado el raster recortado de la junta")
+                        StringToRaster(os.path.join(carpeta, 'fcc.tif'),
+                                       'fcc')  # en teoria se sobre escribiria el raster fcc@1
+                        print("creado el string to raster de fcc")
+
+                        # cargo el fcc de matorral
+                        # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                        fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                        Layer = QgsRasterLayer(fileName, "FCC MATORRAL DE RED")
+                        # recortar raster con el shape
+                        layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                                 'ALPHA_BAND': False,
+                                                 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                                 'SET_RESOLUTION': False,
+                                                 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                                 'OUTPUT': os.path.join(carpeta, 'fcc_matorral.tif')})[
+                            'OUTPUT']
+                        layer2 = QgsRasterLayer(layer2, "fcc de red")
+                        # QgsProject.instance().addMapLayers([Layer])
+                        print(layer2)
+                        print("cargado el raster recortado de la junta")
+                        StringToRaster(os.path.join(carpeta, 'fcc_matorral.tif'),
+                                       'fccmatorral')  # en teoria se sobre escribiria el raster fcc@1
+
+                        def calculo(expresion, capa):
+                            global layerglobal
+                            calc = QgsRasterCalculator(expresion,
+                                                       os.path.join(carpeta, capa + '.tif'),
+                                                       'GTiff',
+                                                       layerglobal.extent(),
+                                                       layerglobal.width(),
+                                                       layerglobal.height(),
+                                                       entries)
+
+                            calc.processCalculation()
+                            del (calc)
+                        print("creado el string to raster de fcc matorral")
+                        calculo('100 * ( hm@1   -  hbc@1  ) / ( hm@1 )', 'rc')
+
+                        StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
+
+                        # falta sacar la lc
+                        calculo(' hm@1 - hbc@1 ', "lc")
+                        StringToRaster(os.path.join(carpeta, 'lc.tif'), "lc")
+
+
+
+
+
+                        coef_hm = float(self.dlg.coef_hm1.text().replace(',', '.'))
+                        coef_hbc = float(self.dlg.coef_hbc1.text().replace(',', '.'))
+                        coef_rc = float(self.dlg.coef_rc1.text().replace(',', '.'))
+                        coef_lc = float(self.dlg.coef_lc1.text().replace(',', '.'))
+                        coef_fcc = float(self.dlg.coef_fcc1.text().replace(',', '.'))
+                        coef_fcc_m = float(self.dlg.coef_matorral1.text().replace(',', '.'))
+                        ruta_muestra = self.dlg.ruta_muestra_similar.text()
+                        capas_raster_de_interes = [] #para comparacion de pixeles
+
+                        if self.dlg.checkBox_hm1.isChecked():
+                            capas_raster_de_interes.append('HM')
+                        if self.dlg.checkBox_hbc1.isChecked():
+                            capas_raster_de_interes.append('HBC')
+                        if self.dlg.checkBox_lc1.isChecked():
+                            capas_raster_de_interes.append('LC')
+                        if self.dlg.checkBox_rc1.isChecked():
+                            capas_raster_de_interes.append('RC')
+                        if self.dlg.checkBox_fcc1.isChecked():
+                            capas_raster_de_interes.append('FCC')
+                        if self.dlg.checkBox_matorral1.isChecked():
+                            capas_raster_de_interes.append('FCC_MATORRAL')
+                        print(capas_raster_de_interes)
+                        mapcanvas = iface.mapCanvas()
+                        # capa vectorial
+                        layers = mapcanvas.layers()
+                        layervectorial = QgsVectorLayer(ruta_muestra, "muestra", "ogr")
+                        feats = [feat for feat in
+                                 layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]
+
+                        """def lenguaje_informe():
+                            def lenguaje_equipo():
+                                # es = castellano
+                                import locale
+                                idioma = locale.getdefaultlocale()[0][0:2]
+                                return idioma
+
+                            def lenguaje_qgis():
+                                # es = castellano
+                                idioma = QSettings().value("locale/userLocale")[0:2]
+                                return idioma
+
+                            lenguaje_equipo = lenguaje_equipo()
+                            lenguaje_qgis = lenguaje_qgis()
+                            if lenguaje_equipo and lenguaje_qgis == "es":
+                                return "es"
+                            else:
+                                return "en"
+                        lenguaje_informe= lenguaje_informe()"""
+
+                        tablas_de_interes = []
+                        graficas_de_interes = []
+                        filtrado_de_interes = []  # pixeles similares
+
+                        for nombre in capas_raster_de_interes:
+                            if nombre == 'HM':
+                                resultado_hm = saca_valores_raster(nombre, feats)
+                                resultado_hm_simplificado = simplificar_lista(resultado_hm[0])
+                                print("he sacado los valores de HM simplificado")
+                                tabla_hm = crea_tabla(resultado_hm)
+                                tablas_de_interes.append(tabla_hm)
+                                grafica_hm = grafica_histograma(resultado_hm_simplificado,
+                                                                estadisticas_lista(resultado_hm_simplificado, coef_hm)[
+                                                                    0][0],
+                                                                estadisticas_lista(resultado_hm_simplificado, coef_hm)[
+                                                                    0][1], "hm")
+                                graficas_de_interes.append(grafica_hm)
+                                filtrado_hm = filtro_raster_intervalo(nombre,
+                                                                      estadisticas_lista(resultado_hm_simplificado,
+                                                                                         coef_hm)[0])
+                                filtrado_de_interes.append(filtrado_hm)
+                                # comparable=np.array([6,7,8,8,8,10,10,10,10,10,11,11,11,11])
+                                # nuevo=compara_histogramas(resultado_hm_simplificado,comparable)
+                                print("Analisis de histogramas de HM")
+                            if nombre == 'HBC':
+                                resultado_hbc = saca_valores_raster(nombre, feats)
+                                resultado_hbc_simplificado = simplificar_lista(resultado_hbc[0])
+                                tabla_hbc = crea_tabla(resultado_hbc)
+                                tablas_de_interes.append(tabla_hbc)
+                                grafica_hbc = grafica_histograma(resultado_hbc_simplificado,
+                                                                 estadisticas_lista(resultado_hbc_simplificado,
+                                                                                    coef_hbc)[0][0],
+                                                                 estadisticas_lista(resultado_hbc_simplificado,
+                                                                                    coef_hbc)[0][1], "hbc")
+                                graficas_de_interes.append(grafica_hbc)
+                                filtrado_hbc = filtro_raster_intervalo(nombre,
+                                                                       estadisticas_lista(resultado_hbc_simplificado,
+                                                                                          coef_hbc)[0])
+                                filtrado_de_interes.append(filtrado_hbc)
+                                print("Analisis de histogramas de HBC")
+                                # recorre_raster_ventanas(nombre)
+                            if nombre == 'LC':
+                                resultado_lc = saca_valores_raster(nombre, feats)
+                                resultado_lc_simplificado = simplificar_lista(resultado_lc[0])
+                                tabla_lc = crea_tabla(resultado_lc)
+                                tablas_de_interes.append(tabla_lc)
+                                grafica_lc = grafica_histograma(resultado_lc_simplificado,
+                                                                estadisticas_lista(resultado_lc_simplificado, coef_lc)[
+                                                                    0][0],
+                                                                estadisticas_lista(resultado_lc_simplificado, coef_lc)[
+                                                                    0][1], "lc")
+                                graficas_de_interes.append(grafica_lc)
+                                filtrado_lc = filtro_raster_intervalo(nombre,
+                                                                      estadisticas_lista(resultado_lc_simplificado,
+                                                                                         coef_lc)[0])
+                                filtrado_de_interes.append(filtrado_lc)
+                                print("Analisis de histogramas de LC")
+                                # recorre_raster_ventanas(nombre)
+                            if nombre == 'RC':
+                                resultado_rc = saca_valores_raster(nombre, feats)
+                                resultado_rc_simplificado = simplificar_lista(resultado_rc[0])
+                                tabla_rc = crea_tabla(resultado_rc)
+                                tablas_de_interes.append(tabla_rc)
+                                grafica_rc = grafica_histograma(resultado_rc_simplificado,
+                                                                estadisticas_lista(resultado_rc_simplificado, coef_rc)[
+                                                                    0][0],
+                                                                estadisticas_lista(resultado_rc_simplificado, coef_rc)[
+                                                                    0][1], "rc")
+                                graficas_de_interes.append(grafica_rc)
+                                filtrado_rc = filtro_raster_intervalo(nombre,
+                                                                      estadisticas_lista(resultado_rc_simplificado,
+                                                                                         coef_rc)[0])
+                                filtrado_de_interes.append(filtrado_rc)
+                                print("Analisis de histogramas de LC")
+                                # recorre_raster_ventanas(nombre)
+                            if nombre == 'FCC':
+                                resultado_fcc = saca_valores_raster(nombre, feats)
+                                resultado_fcc_simplificado = simplificar_lista(resultado_fcc[0])
+                                tabla_fcc = crea_tabla(resultado_fcc)
+                                tablas_de_interes.append(tabla_fcc)
+                                grafica_fcc = grafica_histograma(resultado_fcc_simplificado,
+                                                                 estadisticas_lista(resultado_fcc_simplificado,
+                                                                                    coef_fcc)[0][0],
+                                                                 estadisticas_lista(resultado_fcc_simplificado,
+                                                                                    coef_fcc)[0][1], "fcc")
+                                graficas_de_interes.append(grafica_fcc)
+                                filtrado_fcc = filtro_raster_intervalo(nombre,
+                                                                       estadisticas_lista(resultado_fcc_simplificado,
+                                                                                          coef_fcc)[0])
+                                filtrado_de_interes.append(filtrado_fcc)
+                                print("Analisis de histogramas de FCC")
+                                # recorre_raster_ventanas(nombre)
+                            if nombre == 'FCC_MATORRAL':
+                                resultado_fcc_m = saca_valores_raster(nombre, feats)
+                                resultado_fcc_m_simplificado = simplificar_lista(resultado_fcc_m[0])
+                                tabla_fcc_m = crea_tabla(resultado_fcc_m)
+                                tablas_de_interes.append(tabla_fcc_m)
+                                grafica_fcc_m = grafica_histograma(resultado_fcc_m_simplificado,
+                                                                   estadisticas_lista(resultado_fcc_m_simplificado,
+                                                                                      coef_fcc)[0][0],
+                                                                   estadisticas_lista(resultado_fcc_m_simplificado,
+                                                                                      coef_fcc)[0][1], "fcc_m")
+                                graficas_de_interes.append(grafica_fcc_m)
+                                filtrado_fcc_m = filtro_raster_intervalo(nombre,
+                                                                         estadisticas_lista(
+                                                                             resultado_fcc_m_simplificado, coef_fcc_m)[
+                                                                             0])
+                                filtrado_de_interes.append(filtrado_fcc_m)
+                                print("Analisis de histogramas de FCC_MATORRAL")
+                                # recorre_raster_ventanas(nombre)
+                        print(capas_raster_de_interes)
+                        print(filtrado_de_interes)
+                        crea_html(capas_raster_de_interes, tablas_de_interes,
+                                  graficas_de_interes)
+
+                        # print(resultado)
+                        # epsg = layervectorial.crs().postgisSrid()
+                        # elimino las capas que he cargado durante el proceso
+                        capas = QgsProject.instance().mapLayers()
+                        for capa in capas:
+                            if capa not in capasoriginales:
+                                QgsProject.instance().removeMapLayers([capa])
+
+                        # busca las celdas que encuentran lo anterior (multiplica)
+                        multiplicado = multiplica_rasters(filtrado_de_interes)
+                        # raster = agrega(multiplicado)
+
+                        # ojo deshacer si falla el agregado de buscar cosas similares. son 2 lineas.
+                        raster = agrega2(multiplicado, 30, 1)  # 10,0.49)
+                        vectorizar(raster, carpeta + "similar3.shp")
+
+                        # lo mismo pero para las zonas similares segun histogramas
+                        # busca las celdas que encuentran lo anterior (multiplica)
+                        # multiplicado = multiplica_rasters(filtrado_de_interes2)
+                else:
+                    print('FUERA de la junta')
+                    carpeta = self.dlg.carpetalaz.text()
+
+
+
+
+
 
                 if carpeta == '':
                     iface.messageBar().pushMessage("Error",
@@ -3487,7 +3819,7 @@ class Silvilidar:
                             #lo mismo pero para las zonas similares segun histogramas
                             # busca las celdas que encuentran lo anterior (multiplica)
                             #multiplicado = multiplica_rasters(filtrado_de_interes2)
-                        print(nombre_pestaña2)
+                    print(nombre_pestaña2)
                     if nombre_pestaña2 == 'por_zonas':
 
                             print("llego a por zonas")

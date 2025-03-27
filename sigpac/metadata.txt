@@ -13,13 +13,13 @@ qgisMinimumVersion=3.0
 
 description=Carga el Sigpac en el Qgis, con la referencia o con una coordenada
 
-version=1.22.0
+version=2.25.2
 author=F. Javier Diez Rabanos
 
 email=dierabfr@jcyl.es
 
 
-about= Permite cargar la parcela o recintos del Sigpac correspondientes a una provincia, poligono y parcela dada, tanto con su codigo como con un desplegable como con una coordenada o haciendo click en el mapa.
+about= Permite cargar la parcela o recintos del Sigpac correspondientes a una provincia, poligono y parcela dada, tanto con su codigo como con un desplegable como con una coordenada o haciendo click en el mapa. Archivo configuracion en O:/sigmena/utilidad/PROGRAMA/QGIS/Complementos/Sigpac_configuracion.txt
 tracker=http://bugs
 
 repository=https://github.com/diezrabanos/qgis_plugins/

@@ -21,14 +21,14 @@
  *                                                                         *
  ***************************************************************************/
 """
-#from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-#from PyQt5.QtGui import QIcon
-#from PyQt5.QtWidgets import QAction
-from PyQt5 import QtWidgets 
+
+
+from PyQt5 import QtWidgets
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, QVariant#,QFileInfo
 from qgis.PyQt.QtGui import QIcon, QColor,QFont
 from qgis.PyQt.QtWidgets import QAction, QFileDialog,QMessageBox,QInputDialog
 from PyQt5.QtWidgets import QMessageBox
+from qgis.core import QgsSettings
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -66,8 +66,9 @@ from qgis.core import QgsWkbTypes, QgsPointXY, QgsApplication
 
 import webbrowser
 
+settings = QgsSettings()
+
 class CoordinateCaptureMapTool(QgsMapToolEmitPoint):
-    
     mouseClickedsenal = pyqtSignal(QgsPointXY)
 
     def __init__(self, canvas):
@@ -239,9 +240,8 @@ class Sigpac:
         #self.dlg.pushButton_click.clicked.connect(self.pincharenbotonclick)
 
         #abre la nueva ventana de configuracion
-        self.dlg.pushButton_configurar.clicked.connect(self.configurar)
-        self.dlg2.pushButton_select_path1.clicked.connect(self.select_file1)
-        self.dlg2.pushButton_select_path2.clicked.connect(self.select_file2)
+
+
 
         self.dlg.pushButton_clikenmapa.clicked.connect(self.startCapturing) 
 
@@ -322,24 +322,41 @@ class Sigpac:
         self.first_start = True
 
         #cojo los parametros necesarios del archivo de configuracion
+        global ano
         global rutaarchivomunicipiossigpac
         global rutacarpetarecintos
         global usarcomarca
         global miprovincia
         global micomarca
-        global rutacache
-        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
-        rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
+        #global rutacache
+        rutaarchivoconfiguracion=r"O:\sigmena\utilidad\PROGRAMA\QGIS\Complementos\Sigpac_configuracion.txt" #os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
+        #rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
         if os.path.isfile(rutaarchivoconfiguracion) ==True:
-            fileconfig = open(rutaarchivoconfiguracion, "r")
-            fileconfigleido=fileconfig.readlines()
+            #fileconfig = open(rutaarchivoconfiguracion, "r")
+            # leer un archivo de texto que contiene una lista con tres elementos en cada linea y convertirlo en una lista de listas
+            def leer_archivo_configuracion(ruta_archivo):
+                with open(ruta_archivo, "r") as archivo:
+                    lineas = archivo.readlines()
+                lista = [linea.strip().split(",") for linea in lineas]
+                return lista
+            listaconfiguracion=leer_archivo_configuracion(rutaarchivoconfiguracion)
+            print(listaconfiguracion)
+            def filtrar_lista_de_listas(listafinal, parametro):
+                listafiltrada = [lista for lista in listafinal if lista[0] == parametro]
+                return listafiltrada
             try:
-                rutaarchivomunicipiossigpac= (fileconfigleido[0].replace('\n',''))
-                rutacarpetarecintos= (fileconfigleido[1].replace('\n',''))
-                fileconfig.close()
+                ano=self.dlg.ANNO.text()
+                print(ano)
             except:
-                rutaarchivomunicipiossigpac=""
-                rutacarpetarecintos=""
+                ano="2025"
+                print("paso por la excepcion del año")
+            print("año linea 350",ano)
+            print("lista filtrada ",filtrar_lista_de_listas(listaconfiguracion, ano)[0])
+            ano,rutaarchivomunicipiossigpac, rutacarpetarecintos=filtrar_lista_de_listas(listaconfiguracion, ano)[0]
+            print("año,ruta1,ruta2",ano,rutaarchivomunicipiossigpac, rutacarpetarecintos)
+
+            #fileconfigleido=fileconfig.readlines()
+
         if os.path.isfile(rutaarchivoconfiguracion) ==False:
             fileconfig = open(rutaarchivoconfiguracion, "w")
             fileconfig.close()
@@ -348,7 +365,7 @@ class Sigpac:
 
 
     def help_pressed(self):
-        help_file = 'file:O:/sigmena/utilidad/PROGRAMA/QGIS/Complementos/Manual/Manual_Sigpac_SIGMENA.htm'
+        help_file = r'O:\sigmena/utilidad/PROGRAMA/QGIS/Complementos/Manual/Manual_Sigpac_SIGMENA.htm'
         webbrowser.open_new(help_file)
         
     
@@ -363,43 +380,7 @@ class Sigpac:
   
         archivo=carpeta[0]
  
-    def select_file1(self):
 
-        """seleciono la capa con los datos de entrada terminos municipales del sigpac"""
-        global rutaarchivomunicipiossigpac
-        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
-        rutaarchivomunicipiossigpac = QFileDialog.getOpenFileName(self.dlg2 , "Capa provincial con los terminos municipales SIGPAC",None ,'SHP(*.shp)')
-        self.dlg2.ruta1.setText(rutaarchivomunicipiossigpac[0])
-        archivo=rutaarchivomunicipiossigpac[0]
-        #inserto en linea 0 el contenido
-        if len(rutaarchivomunicipiossigpac[0])>0:
-            contenido=open(rutaarchivoconfiguracion).read().splitlines()
-            contenido.insert(0,rutaarchivomunicipiossigpac[0])
-            fileconfig = open(rutaarchivoconfiguracion, "w")
-
-        
-            fileconfig.writelines("\n".join(contenido))
-            fileconfig.close()
-            iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
-
-    
-        
-    def select_file2(self):
-
-        """seleciono la carpeta con los datos de entrada de recintos"""
-        global rutacarpetarecintos
-        rutaarchivoconfiguracion=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
-        rutacarpetarecintos = QFileDialog.getExistingDirectory(self.dlg2 , "Carpeta con los shps con los recintos sigpac")
-        self.dlg2.ruta2.setText(rutacarpetarecintos)
-        #inserto en linea 1 el contenido
-        if len(rutacarpetarecintos)>0:
-            contenido=open(rutaarchivoconfiguracion).read().splitlines()
-            contenido.insert(1,rutacarpetarecintos)
-            fileconfig = open(rutaarchivoconfiguracion, "w")
-
-            fileconfig.writelines("\n".join(contenido))
-            fileconfig.close()
-            iface.messageBar().pushMessage("CERRAR Y ABRIR QGIS PARA QUE SE APLIQUEN LOS CAMBIOS", qgisCore.Qgis.Warning,5)
    
     def hacerclickenmapa_pressed(self):
         print ("ahora deberia cambiar el cursor por uno que recoja la coordenada cuando cliquee")
@@ -496,7 +477,8 @@ class Sigpac:
         print('{0:.{2}f},{1:.{2}f}'.format(point.x(),point.y(),2))
         x=point.x()
         y=point.y()
-        
+        ano=self.dlg.ANNO.text()
+        print(ano)
         #a partir de aqui lo copio pego como si hubiera escrito la coordenada en el combobox.
         #creo una capa temporal con las coordenadas
         # create layer
@@ -539,10 +521,24 @@ class Sigpac:
         canvas = self.iface.mapCanvas()
         #canvas.setExtent(vl2.extent())
 
+        #nuevo
+        rutaarchivoconfiguracion = r"O:\sigmena\utilidad\PROGRAMA\QGIS\Complementos\Sigpac_configuracion.txt"  # os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\configuracion.txt")
+        def leer_archivo_configuracion(ruta_archivo):
+            with open(ruta_archivo, "r") as archivo:
+                lineas = archivo.readlines()
+            lista = [linea.strip().split(",") for linea in lineas]
+            return lista
+        listaconfiguracion = leer_archivo_configuracion(rutaarchivoconfiguracion)
+        def filtrar_lista_de_listas(listafinal, parametro):
+            listafiltrada = [lista for lista in listafinal if lista[0] == parametro]
+            return listafiltrada
+        ano, rutaarchivomunicipiossigpac, rutacarpetarecintos = filtrar_lista_de_listas(listaconfiguracion, ano)[0]
+        print("año,ruta1,ruta2", ano, rutaarchivomunicipiossigpac, rutacarpetarecintos)
+        #nuevo
 
         #QgsProject.instance().addMapLayer(vl)
         #QgsProject.instance().addMapLayer(vl2)
-        layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac, "municipio", 'ogr')
+        layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac.strip(), "municipio", 'ogr')
         #VOY A CAPTURAR EL MUNICIPIO DONDE DAE EL PUNTO
         processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
         sellectionado = layerbase.selectedFeatureIds()
@@ -553,13 +549,14 @@ class Sigpac:
         except:
             mun= ''
         #cuando se el municipio lo cargo y seleciono el punto de nuevo
-        caparecintos=os.path.join(rutacarpetarecintos,"RECFE22_"+str(mun)+".shp")
-        layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
+        caparecintos=os.path.join(rutacarpetarecintos,"RECFE"+str(ano[2:])+"_"+str(mun)+".shp")
+        print(caparecintos.strip())
+        layer = QgsVectorLayer(caparecintos.strip(), str(mun), 'ogr')
         #seleciono de nuevo por la localizacion sobre esta capa del municipio
         processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':capabufer,'METHOD':0})
         sellectionado2 = layer.selectedFeatureIds()
         try:
-            lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory: Sigpac_Click_recintos" })['OUTPUT']
+            lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory: Sigpac_"+str(ano)+"_Click_recintos" })['OUTPUT']
         
             #cuenta elementos
             elementos=len(list(lyr9.getFeatures()))
@@ -594,8 +591,8 @@ class Sigpac:
             #archivo2=os.environ['TMP']+r"/"+str(random.random())+".shp"
            
             #processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : archivo3, 'OUTPUT' : archivo2 })
-            lyr8=processing.run("native:dissolve",{ 'FIELD' : ['C_PROVINCI','C_MUNICIPI','C_AGREGADO','C_ZONA','C_POLIGONO','C_PARCELA'], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_click_parcelas" })['OUTPUT']
-            lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_click_parcelas"  })['OUTPUT']
+            lyr8=processing.run("native:dissolve",{ 'FIELD' : ['C_PROVINCI','C_MUNICIPI','C_AGREGADO','C_ZONA','C_POLIGONO','C_PARCELA'], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_"+str(ano)+" Click_parcelas" })['OUTPUT']
+            lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_"+str(ano)+"_click_parcelas"  })['OUTPUT']
 
             #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
             lyr9.startEditing()
@@ -824,15 +821,17 @@ class Sigpac:
         self.dlg.cbMUN.clear()
         self.dlg.cbMUN.setCurrentIndex(0)
         print("1 cojo la provincia seleccionada en el combo")
-        provincias=[["","00"],["Avila","05"],["Burgos","09"],["León","24"],["Palencia","34"],["Salamanca","37"],["Segovia","40"],["Soria","42"],["Valladolid","47"],["Zamora","49"]]
+        provincias=[["","00"],["Avila","05"],["Burgos","09"],["León","24"],["Palencia","34"],["Salamanca","37"],["Segovia","40"],["Soria","42"],["Valladolid","47"],["Zamora","49"]]# ojo cambiada esta linea avila y burgos solo llevan ahora un caracter. Antes fallaba a la hora de buscar la comarca.
         indpro=self.dlg.cbPRO.currentIndex()
         provincia=str("{:02d}".format(int((provincias[int(indpro)][1]))))
+        print(provincia)
         print ("escribo la provincia en el almacen")
         almacen[0]=provincia
 
         #para ver si tengo que rellenar las comarcas
         print ("leo del almacen si true o false y lo pongo en pantalla")
         print ("lacabo de pinchar en provincia")
+        print("almacen",almacen[0], 'linea 837')
         if almacen[1]=="False":
             print("1.1 no tengo selecionado que use la comarca")
             self.dlg.cbMUN.clear()
@@ -843,6 +842,7 @@ class Sigpac:
             almacen[3]=[]
             #ahora deberia rellenar los municipios de la cache o no
             if almacen[0]==almacen0[0] and almacen0[1]=="False":
+                print("almacen", almacen0[0], 'linea 848')
                 print("1.1.1 la provincia es la misma dela cache y no tengo que mirar las comarcas, asi que pongo los municipios de la cahce")
                 #la lista de municipios que tengo de la cache es la buena
                 municipios=almacen[4]
@@ -867,7 +867,8 @@ class Sigpac:
                 for feature in feats:
                     lista=[]
                     #filtro para meter solo los municipios de la provincia que me interesa
-                    if str(feature.attributes()[idpro])==almacen[0]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
+                    print('linea 873 ',feature.attributes()[idpro])
+                    if str(feature.attributes()[idpro]).zfill(2)==almacen[0]:  #antes ponia pro, tengo que analizar que sea la que tengo seleccionada, no la del txt
                         lista=[feature.attributes()[idTM],feature.attributes()[idpro], feature.attributes()[idmun]]
                         municipios.append(lista)
                 #ordeno por el primer elemento
@@ -946,6 +947,8 @@ class Sigpac:
         self.dlg.cbMUN.setCurrentIndex(0)
         #lo unico que tengo que hacer es rellenar los municipios
         #saco que comarca he seleccionado
+        print("almacen en linea 950 ", almacen)
+        print("almacen0 en linea 950 ", almacen0)
         comarcas=almacen[3]
         indcom=self.dlg.cbCOM.currentIndex()
         comarca=str(comarcas[int(indcom)-1])
@@ -962,7 +965,11 @@ class Sigpac:
             #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
             QSettings().setValue("/qgis/ignoreShapeEncoding", False)
             #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
-            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+            print(rutaarchivomunicipiossigpac.strip())
+            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac.strip(), 'Municipios Sigpac', 'ogr')
+            #comprobar si la capa es valida
+            if not layerlista.isValid():
+                print("Layer failed to load!")
             idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
             idCOM = layerlista.dataProvider().fieldNameIndex('COMARCA')
             idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
@@ -977,11 +984,13 @@ class Sigpac:
                     municipios.append(lista)
             #ordeno por el primer elemento
             municipios.sort(key=lambda x: x[2])
-            #anado un elemneto enblanco en el desplegable
+        print(municipios)
+        #anado un elemneto enblanco en el desplegable
         self.dlg.cbMUN.addItem("" ) 
         for element in municipios:
             self.dlg.cbMUN.addItem( element[0])
         almacen[4]=municipios
+        print("almacen en linea 986 ", almacen)
         
         
         
@@ -1014,7 +1023,7 @@ class Sigpac:
                     #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
                     QSettings().setValue("/qgis/ignoreShapeEncoding", False)
                     #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
-                    layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                    layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac.strip(), 'Municipios Sigpac', 'ogr')
                     #para rellenar el combo de comarcas
                     comarcas=[]
                     feats = [ feat for feat in layerlista.getFeatures() ]
@@ -1047,7 +1056,7 @@ class Sigpac:
                 #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
                 QSettings().setValue("/qgis/ignoreShapeEncoding", False)
                 #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
-                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+                layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac.strip(), 'Municipios Sigpac', 'ogr')
                 #para rellenar el combo de comarcas
                 comarcas=[]
                 feats = [ feat for feat in layerlista.getFeatures() ]
@@ -1084,7 +1093,7 @@ class Sigpac:
             #para evitar problemas con la codificacion de los shapes con los municipios y las tildes  ##OJO######
             QSettings().setValue("/qgis/ignoreShapeEncoding", False)
             #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
-            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+            layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac.strip(), 'Municipios Sigpac', 'ogr')
             idpro = layerlista.dataProvider().fieldNameIndex('C_PROVINCI')
             idTM =layerlista.dataProvider().fieldNameIndex('D_NOMBRE')
             idmun=  layerlista.dataProvider().fieldNameIndex('C_PROVMUN')
@@ -1137,12 +1146,7 @@ class Sigpac:
        
 
    
-    def configurar(self):
-        contras = QInputDialog.getText(None, 'CONTRASEÑA', 'Introduce la contraseña')
-        if contras[0]=='SIGMENITA':
-            self.dlg2.show()
-        else:
-            iface.messageBar().pushMessage("PARA CONFIGURAR INRODUCIR CONTRASEÑA", qgisCore.Qgis.Warning,5)
+
         
 
 
@@ -1179,6 +1183,7 @@ class Sigpac:
         global almacen0
         global rutaarchivomunicipiossigpac
         global rutacarpetarecintos
+        global ano
         
         #global provincias
         #global usarcomarca
@@ -1196,17 +1201,17 @@ class Sigpac:
 
 
         
-        rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
+        """rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
         if os.path.isfile(rutacache) ==True:
             filecache = open(rutacache, "r")
             filecacheleido=filecache.readlines()
             try:
-                miprovincia= (filecacheleido[0].replace('\n',''))
-                usarcomarca= (filecacheleido[1].replace('\n',''))
-                micomarca= (filecacheleido[2].replace('\n',''))
-                miscomarcas=(filecacheleido[3].replace('\n','')).strip('][').split(',') #convierto una str en una list
-                mismunicipios=ast.literal_eval((filecacheleido[4].replace('\n','')).replace(" [[","[[").replace("]] ","]]"))#.split(',')) #convierto una str en una list
-                misrecintos=(filecacheleido[5].replace('\n',''))
+                miprovincia = settings.value("sigpac/miprovincia", "42")#(filecacheleido[0].replace('\n',''))
+                usarcomarca= settings.value("sigpac/usarcomarca", "True")#(filecacheleido[1].replace('\n',''))
+                micomarca= settings.value("sigpac/micomarca", "Vinuesa")#(filecacheleido[2].replace('\n',''))
+                miscomarcas=settings.value("sigpac/miscomarcas", "[Almazan,Agreda,Almarza,Bayubas de Abajo,Burgo de Osma,Covaleda,Gomara,Navaleno,San Leonardo de Yague,San Pedro Manrique,Soria,Vinuesa]").strip('][').split(',')#(filecacheleido[3].replace('\n','')).strip('][').split(',') #convierto una str en una list
+                mismunicipios=ast.literal_eval(settings.value("sigpac/mismunicipios", "[['Montenegro de Cameros', 42, '42197'], ['Vinuesa', 42, '42340']]").replace(" [[","[[").replace("]] ","]]"))#.split(','))#ast.literal_eval((filecacheleido[4].replace('\n','')).replace(" [[","[[").replace("]] ","]]"))#.split(',')) #convierto una str en una list
+                misrecintos=settings.value("sigpac/misrecintos", "True")#(filecacheleido[5].replace('\n',''))
                 if misrecintos=="False":
                     recintosselecionados==False
                     self.dlg.radioButtonParcelas.setChecked(True)
@@ -1218,9 +1223,28 @@ class Sigpac:
                 filecache.close()
                 
             except:
-                print("esta no encuentra el file cache")
-                
-        
+                print("esta no encuentra el file cache")"""
+
+        miprovincia = settings.value("sigpac/miprovincia", "42")  # (filecacheleido[0].replace('\n',''))
+        usarcomarca = settings.value("sigpac/usarcomarca", "True")  # (filecacheleido[1].replace('\n',''))
+        micomarca = settings.value("sigpac/micomarca", "Vinuesa")  # (filecacheleido[2].replace('\n',''))
+        miscomarcas = settings.value("sigpac/miscomarcas",
+                                     "[Almazan,Agreda,Almarza,Bayubas de Abajo,Burgo de Osma,Covaleda,Gomara,Navaleno,San Leonardo de Yague,San Pedro Manrique,Soria,Vinuesa]").strip(
+            '][').split(
+            ',')  # (filecacheleido[3].replace('\n','')).strip('][').split(',') #convierto una str en una list
+        mismunicipios = ast.literal_eval(settings.value("sigpac/mismunicipios",
+                                                        "[['Montenegro de Cameros', 42, '42197'], ['Vinuesa', 42, '42340']]").replace(
+            " [[", "[[").replace("]] ",
+                                 "]]"))  # .split(','))#ast.literal_eval((filecacheleido[4].replace('\n','')).replace(" [[","[[").replace("]] ","]]"))#.split(',')) #convierto una str en una list
+        misrecintos = settings.value("sigpac/misrecintos", "True")  # (filecacheleido[5].replace('\n',''))
+        if misrecintos == "False":
+            recintosselecionados == False
+            self.dlg.radioButtonParcelas.setChecked(True)
+        else:
+            recintosselecionados == True
+            self.dlg.radioButtonRecintos.setChecked(True)
+        print("la seleccion de recintos, leida de la cache es ", recintosselecionados, "linea 1199")
+        self.dlg.radioButtonRecintos.setChecked(recintosselecionados)
         print("cache leida......................................................................................................................")
         almacen0[0]=miprovincia
         almacen0[1]=usarcomarca
@@ -1244,7 +1268,7 @@ class Sigpac:
 
         #selecciono la ruta capa con todos los municipios del sigpac****************************************************************************************************************************
         
-        layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac, 'Municipios Sigpac', 'ogr')
+        layerlista = QgsVectorLayer(rutaarchivomunicipiossigpac.strip(), 'Municipios Sigpac', 'ogr')
         time.sleep(1)
         #layer = iface.activeLayer()
         ## ojo comprobar que layer existe
@@ -1349,6 +1373,13 @@ class Sigpac:
         result = self.dlg.exec_()
         # See if OK was pressed
         if result:
+            def filtrar_lista_de_listas(listafinal, parametro):
+                listafiltrada = [lista for lista in listafinal if lista[0] == parametro]
+                return listafiltrada
+
+            def obtener_anos(listafinal):
+                anos = [lista[0] for lista in listafinal]
+                return anos
             comarcas=almacen[3]
             municipios=almacen[4]
             usarcomarca=almacen[1]
@@ -1364,382 +1395,421 @@ class Sigpac:
                 comarca=str(comarcas[int(indcom)-1])
             except:
                 comarca=""
-            pro=str(provincias[int(indpro)][1])
-            mun=self.dlg.MUN.text()##displayText()
-            pol=self.dlg.POL.text()##displayText()
-            par=self.dlg.PAR.text()##displayText()
-            x=self.dlg.XX.text()##displayText()
-            y=self.dlg.YY.text()##displayText()
-            
-            x=x.replace(',','.')
-            y=y.replace(',','.')
-         
-            #si no hay nada en la casilla de municipio, coge la informacion del desplegable mun es un numero del estilo 42001
-            if mun == "":
-                mun=str(municipios[int(indmun)-1][2])#coge la ultima columna de mis datos
+            pro = str(provincias[int(indpro)][1])
+            mun = self.dlg.MUN.text()##displayText()
+            pol = self.dlg.POL.text()##displayText()
+            par = self.dlg.PAR.text()##displayText()
+            x = self.dlg.XX.text()##displayText()
+            y = self.dlg.YY.text()##displayText()
+            ano = self.dlg.ANNO.text()
+            def leer_archivo_configuracion(ruta_archivo):
+                with open(ruta_archivo, "r") as archivo:
+                    lineas = archivo.readlines()
+                lista = [linea.strip().split(",") for linea in lineas]
+                return lista
+
+            rutaarchivoconfiguracion = r"O:\sigmena\utilidad\PROGRAMA\QGIS\Complementos\Sigpac_configuracion.txt"
+            listaconfiguracion=leer_archivo_configuracion(rutaarchivoconfiguracion)
+            if ano not in obtener_anos(listaconfiguracion):
+                iface.messageBar().pushMessage("SIGPAC", "NO TENEMOS DISPONIBLE EL AÑO "+ str(ano)+" SELECIONADO. SI CREES QUE DEBIERA ESTARLO COMUNICASELO AL TÉCNICO SIGMENA" , qgisCore.Qgis.Info, 10)
             else:
-                mun=str("{:02d}".format(int(pro)))+str("{:03d}".format(int(mun)))
-            print("mun",mun)
-            print("indmun",indmun)
-            almacen[5]=indmun
+                if ano not in ['2025']:
+                    iface.messageBar().pushMessage( "SIGPAC", "ATENCIÓN, NO ESTÁS CONSULTANDO EL ÚLTIMO SIGPAC DISPONIBLE. SE MUESTRA EL SIGPAC DEL AÑO " + str(
+                    ano) ,qgisCore.Qgis.Critical, 10)
 
-           
-            rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
-            #lo escribo en el txt, mavhacando lo que ya tenia
-            f=open(rutacache,"w")
-            escribir=str(pro)+"\n"+str(usarcomarca)+"\n"+comarca+"\n"+str(comarcas).replace("'","").replace(", ",",")+"\n"+str(municipios)+"\n"+str(recintosselecionados)+"\n"
-            f.write(escribir)
-            f.close()
-            print("he escrito en la cache ",str(recintosselecionados)," linea 1375")
+                ano, rutaarchivomunicipiossigpac, rutacarpetarecintos = filtrar_lista_de_listas(listaconfiguracion, ano)[0]
+                x = x.replace(',','.')
+                y = y.replace(',','.')
 
-            QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
-            
-
-            canvas.freeze(True)
-            
-            
-            if x is not "" and y is not "" and par=="":
-                #creo una capa temporal con las coordenadas
-                # create layer
-                vl2 = QgsVectorLayer("Point?crs=epsg:25830", "Punto", "memory")
-                pr2 = vl2.dataProvider()
-                
-                vl2.startEditing()
-                # add fields
-                pr2.addAttributes([
-                                QgsField("x",  QVariant.Double),
-                                QgsField("y", QVariant.Double)])
-                vl2.updateFields() 
-                # tell the vector layer to fetch changes from the provider
-                
-                #$add a feature
-                fet = QgsFeature()
-                fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
-                fet.setAttributes([ float(x),float( y)])
-                pr2.addFeatures([fet])
-                
-                
-               
-                #cambio la simbologia
-                symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'blue','size': '3',})
-                vl2.renderer().setSymbol(symbol)
-
-                # update layer's extent when new features have been added
-                # because change of extent in provider is not propagated to the layer
-                vl2.updateExtents()
-                vl2.commitChanges()
-                vl2.updateExtents()
-                canvas = self.iface.mapCanvas()
-                canvas.setExtent(vl2.extent())
+                #si no hay nada en la casilla de municipio, coge la informacion del desplegable mun es un numero del estilo 42001
+                if mun == "":
+                    mun=str(municipios[int(indmun)-1][2])#coge la ultima columna de mis datos
+                else:
+                    mun=str("{:02d}".format(int(pro)))+str("{:03d}".format(int(mun)))
+                print("mun",mun)
+                print("indmun",indmun)
+                almacen[5]=indmun
 
 
-                #QgsProject.instance().addMapLayer(vl)
-                QgsProject.instance().addMapLayer(vl2)
-                layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac, "municipio", 'ogr')
+                #rutacache=os.path.join(QgsApplication.qgisSettingsDirPath(),r"python\plugins\sigpac\cache.txt")
+                #lo escribo en el txt, mavhacando lo que ya tenia
+                #f=open(rutacache,"w")
+                #escribir=str(pro)+"\n"+str(usarcomarca)+"\n"+comarca+"\n"+str(comarcas).replace("'","").replace(", ",",")+"\n"+str(municipios)+"\n"+str(recintosselecionados)+"\n"
+                #f.write(escribir)
+                #f.close()
+                settings.setValue("sigpac/miprovincia", str(pro))  # (filecacheleido[0].replace('\n',''))
+                settings.setValue("sigpac/usarcomarca", str(usarcomarca))  # (filecacheleido[1].replace('\n',''))
+                settings.setValue("sigpac/micomarca", comarca)  # (filecacheleido[2].replace('\n',''))
+                settings.setValue("sigpac/miscomarcas",str(comarcas).replace("'","").replace(", ",","))  # (filecacheleido[3].replace('\n','')).strip('][').split(',') #convierto una str en una list
+                settings.setValue("sigpac/mismunicipios",    str(municipios) )
+                                         #convierto una str en una list
+                settings.setValue("sigpac/misrecintos", str(recintosselecionados))  # (filecacheleido[5].replace('\n',''))
+                print("he escrito en la cache ",str(recintosselecionados)," linea 1375")
 
-                processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
-                sellectionado = layerbase.selectedFeatureIds()
-                #QgsProject.instance().addMapLayers([layerbase])
+                QgsProject.instance().layerTreeRegistryBridge().setLayerInsertionPoint( QgsProject.instance().layerTreeRoot(), 0 )
+
+
+                canvas.freeze(True)
+
+
+                if x is not "" and y is not "" and par=="":
+                    #creo una capa temporal con las coordenadas
+                    # create layer
+                    vl2 = QgsVectorLayer("Point?crs=epsg:25830", "Punto", "memory")
+                    pr2 = vl2.dataProvider()
+
+                    vl2.startEditing()
+                    # add fields
+                    pr2.addAttributes([
+                                    QgsField("x",  QVariant.Double),
+                                    QgsField("y", QVariant.Double)])
+                    vl2.updateFields()
+                    # tell the vector layer to fetch changes from the provider
+
+                    #$add a feature
+                    fet = QgsFeature()
+                    fet.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(float(x),float(y))))
+                    fet.setAttributes([ float(x),float( y)])
+                    pr2.addFeatures([fet])
+
+
+
+                    #cambio la simbologia
+                    symbol = QgsMarkerSymbol.createSimple({'name': 'circle', 'color': 'blue','size': '3',})
+                    vl2.renderer().setSymbol(symbol)
+
+                    # update layer's extent when new features have been added
+                    # because change of extent in provider is not propagated to the layer
+                    vl2.updateExtents()
+                    vl2.commitChanges()
+                    vl2.updateExtents()
+                    canvas = self.iface.mapCanvas()
+                    canvas.setExtent(vl2.extent())
+
+
+                    #QgsProject.instance().addMapLayer(vl)
+                    #QgsProject.instance().addMapLayer(vl2)
+                    layerbase = QgsVectorLayer(rutaarchivomunicipiossigpac.strip(), "municipio", 'ogr')
+                    #print(rutaarchivomunicipiossigpac.strip())
+                    if not layerbase.isValid():
+                        print("Layer failed to load!")
+                    processing.run("native:selectbylocation", {'INPUT':layerbase,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+                    sellectionado = layerbase.selectedFeatureIds()
+                    #QgsProject.instance().addMapLayers([layerbase])
+                    try:
+                        mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+                        #print("mun",mun)
+                    except:
+                        mun=''
+                        #print("no hay municipio")
+                    #cuando se el municipio lo cargo y seleciono el punto de nuevo
+                    try:
+                        caparecintos=os.path.join(rutacarpetarecintos,"RECFE"+str(ano[2:])+"_"+str(mun)+".shp")
+                        layer = QgsVectorLayer(caparecintos.strip(), str(mun), 'ogr')
+                        #seleciono de nuevo por la localizacion sobre esta capa del municipio
+                        processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
+                        sellectionado2 = layer.selectedFeatureIds()
+                        pol = str(layer.getFeature(sellectionado2[0])["C_POLIGONO"])
+                        par = str(layer.getFeature(sellectionado2[0])["C_PARCELA"])
+                    except:
+                        pass
+
+
+                    #aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela
+
+
+                print("aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela")
+                print(ano[2:])
+                caparecintos=os.path.join(rutacarpetarecintos,"RECFE"+str(ano[2:])+"_"+mun+".shp")
+                caparecintos = caparecintos.strip()
+                #caparecintos = rutacarpetarecintos+"/RECFE" + str(ano[2:]) + "_" + mun + ".shp"
+                #print(f"Ruta: {caparecintos}")
+                #print(f"Existe: {os.path.exists(caparecintos)}")
+                #print("caparecintos ",caparecintos)
+                layer = QgsVectorLayer(caparecintos.strip(), "RECFE"+str(ano[2:])+"_"+mun, 'ogr')
+                if not layer.isValid():
+                    print("Layer failed to load!")
+                    print("caparecintos ",caparecintos)
+                #QgsProject.instance().addMapLayers([layer])
+                #comprobar si la ruta caparecintos es correcta
+                if not os.path.exists(caparecintos):
+                    print("la capa de recintos no existe")
+
+
+
+
+                layer.selectByExpression("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par),QgsVectorLayer.SetSelection)
+                print("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par))
+                #creo la nueva capa con la seleccion
+                #output_path=archivo3
+                #ojo esto es lo que acabo de cambiar
+                #QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(), "ESRI Shapefile", onlySelected=True)
+                #lyr9=QgsVectorLayer(output_path,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
                 try:
-                    mun = str(layerbase.getFeature(sellectionado[0])["C_PROVMUN"])
+                    lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
+
+
+
+
+                    sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
+                    renderer=QgsSingleSymbolRenderer(sym1)
+                    #etiqueto
+                    layer_settings  = QgsPalLayerSettings()
+                    text_format = QgsTextFormat()
+                    text_format.setFont(QFont("Arial", 12))
+                    text_format.setSize(12)
+                    text_format.setColor(QColor("Blue"))
+                    #le meto un buffer a la etiqueta
+                    buffer_settings = QgsTextBufferSettings()
+                    buffer_settings.setEnabled(True)
+                    buffer_settings.setSize(1)
+                    buffer_settings.setColor(QColor("white"))
+
+                    text_format.setBuffer(buffer_settings)
+                    layer_settings.setFormat(text_format)
+                #cuenta elementos
+                    elementos=len(list(lyr9.getFeatures()))
                 except:
-                    mun=''
-                #cuando se el municipio lo cargo y seleciono el punto de nuevo
-                try:
-                    caparecintos=os.path.join(rutacarpetarecintos,"RECFE22_"+str(mun)+".shp")
-                    layer = QgsVectorLayer(caparecintos, str(mun), 'ogr')
-                    #seleciono de nuevo por la localizacion sobre esta capa del municipio
-                    processing.run("native:selectbylocation", {'INPUT':layer,'PREDICATE':[0],'INTERSECT':vl2,'METHOD':0})
-                    sellectionado2 = layer.selectedFeatureIds()
-                    pol = str(layer.getFeature(sellectionado2[0])["C_POLIGONO"])
-                    par = str(layer.getFeature(sellectionado2[0])["C_PARCELA"])
+                    elementos=0
+
+                if elementos==0:
+                    iface.messageBar().pushMessage("SIGPAC","En el municipio "+str(mun)+" poligono " +str(pol)+" no existe la parcela "+str(par), qgisCore.Qgis.Info,5)
+
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+                """if elementos==1 and archivo == "": OJO SOLO PARA PRUEBA
+                    
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''            
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr9.setLabelsEnabled(True)
+                    lyr9.setLabeling(layer_settings)
+                    lyr9.triggerRepaint()
+                    lyr9.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr9)
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+                    lyr9.updateExtents()
+                    lyr9.commitChanges()
+                    lyr9.updateExtents()
+                    canvas.setExtent(lyr9.extent())"""
+                if elementos>=1 and recintosselecionados==False and archivo == "" :
+
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    #hacer un dissolve y llamar a la capa de salida igual
+                    #archivo2=os.environ['TMP']+r"/"+str(random.random())+".shp"
+
+                    #processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : archivo3, 'OUTPUT' : archivo2 })
+                    lyr8=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
+                    lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
+
+                    #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
+                    lyr9.startEditing()
+
+                    fields = lyr9.fields()
+                    idx = fields.indexFromName('SUP_SIGPAC')
+
+                    if idx == -1:
+                        myField = QgsField( 'SUP_SIGPAC', QVariant.Double )
+                        lyr9.dataProvider().addAttributes([myField])
+                        lyr9.updateFields()
+
+
+                    for f in lyr9.getFeatures():
+                        f.setAttribute(f.fieldNameIndex('SUP_SIGPAC'), f.geometry().area()/10000 )
+                        #f[idx] = '"$area"*1000'
+                        lyr9.updateFeature( f )
+
+                    lyr9.commitChanges()
+
+
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    #lyr9=QgsVectorLayer(archivo2,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                    lyr9.setLabelsEnabled(True)
+                    lyr9.setLabeling(layer_settings)
+                    lyr9.triggerRepaint()
+                    lyr9.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr9)
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+                    lyr9.updateExtents()
+                    lyr9.commitChanges()
+                    lyr9.updateExtents()
+                    canvas.setExtent(lyr9.extent())
+
+
+
+                if elementos>=1 and recintosselecionados==True and archivo == "":
+
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr9.setLabelsEnabled(True)
+                    lyr9.setLabeling(layer_settings)
+                    lyr9.triggerRepaint()
+                    lyr9.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr9)
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+                    lyr9.updateExtents()
+                    lyr9.commitChanges()
+                    lyr9.updateExtents()
+                    canvas.setExtent(lyr9.extent())
+
+                if elementos>1 and recintosselecionados==True and archivo is not "":
+
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    #lyr9.setLabelsEnabled(True)
+                    #lyr9.setLabeling(layer_settings)
+                    #lyr9.triggerRepaint()
+                    #lyr9.setRenderer(renderer)
+                    #QgsProject.instance().addMapLayer(lyr9)
+                    #QgsProject.instance().removeMapLayer(layer)
+                    #canvas.freeze(False)
+
+                    QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
+                    #QgsProject.instance().removeMapLayer(lyr9)
+                    lyr8=QgsVectorLayer(archivo,"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                    #etiqueto
+                    """layer_settings  = QgsPalLayerSettings()
+                    text_format = QgsTextFormat()
+                    text_format.setFont(QFont("Arial", 12))
+                    text_format.setSize(12)
+                    text_format.setColor(QColor("Red"))
+                    layer_settings.setFormat(text_format)
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    layer_settings.isExpression = True"""
+                    #layer_settings.enabled = True
+                    #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr8.setLabelsEnabled(True)
+                    lyr8.setLabeling(layer_settings)
+                    lyr8.triggerRepaint()
+                    lyr8.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr8)
+                    #QgsProject.instance().removeMapLayer(lyr9.id())
+                    #canvas.freeze(False)
+                    lyr8.updateExtents()
+                    lyr8.commitChanges()
+                    lyr8.updateExtents()
+                    canvas.setExtent(lyr8.extent())
+
+                if elementos>1 and recintosselecionados==False and archivo is not "":
+
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    #hacer un dissolve y llamar a la capa de salida igual
+
+                    lyr8=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par)  })['OUTPUT']
+                    lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par)  })['OUTPUT']
+
+                    #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
+                    lyr9.startEditing()
+
+                    fields = lyr9.fields()
+                    idx = fields.indexFromName('SUP_SIGPAC')
+
+                    if idx == -1:
+                        myField = QgsField( 'SUP_SIGPAC', QVariant.Double )
+                        lyr9.dataProvider().addAttributes([myField])
+                        lyr9.updateFields()
+
+
+                    for f in lyr9.getFeatures():
+                        f.setAttribute(f.fieldNameIndex('SUP_SIGPAC'), f.geometry().area()/10000 )
+                        #f[idx] = '"$area"*1000'
+                        lyr9.updateFeature( f )
+
+                    lyr9.commitChanges()
+
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    #lyr9=QgsVectorLayer(archivo2,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                    #lyr9.setLabelsEnabled(True)
+                    #lyr9.setLabeling(layer_settings)
+                    #lyr9.triggerRepaint()
+                    #lyr9.setRenderer(renderer)
+
+                    QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
+                    #QgsProject.instance().removeMapLayer(lyr9)
+                    lyr8=QgsVectorLayer(archivo,"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                    #etiqueto
+                    """layer_settings  = QgsPalLayerSettings()
+                    text_format = QgsTextFormat()
+                    text_format.setFont(QFont("Arial", 12))
+                    text_format.setSize(12)
+                    text_format.setColor(QColor("Red"))
+                    layer_settings.setFormat(text_format)
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    layer_settings.isExpression = True"""
+                    #layer_settings.enabled = True
+                    #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr8.setLabelsEnabled(True)
+                    lyr8.setLabeling(layer_settings)
+                    lyr8.triggerRepaint()
+                    lyr8.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr8)
+                    #QgsProject.instance().removeMapLayer(lyr9.id())
+                    #canvas.freeze(False)
+                    lyr8.updateExtents()
+                    lyr8.commitChanges()
+                    lyr8.updateExtents()
+                    canvas.setExtent(lyr8.extent())
+                if elementos==1 and archivo is not "":
+
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    layer_settings.isExpression = True
+                    layer_settings.enabled = True
+                    layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    #lyr9.setLabelsEnabled(True)
+                    #lyr9.setLabeling(layer_settings)
+                    #lyr9.triggerRepaint()
+                    #lyr9.setRenderer(renderer)
+
+                    QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
+                    #QgsProject.instance().removeMapLayer(lyr9)
+                    lyr8=QgsVectorLayer(archivo,"Sigpac"+str(ano)+"_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
+                    #etiqueto
+                    """layer_settings  = QgsPalLayerSettings()
+                    text_format = QgsTextFormat()
+                    text_format.setFont(QFont("Arial", 12))
+                    text_format.setSize(12)
+                    text_format.setColor(QColor("Red"))
+                    layer_settings.setFormat(text_format)
+                    layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
+                    layer_settings.isExpression = True"""
+                    #layer_settings.enabled = True
+                    #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
+                    lyr8.setLabelsEnabled(True)
+                    lyr8.setLabeling(layer_settings)
+                    lyr8.triggerRepaint()
+                    lyr8.setRenderer(renderer)
+                    QgsProject.instance().addMapLayer(lyr8)
+                    #QgsProject.instance().removeMapLayer(lyr9.id())
+                    #canvas.freeze(False)
+                    lyr8.updateExtents()
+                    lyr8.commitChanges()
+                    lyr8.updateExtents()
+                    canvas.setExtent(lyr8.extent())
+
+
+
+
+                canvas.freeze(False)
+                """try:
+                    QgsVectorFileWriter.deleteShapeFile(archivo3)
                 except:
                     pass
-             
-
-                #aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela
-                
-                
-            print("aqui estoy en el punto de partida como si hubiese metido municipio, poligono y parcela")
-
-            caparecintos=os.path.join(rutacarpetarecintos,"RECFE22_"+mun+".shp")
-            print(rutacarpetarecintos,"RECFE22_"+mun+".shp")
-            layer = QgsVectorLayer(caparecintos, mun, 'ogr')
-            #QgsProject.instance().addMapLayers([layer])
-
-            
-            layer.selectByExpression("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par),QgsVectorLayer.SetSelection)
-            print("\"C_POLIGONO\" = '{}' ".format(pol)+" AND \"C_PARCELA\" = '{}'".format(par))
-            #creo la nueva capa con la seleccion
-            #output_path=archivo3
-            #ojo esto es lo que acabo de cambiar
-            #QgsVectorFileWriter.writeAsVectorFormat(layer, output_path, "CP120", layer.crs(), "ESRI Shapefile", onlySelected=True)
-            #lyr9=QgsVectorLayer(output_path,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-            try:
-                lyr9=processing.run('native:saveselectedfeatures', { "INPUT": layer, "OUTPUT": "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
-
-                
+                try:
+                    QgsVectorFileWriter.deleteShapeFile(archivo3)
+                except:
+                    pass"""
 
 
-                sym1 = QgsFillSymbol.createSimple({'style': 'vertical','color': '0,0,0,0', 'outline_color': 'blue'})
-                renderer=QgsSingleSymbolRenderer(sym1)
-                #etiqueto
-                layer_settings  = QgsPalLayerSettings()
-                text_format = QgsTextFormat()
-                text_format.setFont(QFont("Arial", 12))
-                text_format.setSize(12)
-                text_format.setColor(QColor("Blue"))
-                #le meto un buffer a la etiqueta
-                buffer_settings = QgsTextBufferSettings()
-                buffer_settings.setEnabled(True)
-                buffer_settings.setSize(1)
-                buffer_settings.setColor(QColor("white"))
-
-                text_format.setBuffer(buffer_settings)
-                layer_settings.setFormat(text_format)
-            #cuenta elementos
-                elementos=len(list(lyr9.getFeatures()))
-            except:
-                elementos=0
-                
-            if elementos==0:
-                iface.messageBar().pushMessage("SIGPAC","En el municipio "+str(mun)+" poligono " +str(pol)+" no existe la parcela "+str(par), qgisCore.Qgis.Info,5)
-                
-                #QgsProject.instance().removeMapLayer(layer)
-                #canvas.freeze(False)  
-            if elementos==1 and archivo == "":
-                
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''            
-                layer_settings.isExpression = True
-                layer_settings.enabled = True
-                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                lyr9.setLabelsEnabled(True)
-                lyr9.setLabeling(layer_settings)
-                lyr9.triggerRepaint()
-                lyr9.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(lyr9)
-                #QgsProject.instance().removeMapLayer(layer)
-                #canvas.freeze(False)
-                lyr9.updateExtents()
-                lyr9.commitChanges()
-                lyr9.updateExtents()
-                canvas.setExtent(lyr9.extent())
-            if elementos>1 and recintosselecionados==False and archivo == "" :
-                
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
-                #hacer un dissolve y llamar a la capa de salida igual
-                #archivo2=os.environ['TMP']+r"/"+str(random.random())+".shp"
-               
-                #processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : archivo3, 'OUTPUT' : archivo2 })
-                lyr8=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
-                lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par) })['OUTPUT']
-
-                #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
-                lyr9.startEditing()
-
-                fields = lyr9.fields()
-                idx = fields.indexFromName('SUP_SIGPAC')
-                    
-                if idx == -1:
-                    myField = QgsField( 'SUP_SIGPAC', QVariant.Double )
-                    lyr9.dataProvider().addAttributes([myField])
-                    lyr9.updateFields()
-                    
-
-                for f in lyr9.getFeatures():
-                    f.setAttribute(f.fieldNameIndex('SUP_SIGPAC'), f.geometry().area()/10000 )
-                    #f[idx] = '"$area"*1000'
-                    lyr9.updateFeature( f )
-
-                lyr9.commitChanges()
-
-                
-                layer_settings.isExpression = True
-                layer_settings.enabled = True
-                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                #lyr9=QgsVectorLayer(archivo2,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-                lyr9.setLabelsEnabled(True)
-                lyr9.setLabeling(layer_settings)
-                lyr9.triggerRepaint()
-                lyr9.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(lyr9)
-                #QgsProject.instance().removeMapLayer(layer)
-                #canvas.freeze(False)
-                lyr9.updateExtents()
-                lyr9.commitChanges()
-                lyr9.updateExtents()
-                canvas.setExtent(lyr9.extent())
-
-                        
-                        
-            if elementos>1 and recintosselecionados==True and archivo == "":
-               
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
-                layer_settings.isExpression = True
-                layer_settings.enabled = True
-                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                lyr9.setLabelsEnabled(True)
-                lyr9.setLabeling(layer_settings)
-                lyr9.triggerRepaint()
-                lyr9.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(lyr9)
-                #QgsProject.instance().removeMapLayer(layer)
-                #canvas.freeze(False)
-                lyr9.updateExtents()
-                lyr9.commitChanges()
-                lyr9.updateExtents()
-                canvas.setExtent(lyr9.extent())
-
-            if elementos>1 and recintosselecionados==True and archivo is not "":
-                
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA",' Rec ',"C_RECINTO")'''
-                layer_settings.isExpression = True
-                layer_settings.enabled = True
-                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                #lyr9.setLabelsEnabled(True)
-                #lyr9.setLabeling(layer_settings)
-                #lyr9.triggerRepaint()
-                #lyr9.setRenderer(renderer)
-                #QgsProject.instance().addMapLayer(lyr9)
-                #QgsProject.instance().removeMapLayer(layer)
-                #canvas.freeze(False)
-             
-                QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
-                #QgsProject.instance().removeMapLayer(lyr9)
-                lyr8=QgsVectorLayer(archivo,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-                #etiqueto
-                """layer_settings  = QgsPalLayerSettings()
-                text_format = QgsTextFormat()
-                text_format.setFont(QFont("Arial", 12))
-                text_format.setSize(12)
-                text_format.setColor(QColor("Red"))
-                layer_settings.setFormat(text_format)
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
-                layer_settings.isExpression = True"""
-                #layer_settings.enabled = True
-                #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                lyr8.setLabelsEnabled(True)
-                lyr8.setLabeling(layer_settings)
-                lyr8.triggerRepaint()
-                lyr8.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(lyr8)
-                #QgsProject.instance().removeMapLayer(lyr9.id())
-                #canvas.freeze(False)
-                lyr8.updateExtents()
-                lyr8.commitChanges()
-                lyr8.updateExtents()
-                canvas.setExtent(lyr8.extent())
-
-            if elementos>1 and recintosselecionados==False and archivo is not "":
-                
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
-                #hacer un dissolve y llamar a la capa de salida igual
-    
-                lyr8=processing.run("native:dissolve",{ 'FIELD' : [], 'INPUT' : lyr9, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par)  })['OUTPUT']
-                lyr9=processing.run("qgis:deletecolumn",{ 'COLUMN' : ['L_PERIMETR','L_SUP_SIGP','DN_PK','DN_OID','DN_VERSION','DN_VERSI_1','C_RECINTO','C_USO_SIGP','C_COEF_REG','M_PENDIENT','CAP_AUTO','FACTOR_SUE','FACTOR_PEN','FACTOR_VEG','CAP_MANUAL','FECHA_CAMP','REGION','GRUPO_CULT','PORC_INT_C','PORC_INT_P','CAP_RESULT','INCIDENCIA','PARCELA_AG','C_REFREC','PROVMUN','TIPO','SPLIT','Shape_Leng','Shape_Area'], 'INPUT' : lyr8, 'OUTPUT' : "memory:"+"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par)  })['OUTPUT']
-
-                #calculo la superficie de la parcela, otra opcion seria sumar la superficie de los recintos
-                lyr9.startEditing()
-
-                fields = lyr9.fields()
-                idx = fields.indexFromName('SUP_SIGPAC')
-                    
-                if idx == -1:
-                    myField = QgsField( 'SUP_SIGPAC', QVariant.Double )
-                    lyr9.dataProvider().addAttributes([myField])
-                    lyr9.updateFields()
-                    
-
-                for f in lyr9.getFeatures():
-                    f.setAttribute(f.fieldNameIndex('SUP_SIGPAC'), f.geometry().area()/10000 )
-                    #f[idx] = '"$area"*1000'
-                    lyr9.updateFeature( f )
-
-                lyr9.commitChanges()
-                
-                layer_settings.isExpression = True
-                layer_settings.enabled = True
-                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                #lyr9=QgsVectorLayer(archivo2,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-                #lyr9.setLabelsEnabled(True)
-                #lyr9.setLabeling(layer_settings)
-                #lyr9.triggerRepaint()
-                #lyr9.setRenderer(renderer)
-                
-                QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
-                #QgsProject.instance().removeMapLayer(lyr9)
-                lyr8=QgsVectorLayer(archivo,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-                #etiqueto
-                """layer_settings  = QgsPalLayerSettings()
-                text_format = QgsTextFormat()
-                text_format.setFont(QFont("Arial", 12))
-                text_format.setSize(12)
-                text_format.setColor(QColor("Red"))
-                layer_settings.setFormat(text_format)
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
-                layer_settings.isExpression = True"""
-                #layer_settings.enabled = True
-                #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                lyr8.setLabelsEnabled(True)
-                lyr8.setLabeling(layer_settings)
-                lyr8.triggerRepaint()
-                lyr8.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(lyr8)
-                #QgsProject.instance().removeMapLayer(lyr9.id())
-                #canvas.freeze(False)
-                lyr8.updateExtents()
-                lyr8.commitChanges()
-                lyr8.updateExtents()
-                canvas.setExtent(lyr8.extent())
-            if elementos==1 and archivo is not "":
-                
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''            
-                layer_settings.isExpression = True
-                layer_settings.enabled = True
-                layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                #lyr9.setLabelsEnabled(True)
-                #lyr9.setLabeling(layer_settings)
-                #lyr9.triggerRepaint()
-                #lyr9.setRenderer(renderer)
-        
-                QgsVectorFileWriter.writeAsVectorFormat(lyr9, archivo, "CP120", lyr9.crs(), "ESRI Shapefile", onlySelected=False)
-                #QgsProject.instance().removeMapLayer(lyr9)
-                lyr8=QgsVectorLayer(archivo,"Sigpac_"+str(mun)+"_"+str(pol)+"_"+str(par),"ogr")
-                #etiqueto
-                """layer_settings  = QgsPalLayerSettings()
-                text_format = QgsTextFormat()
-                text_format.setFont(QFont("Arial", 12))
-                text_format.setSize(12)
-                text_format.setColor(QColor("Red"))
-                layer_settings.setFormat(text_format)
-                layer_settings.fieldName = '''concat('Pol ',"C_POLIGONO",' Par ',"C_PARCELA")'''
-                layer_settings.isExpression = True"""
-                #layer_settings.enabled = True
-                #layer_settings = QgsVectorLayerSimpleLabeling(layer_settings)
-                lyr8.setLabelsEnabled(True)
-                lyr8.setLabeling(layer_settings)
-                lyr8.triggerRepaint()
-                lyr8.setRenderer(renderer)
-                QgsProject.instance().addMapLayer(lyr8)
-                #QgsProject.instance().removeMapLayer(lyr9.id())
-                #canvas.freeze(False)
-                lyr8.updateExtents()
-                lyr8.commitChanges()
-                lyr8.updateExtents()
-                canvas.setExtent(lyr8.extent())
-                           
-
-
-  
-            canvas.freeze(False)
-            """try:
-                QgsVectorFileWriter.deleteShapeFile(archivo3)
-            except:
                 pass
-            try:
-                QgsVectorFileWriter.deleteShapeFile(archivo3)
-            except:
-                pass"""
-
-            
-            pass

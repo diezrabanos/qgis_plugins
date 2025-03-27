@@ -491,19 +491,6 @@ coordenadas o click en el mapa</string>
     <string>Limpiar todos los datos</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_configurar">
-   <property name="geometry">
-    <rect>
-     <x>450</x>
-     <y>60</y>
-     <width>131</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Configurar</string>
-   </property>
-  </widget>
   <widget class="QComboBox" name="cbPRO">
    <property name="geometry">
     <rect>
@@ -710,6 +697,32 @@ se haga CLICk en el mapa.</string>
    </property>
    <property name="text">
     <string>Ayuda</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="ANNO">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>60</y>
+     <width>59</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>2025</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_21">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>60</y>
+     <width>56</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>AÑO</string>
    </property>
   </widget>
  </widget>

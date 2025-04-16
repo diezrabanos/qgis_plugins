@@ -1410,7 +1410,7 @@ class Silvilidar:
                 #calculo('c3@1 / 51 + c8@1 / 52', 'resalveo1')
                 calculo('("suma@1" = 51 OR "suma@1" = 52 ) * 1','resalveo1')
                 StringToRaster(os.path.join(carpeta, troncoresumido + '_resalveo1.tif'), "resalveo1")
-                agregado2("resalveo", 30, 0.85)
+                agregado2("resalveo", 20,1) #30, 0.85)
 
 
 
@@ -1645,7 +1645,7 @@ class Silvilidar:
 
 
                     # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName =  r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
+                    fileName =  r'C:\WORK\pruebas\v2\Alt95SobreMdf_prt_cut.tif'#r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
                     Layer = QgsRasterLayer(fileName, "altura de red")
                     print("ok, layer de altura 95 de la red")
                     # recortar raster con el shape
@@ -1655,20 +1655,24 @@ class Silvilidar:
                                              'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None,
                                              'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'hm.tif')})[
                         'OUTPUT']
+                    #la linea anterior da problemas si es muy grande por el tiempo que tarda. Hacer esperar un tiempo
+                    #time.sleep(15)
 
                     #QgsProject.instance().addMapLayers([Layer])
                     layer2 = QgsRasterLayer(layer2, "altura de red")
                     #QgsProject.instance().addMapLayers([layer2])
                     print(layer2)
                     print("cargado el raster recortado de la junta")
+                    #print("comprobar si la capa es correcta ", layer2.isValid())
                     #StringToRaster(os.path.join(carpeta, 'Alt95_m_PNOA2.tif'),
                     StringToRaster(os.path.join(carpeta, 'hm.tif'),
                                    'hm')  # en teoria se sobre escribiria el raster hm@1
                     #print("creado el string to raster de h")
 
                     # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
+                    fileName = r'C:\WORK\pruebas\v2\Alt20SobreMdf_tlr_cut.tif'#r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
                     Layer = QgsRasterLayer(fileName, "altura de red")
+                    #print("comprobar si la capa es correcta ", Layer.isValid())
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
                                             {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
@@ -1677,6 +1681,9 @@ class Silvilidar:
                                              'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
                                              'OUTPUT': os.path.join(carpeta, 'hbc.tif')})[
                         'OUTPUT']
+                    #time.sleep(15)
+                    #print("comprobar si la capa es correcta ", layer2.isValid())
+
                     layer2 = QgsRasterLayer(layer2, "base copa de red")
                     # QgsProject.instance().addMapLayers([Layer])
                     print(layer2)
@@ -1686,7 +1693,7 @@ class Silvilidar:
                     print("creado el string to raster de hbc")
 
                     # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
+                    fileName = r'C:\WORK\pruebas\v2/RptoAmdk_PrimeRets_MasDe0200_cut.tif'#r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
                     Layer = QgsRasterLayer(fileName, "FCC DE RED")
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
@@ -1696,6 +1703,7 @@ class Silvilidar:
                                              'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
                                              'OUTPUT': os.path.join(carpeta, 'fcc.tif')})[
                         'OUTPUT']
+                    #time.sleep(15)
                     layer2 = QgsRasterLayer(layer2, "fcc de red")
                     # QgsProject.instance().addMapLayers([Layer])
                     print(layer2)
@@ -1716,6 +1724,7 @@ class Silvilidar:
                                              'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
                                              'OUTPUT': os.path.join(carpeta, 'fcc_matorral.tif')})[
                         'OUTPUT']
+                    time.sleep(5)
                     layer2 = QgsRasterLayer(layer2, "fcc de red")
                     # QgsProject.instance().addMapLayers([Layer])
                     print(layer2)
@@ -1932,20 +1941,21 @@ class Silvilidar:
 
 
                     #obtengo los parametros derivados
-                    calculo('100 * ( hm@1   -  hbc@1  ) / ( hm@1 )', 'rc')
+                    calculo('100 * ( (hm@1 / 100 )   -   (hbc@1 / 100 )  ) / ( (hm@1 / 100 ) )', 'rc') #ojo unidades ( hbc@1 / 100 ) divido por 100 por que la hbc viene en centimetros CM
 
                     StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
 
                     #falta sacar la lc
-                    calculo(' hm@1 - hbc@1 ', "lc")
+                    calculo(' (hm@1 / 100 ) - (hbc@1 / 100 ) ', "lc")
                     StringToRaster(os.path.join(carpeta, 'lc.tif'), "lc")
                     #falta sacar la fccmatorral
+
                     #proyecto
                     # proyecto la altura con el crecimiento
-                    calculo('(hm@1 < 6) * hm@1 + (hm@1 >= 6) * (hm@1 + ' + str(crecimiento) + ')', 'hmp')
+                    calculo('( (hm@1 / 100 ) < 6) * ( hm@1 / 100 ) + ( ( hm@1 / 100 ) >= 6) * ( ( hm@1 / 100 ) + ' + str(crecimiento) + ')', 'hmp') #ojo unidades ( hm@1 / 100 ) divido por 100 por que la hm viene en centimetros CM
                     StringToRaster(os.path.join(carpeta, 'hmp.tif'), "hmp")
                     # proyecto la altura  de la base de la copa con el crecimiento
-                    calculo('(hm@1 < 7.5) * hbc@1 + (hm@1 >= 7.5) * (hbc@1 + ' + str(crecimiento) + ')', 'hbcp')
+                    calculo('((hm@1 / 100 ) < 7.5) * (hbc@1 / 100 ) + ((hm@1 / 100 ) >= 7.5) * ((hbc@1 / 100 ) + ' + str(crecimiento) + ')', 'hbcp')
                     StringToRaster(os.path.join(carpeta, 'hbcp.tif'), "hbcp")
                     # calculo  la razon de copa una vez proyectada la altura y la base de la copa
                     calculo('100 * ( hmp@1   -  hbcp@1  ) / ( hmp@1 )', 'rcp')
@@ -2048,7 +2058,7 @@ class Silvilidar:
                         calculo('("suma@1" = 51 OR "suma@1" = 52 ) * 1', 'resalveo1')
                         StringToRaster(os.path.join(carpeta, 'resalveo1.tif'), "resalveo1")
                         #print("pixel resalveo ", QgsRasterLayer(os.path.join(carpeta, 'resalveo1.tif'), "Resalveo1").rasterUnitsPerPixelX())
-                        agregado2("resalveo", 30, 0.85)#30,0.85
+                        agregado2("resalveo", 20, 1)#30,0.85
                         layerglobal = QgsRasterLayer(os.path.join(carpeta, 'resalveo1.tif'), "Resalveo1")
                         subtexto3 = "Resalveo"
                         resalveo = QgsVectorLayer(os.path.join(carpeta, 'Resalveo3.shp'), subtexto3, "ogr")
@@ -2727,13 +2737,19 @@ class Silvilidar:
                     print("creo carpeta nueva")
                     return carpeta_nueva
                 def recorre_raster_ventanas(nombre_raster):
+                    #creo que se usa dentro y fuera.
                     global tamano
                     # print("tamano",tamano)
                     from qgis.core import QgsRectangle
-                    raster_layer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
-                    # Obtener el proveedor de datos del raster
+
+                    if self.dentro:
+                        raster_layer = QgsRasterLayer(carpeta + '/' + nombre_raster + '.tif', nombre_raster)
+                        print(carpeta + '/' + nombre_raster + '.tif')
+                    else:
+                        raster_layer = QgsRasterLayer(carpeta[:-29] + '/' + nombre_raster + '.vrt', nombre_raster)
+                        # Obtener el proveedor de datos del raster
+                        print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
                     provider = raster_layer.dataProvider()
-                    print(carpeta[:-29] + '/' + nombre_raster + '.vrt')
                     # Inicializar la lista de ventanas
                     ventanas = []
                     # Obtener el tamaño de píxel del raster
@@ -3275,143 +3291,144 @@ class Silvilidar:
 
                 if self.dentro:
                     print('dentro de la junta')
+
+                    def crea_carpeta(carpeta, carpeta_nueva):
+                        from datetime import datetime
+                        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                        carpeta_nueva = os.path.join(carpeta, f'{carpeta_nueva}_{timestamp}')
+                        os.makedirs(carpeta_nueva, exist_ok=True)
+                        print("creo carpeta nueva")
+                        return carpeta_nueva
+
+                    def calculo(expresion, capa):
+                        global layerglobal
+                        calc = QgsRasterCalculator(expresion,
+                                                   os.path.join(carpeta, capa + '.tif'),
+                                                   'GTiff',
+                                                   layerglobal.extent(),
+                                                   layerglobal.width(),
+                                                   layerglobal.height(),
+                                                   entries)
+
+                        calc.processCalculation()
+                        del (calc)
+                    print(nombre_pestaña2)
+                    # compruebo que las capas necesarias estan cargadas
+                    #como no existen las tengo que crear en tiempo real cada vez (OJO mirar si merece la pena buscar si ya existen para no tenerlo que rehacer)
+                    #creo las capas mediante recorte de las capas de la red.
+                    #hay que crear carpeta que no existe
+                    entries = []
+                    carpeta = os.path.dirname(self.dlg.ruta_zona_de_trabajo_2.text())
+                    print('carpeta1 ',carpeta)
+
+                    carpeta_nueva = carpeta + '/Silvilidar'
+                    carpeta = crea_carpeta(carpeta, 'Silvilidar')
+
+                    print("carpeta2 ", carpeta)
+                    ruta_zona_trabajo = self.dlg.ruta_zona_de_trabajo_2.text()
+                    layervectorial = QgsVectorLayer(ruta_zona_trabajo, "zona de trabajo", "ogr")
+                    contenido = os.listdir(carpeta)
+                    #carpeta_nueva = carpeta + '/Busca_similar'
+                    carpeta2 = crea_carpeta(carpeta,'Busca_similar' )
+                    print('carpeta3 ',carpeta2)
+
+                    #debo crear las capas raster dentro de la carpeta
+                    # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
+                    Layer = QgsRasterLayer(fileName, "altura de red")
+                    print("ok, layer de altura 95 de la red")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False, 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                             'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None,
+                                             'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'hm.tif')})[
+                        'OUTPUT']
+
+                    # QgsProject.instance().addMapLayers([Layer])
+                    layer2 = QgsRasterLayer(layer2, "altura de red")
+                    # QgsProject.instance().addMapLayers([layer2])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    # StringToRaster(os.path.join(carpeta, 'Alt95_m_PNOA2.tif'),
+                    StringToRaster(os.path.join(carpeta, 'hm.tif'),
+                                   'hm')  # en teoria se sobre escribiria el raster hm@1
+                    # print("creado el string to raster de h")
+
+                    # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r'C:\WORK\pruebas\v2\Alt20SobreMdf_tlr_cut.tif'#r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
+                    Layer = QgsRasterLayer(fileName, "altura de red")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False,
+                                             'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                             'SET_RESOLUTION': False,
+                                             'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                             'OUTPUT': os.path.join(carpeta, 'hbc.tif')})[
+                        'OUTPUT']
+                    layer2 = QgsRasterLayer(layer2, "base copa de red")
+                    # QgsProject.instance().addMapLayers([Layer])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    StringToRaster(os.path.join(carpeta, 'hbc.tif'),
+                                   'hbc')  # en teoria se sobre escribiria el raster hm@1
+                    print("creado el string to raster de hbc")
+
+                    # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
+                    Layer = QgsRasterLayer(fileName, "FCC DE RED")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False,
+                                             'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                             'SET_RESOLUTION': False,
+                                             'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                             'OUTPUT': os.path.join(carpeta, 'fcc.tif')})[
+                        'OUTPUT']
+                    layer2 = QgsRasterLayer(layer2, "fcc de red")
+                    # QgsProject.instance().addMapLayers([Layer])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    StringToRaster(os.path.join(carpeta, 'fcc.tif'),
+                                   'fcc')  # en teoria se sobre escribiria el raster fcc@1
+                    print("creado el string to raster de fcc")
+
+                    # cargo el fcc de matorral
+                    # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
+                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                    Layer = QgsRasterLayer(fileName, "FCC MATORRAL DE RED")
+                    # recortar raster con el shape
+                    layer2 = processing.run("gdal:cliprasterbymasklayer",
+                                            {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
+                                             'ALPHA_BAND': False,
+                                             'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
+                                             'SET_RESOLUTION': False,
+                                             'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
+                                             'OUTPUT': os.path.join(carpeta, 'fcc_matorral.tif')})[
+                        'OUTPUT']
+                    layer2 = QgsRasterLayer(layer2, "fcc de red")
+                    # QgsProject.instance().addMapLayers([Layer])
+                    print(layer2)
+                    print("cargado el raster recortado de la junta")
+                    StringToRaster(os.path.join(carpeta, 'fcc_matorral.tif'),
+                                   'fccmatorral')  # en teoria se sobre escribiria el raster fcc@1
+
+
+                    print("creado el string to raster de fcc matorral")
+                    calculo('100 * (  hm@1    -  ( hbc@1 / 100 ) ) /   hm@1  ', 'rc')
+
+                    StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
+
+                    # falta sacar la lc
+                    calculo('  hm@1  - ( hbc@1 / 100 ) ', "lc")
+                    StringToRaster(os.path.join(carpeta, 'lc.tif'), "lc")
+
+                    #hasta aqui común para todos
+
                     if nombre_pestaña2 == 'pixel_a_pixel':
-                        print(nombre_pestaña2)
-                        # compruebo que las capas necesarias estan cargadas
-                        #como no existen las tengo que crear en tiempo real cada vez (OJO mirar si merece la pena buscar si ya existen para no tenerlo que rehacer)
-                        #creo las capas mediante recorte de las capas de la red.
-                        #hay que crear carpeta que no existe
-                        entries = []
-                        carpeta = os.path.dirname(self.dlg.ruta_zona_de_trabajo_2.text())
-                        print('carpeta1 ',carpeta)
-
-                        def crea_carpeta(carpeta, carpeta_nueva):
-                            from datetime import datetime
-                            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                            carpeta_nueva = os.path.join(carpeta, f'{carpeta_nueva}_{timestamp}')
-                            os.makedirs(carpeta_nueva, exist_ok=True)
-                            print("creo carpeta nueva")
-                            return carpeta_nueva
-
-                        carpeta_nueva = carpeta + '/Silvilidar'
-                        carpeta = crea_carpeta(carpeta, 'Silvilidar')
-
-                        print("carpeta2 ", carpeta)
-                        ruta_zona_trabajo = self.dlg.ruta_zona_de_trabajo_2.text()
-                        layervectorial = QgsVectorLayer(ruta_zona_trabajo, "zona de trabajo", "ogr")
-                        contenido = os.listdir(carpeta)
-                        #carpeta_nueva = carpeta + '/Busca_similar'
-                        carpeta2 = crea_carpeta(carpeta,'Busca_similar' )
-                        print('carpeta3 ',carpeta2)
-
-                        #debo crear las capas raster dentro de la carpeta
-                        # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                        fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
-                        Layer = QgsRasterLayer(fileName, "altura de red")
-                        print("ok, layer de altura 95 de la red")
-                        # recortar raster con el shape
-                        layer2 = processing.run("gdal:cliprasterbymasklayer",
-                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
-                                                 'ALPHA_BAND': False, 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
-                                                 'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None,
-                                                 'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'hm.tif')})[
-                            'OUTPUT']
-
-                        # QgsProject.instance().addMapLayers([Layer])
-                        layer2 = QgsRasterLayer(layer2, "altura de red")
-                        # QgsProject.instance().addMapLayers([layer2])
-                        print(layer2)
-                        print("cargado el raster recortado de la junta")
-                        # StringToRaster(os.path.join(carpeta, 'Alt95_m_PNOA2.tif'),
-                        StringToRaster(os.path.join(carpeta, 'hm.tif'),
-                                       'hm')  # en teoria se sobre escribiria el raster hm@1
-                        # print("creado el string to raster de h")
-
-                        # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                        fileName = r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
-                        Layer = QgsRasterLayer(fileName, "altura de red")
-                        # recortar raster con el shape
-                        layer2 = processing.run("gdal:cliprasterbymasklayer",
-                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
-                                                 'ALPHA_BAND': False,
-                                                 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
-                                                 'SET_RESOLUTION': False,
-                                                 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                                 'OUTPUT': os.path.join(carpeta, 'hbc.tif')})[
-                            'OUTPUT']
-                        layer2 = QgsRasterLayer(layer2, "base copa de red")
-                        # QgsProject.instance().addMapLayers([Layer])
-                        print(layer2)
-                        print("cargado el raster recortado de la junta")
-                        StringToRaster(os.path.join(carpeta, 'hbc.tif'),
-                                       'hbc')  # en teoria se sobre escribiria el raster hm@1
-                        print("creado el string to raster de hbc")
-
-                        # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                        fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
-                        Layer = QgsRasterLayer(fileName, "FCC DE RED")
-                        # recortar raster con el shape
-                        layer2 = processing.run("gdal:cliprasterbymasklayer",
-                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
-                                                 'ALPHA_BAND': False,
-                                                 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
-                                                 'SET_RESOLUTION': False,
-                                                 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                                 'OUTPUT': os.path.join(carpeta, 'fcc.tif')})[
-                            'OUTPUT']
-                        layer2 = QgsRasterLayer(layer2, "fcc de red")
-                        # QgsProject.instance().addMapLayers([Layer])
-                        print(layer2)
-                        print("cargado el raster recortado de la junta")
-                        StringToRaster(os.path.join(carpeta, 'fcc.tif'),
-                                       'fcc')  # en teoria se sobre escribiria el raster fcc@1
-                        print("creado el string to raster de fcc")
-
-                        # cargo el fcc de matorral
-                        # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                        fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
-                        Layer = QgsRasterLayer(fileName, "FCC MATORRAL DE RED")
-                        # recortar raster con el shape
-                        layer2 = processing.run("gdal:cliprasterbymasklayer",
-                                                {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
-                                                 'ALPHA_BAND': False,
-                                                 'CROP_TO_CUTLINE': True, 'KEEP_RESOLUTION': False,
-                                                 'SET_RESOLUTION': False,
-                                                 'X_RESOLUTION': None, 'Y_RESOLUTION': None, 'DATA_TYPE': 0,
-                                                 'OUTPUT': os.path.join(carpeta, 'fcc_matorral.tif')})[
-                            'OUTPUT']
-                        layer2 = QgsRasterLayer(layer2, "fcc de red")
-                        # QgsProject.instance().addMapLayers([Layer])
-                        print(layer2)
-                        print("cargado el raster recortado de la junta")
-                        StringToRaster(os.path.join(carpeta, 'fcc_matorral.tif'),
-                                       'fccmatorral')  # en teoria se sobre escribiria el raster fcc@1
-
-                        def calculo(expresion, capa):
-                            global layerglobal
-                            calc = QgsRasterCalculator(expresion,
-                                                       os.path.join(carpeta, capa + '.tif'),
-                                                       'GTiff',
-                                                       layerglobal.extent(),
-                                                       layerglobal.width(),
-                                                       layerglobal.height(),
-                                                       entries)
-
-                            calc.processCalculation()
-                            del (calc)
-                        print("creado el string to raster de fcc matorral")
-                        calculo('100 * ( hm@1   -  hbc@1  ) / ( hm@1 )', 'rc')
-
-                        StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
-
-                        # falta sacar la lc
-                        calculo(' hm@1 - hbc@1 ', "lc")
-                        StringToRaster(os.path.join(carpeta, 'lc.tif'), "lc")
-
-
-
-
-
+                        print("empiezo pixel a pixel dentro de la junta")
                         coef_hm = float(self.dlg.coef_hm1.text().replace(',', '.'))
                         coef_hbc = float(self.dlg.coef_hbc1.text().replace(',', '.'))
                         coef_rc = float(self.dlg.coef_rc1.text().replace(',', '.'))
@@ -3595,6 +3612,297 @@ class Silvilidar:
                         # lo mismo pero para las zonas similares segun histogramas
                         # busca las celdas que encuentran lo anterior (multiplica)
                         # multiplicado = multiplica_rasters(filtrado_de_interes2)
+
+                    if nombre_pestaña2 == 'por_zonas':
+
+                        print("llego a por zonas")
+                        print(nombre_pestaña2)
+                        # compruebo que las capas necesarias estan cargadas
+                        # contenido = os.listdir(carpeta)
+                        """if 'Teselas_merged.shp' not in contenido:
+                            iface.messageBar().pushMessage("Error",
+                                                           "Antes de buscar zonas similares hay que ejecutar la primera pestaña de Silvilidar",
+                                                           duration=15)"""
+                        # else:
+                        #carpeta_nueva = carpeta + '/Busca_similar'
+
+                        #carpeta = crea_carpeta(carpeta, carpeta_nueva)
+                        print(carpeta)
+                        # lo quito porque aqui no hay coeficientes, me servira despues para configurar el grado de similitud
+                        coef_hm = 1  # float(self.dlg.coef_hm2.text().replace(',', '.'))
+                        coef_hbc = 1  # float(self.dlg.coef_hbc2.text().replace(',', '.'))
+                        coef_rc = 1  # float(self.dlg.coef_rc2.text().replace(',', '.'))
+                        coef_lc = 1  # float(self.dlg.coef_lc2.text().replace(',', '.'))
+                        coef_fcc = 1  # float(self.dlg.coef_fcc2.text().replace(',', '.'))
+                        coef_fcc_m = 1  # float(self.dlg.coef_matorral2.text().replace(',', '.'))
+                        ruta_muestra = self.dlg.ruta_muestra_similar.text()
+                        correlacion = float(self.dlg.coeficiente_correlacion.text().replace(',', '.'))
+                        solape = float(self.dlg.solape.text().replace(',', '.'))
+                        capas_raster_de_interes2 = []  # para comparacion de pixeles
+                        if self.dlg.checkBox_hm2.isChecked():
+                            capas_raster_de_interes2.append('HM')
+                        if self.dlg.checkBox_hbc2.isChecked():
+                            capas_raster_de_interes2.append('HBC')
+                        if self.dlg.checkBox_lc2.isChecked():
+                            capas_raster_de_interes2.append('LC')
+                        if self.dlg.checkBox_rc2.isChecked():
+                            capas_raster_de_interes2.append('RC')
+                        if self.dlg.checkBox_fcc2.isChecked():
+                            capas_raster_de_interes2.append('FCC')
+                        if self.dlg.checkBox_matorral2.isChecked():
+                            capas_raster_de_interes2.append('FCC_MATORRAL')
+                        mapcanvas = iface.mapCanvas()
+                        """# capa vectorial
+                        layers = mapcanvas.layers()
+                        # layervectorial = qgis.utils.iface.activeLayer() # si trabajas interactivamente
+                        layervectorial = QgsVectorLayer(ruta_muestra, "muestra", "ogr")
+                        feats = [feat for feat in
+                                 layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]"""
+                        mapcanvas = iface.mapCanvas()
+                        # capa vectorial
+                        layers = mapcanvas.layers()
+                        # layervectorial = qgis.utils.iface.activeLayer() # si trabajas interactivamente
+                        layervectorial = QgsVectorLayer(ruta_muestra, "muestra", "ogr")
+                        feats = [feat for feat in
+                                 layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]
+
+                        print('capas_raster_de_interes2 ', capas_raster_de_interes2)
+                        print(nombre_pestaña2)
+                        print(capas_raster_de_interes2)
+                        # ojo de aqui en adelante modificar
+                        tablas_de_interes2 = []
+                        graficas_de_interes2 = []
+                        filtrado_de_interes2 = []  # pixeles similares
+                        for nombre in capas_raster_de_interes2:
+                            if nombre == 'HM':
+                                resultado_hm = saca_valores_raster(nombre, feats)
+                                resultado_hm_simplificado = simplificar_lista(resultado_hm[0])
+                                print("he sacado los valores de HM simplificado")
+                                tabla_hm = crea_tabla(resultado_hm)
+                                tablas_de_interes2.append(tabla_hm)
+                                grafica_hm = grafica_histograma(resultado_hm_simplificado,
+                                                                estadisticas_lista(resultado_hm_simplificado, coef_hm)[
+                                                                    0][0],
+                                                                estadisticas_lista(resultado_hm_simplificado, coef_hm)[
+                                                                    0][1], "hm")
+                                graficas_de_interes2.append(grafica_hm)
+                                filtrado_hm = filtro_raster_intervalo(nombre,
+                                                                      estadisticas_lista(resultado_hm_simplificado,
+                                                                                         coef_hm)[0])
+                                filtrado_de_interes2.append(filtrado_hm)
+                                # comparable=np.array([6,7,8,8,8,10,10,10,10,10,11,11,11,11])
+                                # nuevo=compara_histogramas(resultado_hm_simplificado,comparable)
+                                print("Analisis de histogramas de HM")
+                                recorre_raster_ventanas(
+                                    nombre)  # , 12)#a mayor numero menos numero de ventanas. es el tamano de las ventanas en numero de pixeles
+
+                            if nombre == 'HBC':
+                                resultado_hbc = saca_valores_raster(nombre, feats)
+                                resultado_hbc_simplificado = simplificar_lista(resultado_hbc[0])
+                                tabla_hbc = crea_tabla(resultado_hbc)
+                                tablas_de_interes2.append(tabla_hbc)
+                                grafica_hbc = grafica_histograma(resultado_hbc_simplificado,
+                                                                 estadisticas_lista(resultado_hbc_simplificado,
+                                                                                    coef_hbc)[0][0],
+                                                                 estadisticas_lista(resultado_hbc_simplificado,
+                                                                                    coef_hbc)[0][1], "hbc")
+                                graficas_de_interes2.append(grafica_hbc)
+                                filtrado_hbc = filtro_raster_intervalo(nombre,
+                                                                       estadisticas_lista(resultado_hbc_simplificado,
+                                                                                          coef_hbc)[0])
+                                filtrado_de_interes2.append(filtrado_hbc)
+                                print("Analisis de histogramas de HBC")
+                                recorre_raster_ventanas(nombre)
+                            if nombre == 'LC':
+                                resultado_lc = saca_valores_raster(nombre, feats)
+                                resultado_lc_simplificado = simplificar_lista(resultado_lc[0])
+                                tabla_lc = crea_tabla(resultado_lc)
+                                tablas_de_interes2.append(tabla_lc)
+                                grafica_lc = grafica_histograma(resultado_lc_simplificado,
+                                                                estadisticas_lista(resultado_lc_simplificado, coef_lc)[
+                                                                    0][0],
+                                                                estadisticas_lista(resultado_lc_simplificado, coef_lc)[
+                                                                    0][1], "lc")
+                                graficas_de_interes2.append(grafica_lc)
+                                filtrado_lc = filtro_raster_intervalo(nombre,
+                                                                      estadisticas_lista(resultado_lc_simplificado,
+                                                                                         coef_lc)[0])
+                                filtrado_de_interes2.append(filtrado_lc)
+                                print("Analisis de histogramas de LC")
+                                recorre_raster_ventanas(nombre)
+                            if nombre == 'RC':
+                                resultado_rc = saca_valores_raster(nombre, feats)
+                                resultado_rc_simplificado = simplificar_lista(resultado_rc[0])
+                                tabla_rc = crea_tabla(resultado_rc)
+                                tablas_de_interes2.append(tabla_rc)
+                                grafica_rc = grafica_histograma(resultado_rc_simplificado,
+                                                                estadisticas_lista(resultado_rc_simplificado, coef_rc)[
+                                                                    0][0],
+                                                                estadisticas_lista(resultado_rc_simplificado, coef_rc)[
+                                                                    0][1], "rc")
+                                graficas_de_interes2.append(grafica_rc)
+                                filtrado_rc = filtro_raster_intervalo(nombre,
+                                                                      estadisticas_lista(resultado_rc_simplificado,
+                                                                                         coef_rc)[0])
+                                filtrado_de_interes2.append(filtrado_rc)
+                                print("Analisis de histogramas de LC")
+                                recorre_raster_ventanas(nombre)
+                            if nombre == 'FCC':
+                                resultado_fcc = saca_valores_raster(nombre, feats)
+                                resultado_fcc_simplificado = simplificar_lista(resultado_fcc[0])
+                                tabla_fcc = crea_tabla(resultado_fcc)
+                                tablas_de_interes2.append(tabla_fcc)
+                                grafica_fcc = grafica_histograma(resultado_fcc_simplificado,
+                                                                 estadisticas_lista(resultado_fcc_simplificado,
+                                                                                    coef_fcc)[0][0],
+                                                                 estadisticas_lista(resultado_fcc_simplificado,
+                                                                                    coef_fcc)[0][1], "fcc")
+                                graficas_de_interes2.append(grafica_fcc)
+                                filtrado_fcc = filtro_raster_intervalo(nombre,
+                                                                       estadisticas_lista(resultado_fcc_simplificado,
+                                                                                          coef_fcc)[0])
+                                filtrado_de_interes2.append(filtrado_fcc)
+                                print("Analisis de histogramas de FCC")
+                                recorre_raster_ventanas(nombre)
+                            if nombre == 'FCC_MATORRAL':
+                                resultado_fcc_m = saca_valores_raster(nombre, feats)
+                                resultado_fcc_m_simplificado = simplificar_lista(resultado_fcc_m[0])
+                                tabla_fcc_m = crea_tabla(resultado_fcc_m)
+                                tablas_de_interes2.append(tabla_fcc_m)
+                                grafica_fcc_m = grafica_histograma(resultado_fcc_m_simplificado,
+                                                                   estadisticas_lista(resultado_fcc_m_simplificado,
+                                                                                      coef_fcc)[0][0],
+                                                                   estadisticas_lista(resultado_fcc_m_simplificado,
+                                                                                      coef_fcc)[0][1], "fcc_m")
+                                graficas_de_interes2.append(grafica_fcc_m)
+                                filtrado_fcc_m = filtro_raster_intervalo(nombre,
+                                                                         estadisticas_lista(
+                                                                             resultado_fcc_m_simplificado, coef_fcc_m)[
+                                                                             0])
+                                filtrado_de_interes2.append(filtrado_fcc_m)
+                                print("Analisis de histogramas de FCC_MATORRAL")
+                                recorre_raster_ventanas(nombre)
+                        print(capas_raster_de_interes2)
+                        print(filtrado_de_interes2)
+                        crea_html(capas_raster_de_interes2, tablas_de_interes2,
+                                  graficas_de_interes2)  # igual hay que hacer una modificacion para que no pinte los rangos en rojo, porque en este caso no tiene sentido
+
+                        # print(resultado)
+                        # epsg = layervectorial.crs().postgisSrid()
+
+                        # busca las celdas que encuentran lo anterior (multiplica)
+                        multiplicado = multiplica_rasters(filtrado_de_interes2)
+                        # elimino las capas que he cargado durante el proceso
+                        capas = QgsProject.instance().mapLayers()
+                        for capa in capas:
+                            if capa not in capasoriginales:
+                                QgsProject.instance().removeMapLayers([capa])
+                        # cargo la capa de poligonos con las zonas similares
+
+                        # vlayer = QgsVectorLayer(os.path.join(carpeta, 'similares.shp'), 'Zonas con histograma similar', "ogr")
+
+                        # Añadir la capa al proyecto actual (opcional)
+                        # QgsProject.instance().addMapLayer(vlayer)
+                        # raster = agrega(multiplicado)
+                        # raster = agrega2(multiplicado,10,0.49)
+                        # vectorizar(raster, carpeta + "similar3.shp")
+
+                        # miro que capas vectoriales he creado y no estan vacias y hago la interseccion entre ellas. El resultado despues lo disuelvo.
+                        rutas_capas_salida = []
+                        for nombre_raster in capas_raster_de_interes2:
+                            ruta = carpeta + f"/similares_{nombre_raster}.shp"
+                            rutas_capas_salida.append(ruta)
+                        if len(rutas_capas_salida) == 0:
+                            print("no hay nada que intersectar")
+                        if len(rutas_capas_salida) == 1:
+                            print("no hago intersecccion, solo hay una capa y es lo que devuelvo")
+                            print(rutas_capas_salida[0])
+
+                            resultado0 = QgsVectorLayer(rutas_capas_salida[0], "Zonas similares por histograma", "ogr")
+
+                            disuelto = processing.run("native:dissolve",
+                                                      {'INPUT': resultado0,
+                                                       'FIELD': ['DN'],
+                                                       'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
+                            QgsVectorFileWriter.writeAsVectorFormat(disuelto,
+                                                                    carpeta + '/Zonas_similares_por_histograma.shp',
+                                                                    "CP120", disuelto.crs(),
+                                                                    "ESRI Shapefile")
+                            resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
+                                                       "Zonas similares por histograma", "ogr")
+                        if len(rutas_capas_salida) == 2:
+                            print("hago interseccion de dos capas")
+                            capa1 = QgsVectorLayer(rutas_capas_salida[0], "capa1", "ogr")
+                            capa2 = QgsVectorLayer(rutas_capas_salida[1], "capa2", "ogr")
+
+                            interseccion = processing.run("native:intersection",
+                                                          {'INPUT': capa1,
+                                                           'OVERLAY': capa2,
+                                                           'OUTPUT': 'TEMPORARY_OUTPUT'})
+                            print('interseccion', interseccion['OUTPUT'])
+
+                            disuelto = processing.run("native:dissolve",
+                                                      {'INPUT': interseccion['OUTPUT'],
+                                                       'FIELD': ['DN'],
+                                                       'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
+                            QgsVectorFileWriter.writeAsVectorFormat(disuelto,
+                                                                    carpeta + '/Zonas_similares_por_histograma.shp',
+                                                                    "CP120", capa1.crs(),
+                                                                    "ESRI Shapefile")
+                            resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
+                                                       "Zonas similares por histograma", "ogr")
+                        """if len(rutas_capas_salida)==3:
+                            print("hago interseccion de tres capas")
+                            capa1 = QgsVectorLayer(rutas_capas_salida[0], "capa1", "ogr")
+                            capa2 = QgsVectorLayer(rutas_capas_salida[1], "capa2", "ogr")
+                            capa3 = QgsVectorLayer(rutas_capas_salida[2], "capa3", "ogr")
+
+                            interseccion0 = processing.run("native:intersection",
+                                {'INPUT': capa1,
+                                'OVERLAY': capa2,
+                                'OUTPUT': 'TEMPORARY_OUTPUT'})
+                            print('interseccion',interseccion0['OUTPUT'])
+                            interseccion = processing.run("native:intersection",
+                                                           {'INPUT': interseccion0['OUTPUT'],
+                                                            'OVERLAY': capa3,
+                                                            'OUTPUT': 'TEMPORARY_OUTPUT'})
+                            disuelto = processing.run("native:dissolve",
+                                {'INPUT': interseccion['OUTPUT'],
+                                'FIELD': ['DN'],
+                                'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
+                            QgsVectorFileWriter.writeAsVectorFormat(disuelto, carpeta + '/Zonas_similares_por_histograma.shp', "CP120", capa1.crs(),
+                                                                    "ESRI Shapefile")
+                            resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp', "Zonas similares por histograma", "ogr")"""
+                        if 3 <= len(rutas_capas_salida) <= 6:
+                            print(f"hago interseccion de {len(rutas_capas_salida)} capas")
+                            capas = [QgsVectorLayer(ruta, f"capa{i + 1}", "ogr") for i, ruta in
+                                     enumerate(rutas_capas_salida)]
+
+                            interseccion = capas[0]
+                            for i in range(1, len(capas)):
+                                interseccion = processing.run("native:intersection", {
+                                    'INPUT': interseccion,
+                                    'OVERLAY': capas[i],
+                                    'OUTPUT': 'TEMPORARY_OUTPUT'
+                                })['OUTPUT']
+
+                            disuelto = processing.run("native:dissolve", {
+                                'INPUT': interseccion,
+                                'FIELD': ['DN'],
+                                'OUTPUT': 'TEMPORARY_OUTPUT'
+                            })['OUTPUT']
+
+                            QgsVectorFileWriter.writeAsVectorFormat(disuelto,
+                                                                    carpeta + '/Zonas_similares_por_histograma.shp',
+                                                                    "CP120", capas[0].crs(), "ESRI Shapefile")
+                            resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
+                                                       "Zonas similares por histograma", "ogr")
+
+                            # lyr = QgsVectorLayer(carpeta + '/disuelto.shp', "Zonas similares", "ogr")
+                        #print("voy a aplicar la simbologia en linea 3893")
+                        #resultado.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
+                        QgsProject.instance().addMapLayer(resultado)
+                        #print("capa cargada")
                 else:
                     print('FUERA de la junta')
                     carpeta = self.dlg.carpetalaz.text()
@@ -3604,20 +3912,20 @@ class Silvilidar:
 
 
 
-                if carpeta == '':
-                    iface.messageBar().pushMessage("Error",
-                                                   "Debe seleccionar la carpeta con los datos LiDAR ya procesados",
-                                                   duration=15)
-                else:
-                    if nombre_pestaña2 == 'pixel_a_pixel':
-                        print(nombre_pestaña2)
-                        # compruebo que las capas necesarias estan cargadas
-                        contenido = os.listdir(carpeta)
-                        if 'Teselas_merged.shp' not in contenido:
-                            iface.messageBar().pushMessage("Error",
-                                                           "Antes de buscar zonas similares hay que ejecutar la primera pestaña de Silvilidar",
-                                                           duration=15)
-                        else:
+                    if carpeta == '':
+                        iface.messageBar().pushMessage("Error",
+                                                       "Debe seleccionar la carpeta con los datos LiDAR ya procesados",
+                                                       duration=15)
+                    else:
+                        if nombre_pestaña2 == 'pixel_a_pixel':
+                            print(nombre_pestaña2)
+                            # compruebo que las capas necesarias estan cargadas
+                            """contenido = os.listdir(carpeta)
+                            if 'Teselas_merged.shp' not in contenido:
+                                iface.messageBar().pushMessage("Error",
+                                                               "Antes de buscar zonas similares hay que ejecutar la primera pestaña de Silvilidar",
+                                                               duration=15)
+                            else:"""
 
                             carpeta_nueva = carpeta + '/Busca_similar'
 
@@ -3819,26 +4127,22 @@ class Silvilidar:
                             #lo mismo pero para las zonas similares segun histogramas
                             # busca las celdas que encuentran lo anterior (multiplica)
                             #multiplicado = multiplica_rasters(filtrado_de_interes2)
-                    print(nombre_pestaña2)
-                    if nombre_pestaña2 == 'por_zonas':
+                        print(nombre_pestaña2)
+                        if nombre_pestaña2 == 'por_zonas':
 
-                            print("llego a por zonas")
-                            print(nombre_pestaña2)
-                            # compruebo que las capas necesarias estan cargadas
-                            contenido = os.listdir(carpeta)
-                            if 'Teselas_merged.shp' not in contenido:
-                                iface.messageBar().pushMessage("Error",
-                                                               "Antes de buscar zonas similares hay que ejecutar la primera pestaña de Silvilidar",
-                                                               duration=15)
-                            else:
-                                print("creo carpeta similar")
+                                print("llego a por zonas")
+                                print(nombre_pestaña2)
+                                # compruebo que las capas necesarias estan cargadas
+                                #contenido = os.listdir(carpeta)
+                                """if 'Teselas_merged.shp' not in contenido:
+                                    iface.messageBar().pushMessage("Error",
+                                                                   "Antes de buscar zonas similares hay que ejecutar la primera pestaña de Silvilidar",
+                                                                   duration=15)"""
+                                #else:
                                 carpeta_nueva = carpeta + '/Busca_similar'
 
-
-
                                 carpeta = crea_carpeta(carpeta, carpeta_nueva)
-                                print("carpeta", carpeta)
-                                print("carpeta-29", carpeta[:-29])
+                                print(carpeta)
                                 #lo quito porque aqui no hay coeficientes, me servira despues para configurar el grado de similitud
                                 coef_hm = 1#float(self.dlg.coef_hm2.text().replace(',', '.'))
                                 coef_hbc = 1#float(self.dlg.coef_hbc2.text().replace(',', '.'))
@@ -3862,6 +4166,13 @@ class Silvilidar:
                                     capas_raster_de_interes2.append('FCC')
                                 if self.dlg.checkBox_matorral2.isChecked():
                                     capas_raster_de_interes2.append('FCC_MATORRAL')
+                                mapcanvas = iface.mapCanvas()
+                                """# capa vectorial
+                                layers = mapcanvas.layers()
+                                # layervectorial = qgis.utils.iface.activeLayer() # si trabajas interactivamente
+                                layervectorial = QgsVectorLayer(ruta_muestra, "muestra", "ogr")
+                                feats = [feat for feat in
+                                         layervectorial.getFeatures()]  # [ feat for feat in layers[0].getFeatures() ]"""
                                 mapcanvas = iface.mapCanvas()
                                 # capa vectorial
                                 layers = mapcanvas.layers()
@@ -3985,126 +4296,127 @@ class Silvilidar:
                                     filtrado_de_interes2.append(filtrado_fcc_m)
                                     print("Analisis de histogramas de FCC_MATORRAL")
                                     recorre_raster_ventanas(nombre)
-                            print(capas_raster_de_interes2)
-                            print(filtrado_de_interes2)
-                            crea_html(capas_raster_de_interes2, tablas_de_interes2,
-                                      graficas_de_interes2)#igual hay que hacer una modificacion para que no pinte los rangos en rojo, porque en este caso no tiene sentido
+                                print(capas_raster_de_interes2)
+                                print(filtrado_de_interes2)
+                                crea_html(capas_raster_de_interes2, tablas_de_interes2,
+                                          graficas_de_interes2)#igual hay que hacer una modificacion para que no pinte los rangos en rojo, porque en este caso no tiene sentido
 
-                            # print(resultado)
-                            # epsg = layervectorial.crs().postgisSrid()
+                                # print(resultado)
+                                # epsg = layervectorial.crs().postgisSrid()
 
 
-                            # busca las celdas que encuentran lo anterior (multiplica)
-                            multiplicado = multiplica_rasters(filtrado_de_interes2)
-                            # elimino las capas que he cargado durante el proceso
-                            capas = QgsProject.instance().mapLayers()
-                            for capa in capas:
-                                if capa not in capasoriginales:
-                                    QgsProject.instance().removeMapLayers([capa])
-                            #cargo la capa de poligonos con las zonas similares
+                                # busca las celdas que encuentran lo anterior (multiplica)
+                                multiplicado = multiplica_rasters(filtrado_de_interes2)
+                                # elimino las capas que he cargado durante el proceso
+                                capas = QgsProject.instance().mapLayers()
+                                for capa in capas:
+                                    if capa not in capasoriginales:
+                                        QgsProject.instance().removeMapLayers([capa])
+                                #cargo la capa de poligonos con las zonas similares
 
-                            #vlayer = QgsVectorLayer(os.path.join(carpeta, 'similares.shp'), 'Zonas con histograma similar', "ogr")
+                                #vlayer = QgsVectorLayer(os.path.join(carpeta, 'similares.shp'), 'Zonas con histograma similar', "ogr")
 
-                            # Añadir la capa al proyecto actual (opcional)
-                            #QgsProject.instance().addMapLayer(vlayer)
-                            #raster = agrega(multiplicado)
-                            #raster = agrega2(multiplicado,10,0.49)
-                            #vectorizar(raster, carpeta + "similar3.shp")
+                                # Añadir la capa al proyecto actual (opcional)
+                                #QgsProject.instance().addMapLayer(vlayer)
+                                #raster = agrega(multiplicado)
+                                #raster = agrega2(multiplicado,10,0.49)
+                                #vectorizar(raster, carpeta + "similar3.shp")
 
-                            #miro que capas vectoriales he creado y no estan vacias y hago la interseccion entre ellas. El resultado despues lo disuelvo.
-                            rutas_capas_salida=[]
-                            for nombre_raster in capas_raster_de_interes2:
-                                ruta = carpeta + f"/similares_{nombre_raster}.shp"
-                                rutas_capas_salida.append(ruta)
-                            if len(rutas_capas_salida)==0:
-                                print("no hay nada que intersectar")
-                            if len(rutas_capas_salida)==1:
-                                print("no hago intersecccion, solo hay una capa y es lo que devuelvo")
-                                print(rutas_capas_salida[0])
+                                #miro que capas vectoriales he creado y no estan vacias y hago la interseccion entre ellas. El resultado despues lo disuelvo.
+                                rutas_capas_salida=[]
+                                for nombre_raster in capas_raster_de_interes2:
+                                    ruta = carpeta + f"/similares_{nombre_raster}.shp"
+                                    rutas_capas_salida.append(ruta)
+                                if len(rutas_capas_salida)==0:
+                                    print("no hay nada que intersectar")
+                                if len(rutas_capas_salida)==1:
+                                    print("no hago intersecccion, solo hay una capa y es lo que devuelvo")
+                                    print(rutas_capas_salida[0])
 
-                                resultado0 = QgsVectorLayer(rutas_capas_salida[0], "Zonas similares por histograma", "ogr")
+                                    resultado0 = QgsVectorLayer(rutas_capas_salida[0], "Zonas similares por histograma", "ogr")
 
-                                disuelto = processing.run("native:dissolve",
-                                                          {'INPUT': resultado0,
-                                                           'FIELD': ['DN'],
-                                                           'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
-                                QgsVectorFileWriter.writeAsVectorFormat(disuelto,
-                                                                        carpeta + '/Zonas_similares_por_histograma.shp',
-                                                                        "CP120", disuelto.crs(),
-                                                                        "ESRI Shapefile")
-                                resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
-                                                           "Zonas similares por histograma", "ogr")
-                            if len(rutas_capas_salida)==2:
-                                print("hago interseccion de dos capas")
-                                capa1 = QgsVectorLayer(rutas_capas_salida[0], "capa1", "ogr")
-                                capa2 = QgsVectorLayer(rutas_capas_salida[1], "capa2", "ogr")
+                                    disuelto = processing.run("native:dissolve",
+                                                              {'INPUT': resultado0,
+                                                               'FIELD': ['DN'],
+                                                               'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
+                                    QgsVectorFileWriter.writeAsVectorFormat(disuelto,
+                                                                            carpeta + '/Zonas_similares_por_histograma.shp',
+                                                                            "CP120", disuelto.crs(),
+                                                                            "ESRI Shapefile")
+                                    resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
+                                                               "Zonas similares por histograma", "ogr")
+                                if len(rutas_capas_salida)==2:
+                                    print("hago interseccion de dos capas")
+                                    capa1 = QgsVectorLayer(rutas_capas_salida[0], "capa1", "ogr")
+                                    capa2 = QgsVectorLayer(rutas_capas_salida[1], "capa2", "ogr")
 
-                                interseccion = processing.run("native:intersection",
-                                    {'INPUT': capa1,
-                                    'OVERLAY': capa2,
-                                    'OUTPUT': 'TEMPORARY_OUTPUT'})
-                                print('interseccion',interseccion['OUTPUT'])
+                                    interseccion = processing.run("native:intersection",
+                                        {'INPUT': capa1,
+                                        'OVERLAY': capa2,
+                                        'OUTPUT': 'TEMPORARY_OUTPUT'})
+                                    print('interseccion',interseccion['OUTPUT'])
 
-                                disuelto = processing.run("native:dissolve",
-                                    {'INPUT': interseccion['OUTPUT'],
-                                    'FIELD': ['DN'],
-                                    'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
-                                QgsVectorFileWriter.writeAsVectorFormat(disuelto, carpeta + '/Zonas_similares_por_histograma.shp', "CP120", capa1.crs(),
-                                                                        "ESRI Shapefile")
-                                resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
-                                                           "Zonas similares por histograma", "ogr")
-                            """if len(rutas_capas_salida)==3:
-                                print("hago interseccion de tres capas")
-                                capa1 = QgsVectorLayer(rutas_capas_salida[0], "capa1", "ogr")
-                                capa2 = QgsVectorLayer(rutas_capas_salida[1], "capa2", "ogr")
-                                capa3 = QgsVectorLayer(rutas_capas_salida[2], "capa3", "ogr")
+                                    disuelto = processing.run("native:dissolve",
+                                        {'INPUT': interseccion['OUTPUT'],
+                                        'FIELD': ['DN'],
+                                        'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
+                                    QgsVectorFileWriter.writeAsVectorFormat(disuelto, carpeta + '/Zonas_similares_por_histograma.shp', "CP120", capa1.crs(),
+                                                                            "ESRI Shapefile")
+                                    resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
+                                                               "Zonas similares por histograma", "ogr")
+                                """if len(rutas_capas_salida)==3:
+                                    print("hago interseccion de tres capas")
+                                    capa1 = QgsVectorLayer(rutas_capas_salida[0], "capa1", "ogr")
+                                    capa2 = QgsVectorLayer(rutas_capas_salida[1], "capa2", "ogr")
+                                    capa3 = QgsVectorLayer(rutas_capas_salida[2], "capa3", "ogr")
+    
+                                    interseccion0 = processing.run("native:intersection",
+                                        {'INPUT': capa1,
+                                        'OVERLAY': capa2,
+                                        'OUTPUT': 'TEMPORARY_OUTPUT'})
+                                    print('interseccion',interseccion0['OUTPUT'])
+                                    interseccion = processing.run("native:intersection",
+                                                                   {'INPUT': interseccion0['OUTPUT'],
+                                                                    'OVERLAY': capa3,
+                                                                    'OUTPUT': 'TEMPORARY_OUTPUT'})
+                                    disuelto = processing.run("native:dissolve",
+                                        {'INPUT': interseccion['OUTPUT'],
+                                        'FIELD': ['DN'],
+                                        'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
+                                    QgsVectorFileWriter.writeAsVectorFormat(disuelto, carpeta + '/Zonas_similares_por_histograma.shp', "CP120", capa1.crs(),
+                                                                            "ESRI Shapefile")
+                                    resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp', "Zonas similares por histograma", "ogr")"""
+                                if 3 <= len(rutas_capas_salida) <= 6:
+                                    print(f"hago interseccion de {len(rutas_capas_salida)} capas")
+                                    capas = [QgsVectorLayer(ruta, f"capa{i + 1}", "ogr") for i, ruta in
+                                             enumerate(rutas_capas_salida)]
 
-                                interseccion0 = processing.run("native:intersection",
-                                    {'INPUT': capa1,
-                                    'OVERLAY': capa2,
-                                    'OUTPUT': 'TEMPORARY_OUTPUT'})
-                                print('interseccion',interseccion0['OUTPUT'])
-                                interseccion = processing.run("native:intersection",
-                                                               {'INPUT': interseccion0['OUTPUT'],
-                                                                'OVERLAY': capa3,
-                                                                'OUTPUT': 'TEMPORARY_OUTPUT'})
-                                disuelto = processing.run("native:dissolve",
-                                    {'INPUT': interseccion['OUTPUT'],
-                                    'FIELD': ['DN'],
-                                    'OUTPUT': 'TEMPORARY_OUTPUT'})['OUTPUT']
-                                QgsVectorFileWriter.writeAsVectorFormat(disuelto, carpeta + '/Zonas_similares_por_histograma.shp', "CP120", capa1.crs(),
-                                                                        "ESRI Shapefile")
-                                resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp', "Zonas similares por histograma", "ogr")"""
-                            if 3 <= len(rutas_capas_salida) <= 6:
-                                print(f"hago interseccion de {len(rutas_capas_salida)} capas")
-                                capas = [QgsVectorLayer(ruta, f"capa{i + 1}", "ogr") for i, ruta in
-                                         enumerate(rutas_capas_salida)]
+                                    interseccion = capas[0]
+                                    for i in range(1, len(capas)):
+                                        interseccion = processing.run("native:intersection", {
+                                            'INPUT': interseccion,
+                                            'OVERLAY': capas[i],
+                                            'OUTPUT': 'TEMPORARY_OUTPUT'
+                                        })['OUTPUT']
 
-                                interseccion = capas[0]
-                                for i in range(1, len(capas)):
-                                    interseccion = processing.run("native:intersection", {
+                                    disuelto = processing.run("native:dissolve", {
                                         'INPUT': interseccion,
-                                        'OVERLAY': capas[i],
+                                        'FIELD': ['DN'],
                                         'OUTPUT': 'TEMPORARY_OUTPUT'
                                     })['OUTPUT']
 
-                                disuelto = processing.run("native:dissolve", {
-                                    'INPUT': interseccion,
-                                    'FIELD': ['DN'],
-                                    'OUTPUT': 'TEMPORARY_OUTPUT'
-                                })['OUTPUT']
-
-                                QgsVectorFileWriter.writeAsVectorFormat(disuelto,
-                                                                        carpeta + '/Zonas_similares_por_histograma.shp',
-                                                                        "CP120", capas[0].crs(), "ESRI Shapefile")
-                                resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
-                                                           "Zonas similares por histograma", "ogr")
+                                    QgsVectorFileWriter.writeAsVectorFormat(disuelto,
+                                                                            carpeta + '/Zonas_similares_por_histograma.shp',
+                                                                            "CP120", capas[0].crs(), "ESRI Shapefile")
+                                    resultado = QgsVectorLayer(carpeta + '/Zonas_similares_por_histograma.shp',
+                                                               "Zonas similares por histograma", "ogr")
 
 
 
-                                #lyr = QgsVectorLayer(carpeta + '/disuelto.shp', "Zonas similares", "ogr")
-                                #lyr.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
-                            QgsProject.instance().addMapLayer(resultado)
+                                    #lyr = QgsVectorLayer(carpeta + '/disuelto.shp', "Zonas similares", "ogr")
+                                resultado.loadNamedStyle(os.path.dirname(__file__) + '/styles/similar3.qml')
+                                print("voy a aplicar la simbologia en linea 4409")
+                                QgsProject.instance().addMapLayer(resultado)
 
 
 

@@ -341,7 +341,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="pixel_a_pixel">
       <attribute name="title">
@@ -652,7 +652,7 @@ desde la realización del vuelo LiDAR.</string>
         </rect>
        </property>
        <property name="text">
-        <string>Diferencia con la muestra (entre 0,05 y 0,30)</string>
+        <string>Diferencia con la muestra (entre 0,05 y 0,60)</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_11">
@@ -693,7 +693,7 @@ desde la realización del vuelo LiDAR.</string>
         </rect>
        </property>
        <property name="text">
-        <string>0,2</string>
+        <string>0,5</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_10">

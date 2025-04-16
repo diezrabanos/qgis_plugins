@@ -2,6 +2,9 @@
 <ui version="4.0">
  <class>SalidaDialog</class>
  <widget class="QDialog" name="SalidaDialog">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -265,7 +268,7 @@ por la simplificación de la salida</string>
     <string>Fracción de Cabida Cubierta de Matorral</string>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_teselas">

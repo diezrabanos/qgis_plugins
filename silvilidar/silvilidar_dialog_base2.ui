@@ -341,7 +341,7 @@ desde la realización del vuelo LiDAR.</string>
       </rect>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pixel_a_pixel">
       <attribute name="title">
@@ -680,7 +680,7 @@ desde la realización del vuelo LiDAR.</string>
         </rect>
        </property>
        <property name="text">
-        <string>1</string>
+        <string>2</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="coeficiente_correlacion">

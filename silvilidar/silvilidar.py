@@ -21,9 +21,6 @@ Permite procesar datos LiDAR de una manera sencilla para obtener un diagnostico 
  *                                                                         *
  ***************************************************************************/
 """
-# from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-# from PyQt5.QtGui import QIcon
-# from PyQt5.QtWidgets import QAction
 
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from qgis.PyQt.QtGui import QIcon, QColor
@@ -48,7 +45,6 @@ from qgis.core import QgsProject, QgsRasterLayer, QgsVectorLayer, QgsFeatureRequ
     QgsRaster, QgsCoordinateReferenceSystem
 from qgis.PyQt.QtCore import QVariant
 from qgis.utils import iface
-# from PyQt5.QtCore import QFileInfo
 from qgis.PyQt.QtCore import QFileInfo
 from qgis.analysis import QgsRasterCalculator, QgsRasterCalculatorEntry
 import processing
@@ -65,6 +61,31 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 tamano = 10
+#defino valores por defecto
+hm_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\1_AlturaDominanteLidar\Alt95_m_PNOA2.tif"
+hbc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\3_EstructuraDeCopas\Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2.tif"
+fcc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\8_OtrasMetricas\Cob200cm_prt_PNOA2.tif"
+fccmatorral_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\6_CoberturaEstratosAbsolutos\CobEstr_0050_0150_tlr_PNOA2.tif"
+# Cargar desde config.txt si existe
+if os.path.exists(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt")):
+
+    with open(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt"), "r", encoding="utf-8") as f:
+        for linea in f:
+            if "=" in linea:
+                clave, valor = linea.strip().split("=", 1)
+                clave = clave.strip()
+                valor = valor = valor.strip().strip('"')
+                # Asignar valores
+                if clave == "hm_ruta":
+                    hm_ruta = valor
+                elif clave == "hbc_ruta":
+                    hbc_ruta = valor
+                elif clave == "fcc_ruta":
+                    fcc_ruta = valor
+                elif clave == "fccmatorral_ruta":
+                    fccmatorral_ruta = valor
+else:
+    print(" no encuentro el archivo paths ")
 class Salida:
     def __init__(self, iface):
         self.dlg4 = SalidaDialog()
@@ -1645,7 +1666,7 @@ class Silvilidar:
 
 
                     # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName =  r'C:\WORK\pruebas\v2\Alt95SobreMdf_prt_cut.tif'#r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
+                    fileName =  hm_ruta #r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #r'C:\WORK\pruebas\v2\Alt95SobreMdf_prt_cut.tif'#
                     Layer = QgsRasterLayer(fileName, "altura de red")
                     print("ok, layer de altura 95 de la red")
                     # recortar raster con el shape
@@ -1670,7 +1691,7 @@ class Silvilidar:
                     #print("creado el string to raster de h")
 
                     # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r'C:\WORK\pruebas\v2\Alt20SobreMdf_tlr_cut.tif'#r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
+                    fileName = hbc_ruta #r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\3_EstructuraDeCopas/Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2.tif"#r'C:\WORK\pruebas\v2\Alt20SobreMdf_tlr_cut.tif'#r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
                     Layer = QgsRasterLayer(fileName, "altura de red")
                     #print("comprobar si la capa es correcta ", Layer.isValid())
                     # recortar raster con el shape
@@ -1693,8 +1714,15 @@ class Silvilidar:
                     print("creado el string to raster de hbc")
 
                     # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r'C:\WORK\pruebas\v2/RptoAmdk_PrimeRets_MasDe0200_cut.tif'#r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
+                    fileName = fcc_ruta #r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\2_CoberturaArboladaLidar/Cob3m_PRT_PNOA2.tif"#r'C:\WORK\pruebas\v2/RptoAmdk_PrimeRets_MasDe0200_cut.tif'#r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
+                    print("fcc ruta                 a a a a a a                                     a a a a a", fcc_ruta)
                     Layer = QgsRasterLayer(fileName, "FCC DE RED")
+                    #time.sleep(5)
+                    #compruebo si la capa es correcta
+                    num_bandas = Layer.bandCount()
+                    print(f"La capa tiene {num_bandas} bandas.")
+                    print("comprobar si la capa es correcta ", Layer.isValid())
+                    print("error ", Layer.error().summary())
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
                                             {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,
@@ -1714,7 +1742,7 @@ class Silvilidar:
 
                     #cargo el fcc de matorral
                     # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                    fileName = fccmatorral_ruta #r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/CobEstrDe0150a0250cm_TLR_PNOA2.tif"#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##
                     Layer = QgsRasterLayer(fileName, "FCC MATORRAL DE RED")
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
@@ -1941,21 +1969,28 @@ class Silvilidar:
 
 
                     #obtengo los parametros derivados
-                    calculo('100 * ( (hm@1 / 100 )   -   (hbc@1 / 100 )  ) / ( (hm@1 / 100 ) )', 'rc') #ojo unidades ( hbc@1 / 100 ) divido por 100 por que la hbc viene en centimetros CM
-
+                    #calculo('100 * ( (hm@1 / 100 )   -   (hbc@1 / 100 )  ) / ( (hm@1 / 100 ) )', 'rc') #ojo unidades ( hbc@1 / 100 ) divido por 100 por que la hbc viene en centimetros CM
+                    calculo('100 * ( (hm@1  )   -   (hbc@1 / 100 )  ) / ( (hm@1  ) )', 'rc')
                     StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
 
                     #falta sacar la lc
-                    calculo(' (hm@1 / 100 ) - (hbc@1 / 100 ) ', "lc")
+                    #calculo(' (hm@1 / 100 ) - (hbc@1 / 100 ) ', "lc")
+                    calculo(' (hm@1  ) - (hbc@1/ 100 ) ', "lc")
                     StringToRaster(os.path.join(carpeta, 'lc.tif'), "lc")
                     #falta sacar la fccmatorral
 
                     #proyecto
                     # proyecto la altura con el crecimiento
                     calculo('( (hm@1 / 100 ) < 6) * ( hm@1 / 100 ) + ( ( hm@1 / 100 ) >= 6) * ( ( hm@1 / 100 ) + ' + str(crecimiento) + ')', 'hmp') #ojo unidades ( hm@1 / 100 ) divido por 100 por que la hm viene en centimetros CM
+                    #calculo(
+                    #    '( (hm@1  ) < 6) * ( hm@1   ) + ( ( hm@1  ) >= 6) * ( ( hm@1  ) + ' + str(
+                    #        crecimiento) + ')', 'hmp')
                     StringToRaster(os.path.join(carpeta, 'hmp.tif'), "hmp")
                     # proyecto la altura  de la base de la copa con el crecimiento
                     calculo('((hm@1 / 100 ) < 7.5) * (hbc@1 / 100 ) + ((hm@1 / 100 ) >= 7.5) * ((hbc@1 / 100 ) + ' + str(crecimiento) + ')', 'hbcp')
+                    #calculo(
+                    #    '((hm@1  ) < 7.5) * (hbc@1 / 100 ) + ((hm@1  ) >= 7.5) * ((hbc@1 / 100 ) + ' + str(
+                    #        crecimiento) + ')', 'hbcp')
                     StringToRaster(os.path.join(carpeta, 'hbcp.tif'), "hbcp")
                     # calculo  la razon de copa una vez proyectada la altura y la base de la copa
                     calculo('100 * ( hmp@1   -  hbcp@1  ) / ( hmp@1 )', 'rcp')
@@ -3334,7 +3369,7 @@ class Silvilidar:
 
                     #debo crear las capas raster dentro de la carpeta
                     # cargo el raster de la junta hm NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
+                    fileName = hm_ruta #r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar/Alt95_m_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt\h95red.tif"  #
                     Layer = QgsRasterLayer(fileName, "altura de red")
                     print("ok, layer de altura 95 de la red")
                     # recortar raster con el shape
@@ -3344,7 +3379,10 @@ class Silvilidar:
                                              'SET_RESOLUTION': False, 'X_RESOLUTION': None, 'Y_RESOLUTION': None,
                                              'DATA_TYPE': 0, 'OUTPUT': os.path.join(carpeta, 'hm.tif')})[
                         'OUTPUT']
+                    #time.sleep(10)  # espera 10 segundos para que se cree el raster
+                    #calculo(' hm@1 / 100    ', 'HM')
 
+                    #StringToRaster(os.path.join(carpeta, 'hm.tif'), "hm")
                     # QgsProject.instance().addMapLayers([Layer])
                     layer2 = QgsRasterLayer(layer2, "altura de red")
                     # QgsProject.instance().addMapLayers([layer2])
@@ -3356,7 +3394,7 @@ class Silvilidar:
                     # print("creado el string to raster de h")
 
                     # cargo el raster de la junta hbc percentil 20 para calcular luego rc NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r'C:\WORK\pruebas\v2\Alt20SobreMdf_tlr_cut.tif'#r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
+                    fileName = hbc_ruta #r'C:\WORK\pruebas\v2\Alt20SobreMdf_tlr_cut.tif'#r"C:\WORK\pruebas\metricasEjemplo\h20red.tif"  # r"R:\SIGMENA\prueba\2025\02\05\hbc_bengoa_malo.tif"viene de *_CeldasAlt20SobreMds_tlr_conUmbral2mSilvilidar
                     Layer = QgsRasterLayer(fileName, "altura de red")
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
@@ -3376,7 +3414,7 @@ class Silvilidar:
                     print("creado el string to raster de hbc")
 
                     # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
+                    fileName = fcc_ruta #r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"  # r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccred.tif"
                     Layer = QgsRasterLayer(fileName, "FCC DE RED")
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
@@ -3397,7 +3435,7 @@ class Silvilidar:
 
                     # cargo el fcc de matorral
                     # cargo el raster de la junta FCC NO BUENO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO
-                    fileName = r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
+                    fileName = fccmatorral_ruta#r"C:\WORK\pruebas\metricasEjemplo\532_4642\alt/fccmatred.tif"  ##r"//repoarchivohm.jcyl.red/MADGMNSVPI_SCAYLEVueloLIDAR$/dasoLidar/PNOA2_2017-2021/metricasLidar/Cob3m_PRT_PNOA2.tif"
                     Layer = QgsRasterLayer(fileName, "FCC MATORRAL DE RED")
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
@@ -3417,16 +3455,33 @@ class Silvilidar:
 
 
                     print("creado el string to raster de fcc matorral")
-                    calculo('100 * (  hm@1    -  ( hbc@1 / 100 ) ) /   hm@1  ', 'rc')
+                    calculo('100 * (  hm@1    -   hbc@1   ) /   hm@1  ', 'rc')
 
                     StringToRaster(os.path.join(carpeta, 'rc.tif'), "rc")
 
                     # falta sacar la lc
-                    calculo('  hm@1  - ( hbc@1 / 100 ) ', "lc")
+                    calculo('  hm@1  -  hbc@1   ', "lc")
                     StringToRaster(os.path.join(carpeta, 'lc.tif'), "lc")
 
                     #hasta aqui común para todos
+                    def grafica_histograma(datos, intervalo_min, intervalo_max, nombre):
+                        print("nombre ", nombre)
+                        fig, ax = plt.subplots()
+                        ax.hist(datos, 10)  # np.arange(0,np.amax(datos)))
+                        ax.axvline(intervalo_min, color='red', linestyle='dashed', linewidth=1)
+                        ax.axvline(intervalo_max, color='red', linestyle='dashed', linewidth=1)
+                        # ojo nuevo empieza
+                        if nombre in ['hm', 'hbc', 'lc']:
+                            ax.set_xlabel('Centímetros')
+                        elif nombre in ['fcc', 'rc']:
+                            ax.set_xlabel('%')
 
+                        ax.set_ylabel('Número de píxeles')
+                        # ojo nuevo acaba
+                        # plt.show()
+                        plt.savefig(carpeta + '/' + nombre + '.png')
+                        print(carpeta + '/' + nombre + '.png')
+                        return carpeta + '/' + nombre + '.png'
                     if nombre_pestaña2 == 'pixel_a_pixel':
                         print("empiezo pixel a pixel dentro de la junta")
                         coef_hm = float(self.dlg.coef_hm1.text().replace(',', '.'))

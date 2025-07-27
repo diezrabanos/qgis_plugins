@@ -27,26 +27,42 @@ import os
 from PyQt5 import uic
 from PyQt5 import QtWidgets
 
+# Cargar desde config.txt si existe
+hm_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\1_AlturaDominanteLidar\Alt95_m_PNOA2.tif"
+hbc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\3_EstructuraDeCopas\Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2.tif"
+fcc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\8_OtrasMetricas\Cob200cm_prt_PNOA2.tif"
+fccmatorral_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\6_CoberturaEstratosAbsolutos\CobEstr_0050_0150_tlr_PNOA2.tif"
+if os.path.exists(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt")):
+    with open(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt"), "r", encoding="utf-8") as f:
+        for linea in f:
+            if "=" in linea:
+                clave, valor = linea.strip().split("=", 1)
+                clave = clave.strip()
+                valor = valor.strip().strip('"')
+                # Asignar valores
+                if clave == "hm_ruta":
+                    hm_ruta = valor
+                elif clave == "hbc_ruta":
+                    hbc_ruta = valor
+                elif clave == "fcc_ruta":
+                    fcc_ruta = valor
+                elif clave == "fccmatorral_ruta":
+                    fccmatorral_ruta = valor
+
+else:
+    print(" no encuentro el archivo paths ")
+
 def dentro_de_jcyl():
-    import socket
-    import re
-    #ojo ojojojojojojojojojo temporal
-    #print("fuera de junta")
-    #return False
-    # ojo ojojojojojojojojojo temporal
+    """Comprueba si se esta dentro de la junta de castilla y leon, si se tiene acceso a un archivo"""
+    if os.path.isfile(hm_ruta):
+        return True
+        #return False
+    else:
+        return False
+        #return True
 
-    try:
-        dominio = socket.getfqdn()
-        patron = re.compile(r'JMA\w{6,14}\.jcyl\.red')
-
-        if patron.match(dominio):
-            return True
-    except Exception as e:
-        # Manejar la excepción de manera adecuada
-        pass
-
-    return False
-if dentro_de_jcyl():
+dentro = dentro_de_jcyl()
+if dentro:
     # This loads your .ui file so that PyQt can populate your plugin with the elements from Qt Designer
     FORM_CLASS, _ = uic.loadUiType(os.path.join(
         os.path.dirname(__file__), 'silvilidar_dialog_base.ui'))

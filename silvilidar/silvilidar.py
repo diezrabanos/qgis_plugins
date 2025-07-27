@@ -68,13 +68,14 @@ fcc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2
 fccmatorral_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\6_CoberturaEstratosAbsolutos\CobEstr_0050_0150_tlr_PNOA2.tif"
 # Cargar desde config.txt si existe
 if os.path.exists(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt")):
-
+    #self.dentro = True
     with open(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt"), "r", encoding="utf-8") as f:
         for linea in f:
             if "=" in linea:
                 clave, valor = linea.strip().split("=", 1)
                 clave = clave.strip()
-                valor = valor = valor.strip().strip('"')
+                valor = valor.strip().strip('"')
+                print(valor)
                 # Asignar valores
                 if clave == "hm_ruta":
                     hm_ruta = valor
@@ -84,6 +85,7 @@ if os.path.exists(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt")
                     fcc_ruta = valor
                 elif clave == "fccmatorral_ruta":
                     fccmatorral_ruta = valor
+
 else:
     print(" no encuentro el archivo paths ")
 class Salida:
@@ -129,27 +131,15 @@ class Silvilidar:
 
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
+
         def dentro_de_jcyl():
-            import socket
-            import re
-            # ojo esto es para que no FUNCIONE DE MOMENTO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO eliminarlo cuando queramos que sea interactivo, eliminar
-            print("devuelvo false porque se supone que estoy fuera de jcyl")
-            #ojo la siguiente linea es un atajo para que entienda siempre que estoy fuera de la junta
-            #return False
-            # ojo esto es para que no FUNCIONE DE MOMENTO OJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJOJO eliminarlo cuando queramos que sea interactivo, eliminar
-            try:
-                dominio = socket.getfqdn()
-                patron = re.compile(r'JMA\w{6,14}\.jcyl\.red')
-
-                if patron.match(dominio):
-                    print("dentro junta")
-                    return True
-            except Exception as e:
-                print("fuera junta")
-                # Manejar la excepción de manera adecuada
-                pass
-
-            return False
+            """Comprueba si se esta dentro de la junta de castilla y leon, si se tiene acceso a uno archivo"""
+            if os.path.isfile(hm_ruta):
+                return True
+                #return False 
+            else:
+                return False
+                #return True
 
 
         self.dentro= dentro_de_jcyl()
@@ -1496,7 +1486,7 @@ class Silvilidar:
 
         # defino una funcion que une en una capa el resultado de todas las hojas raster, hace un grid de lo que encuentre con la cadena
         def juntarasters(cadena):
-            busca = os.path.join(carpeta, "*_" + cadena + ".tif")
+            busca = os.path.join(os.path.join(carpeta, "p"),"*_" + cadena + "p.tif")
             files = glob.glob(busca)
             out = os.path.join(carpeta, cadena.upper() + ".vrt")
             params = {'INPUT': files, 'RESOLUTION': 0, 'SEPARATE': False, 'PROJ_DIFFERENCE': False, 'ADD_ALPHA': False,
@@ -1721,8 +1711,8 @@ class Silvilidar:
                     #compruebo si la capa es correcta
                     num_bandas = Layer.bandCount()
                     print(f"La capa tiene {num_bandas} bandas.")
-                    print("comprobar si la capa es correcta ", Layer.isValid())
-                    print("error ", Layer.error().summary())
+                    #print("comprobar si la capa es correcta ", Layer.isValid())
+                    #print("error ", Layer.error().summary())
                     # recortar raster con el shape
                     layer2 = processing.run("gdal:cliprasterbymasklayer",
                                             {'INPUT': Layer, 'MASK': layervectorial, 'NODATA': None,

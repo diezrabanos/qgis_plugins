@@ -1,4 +1,4 @@
-hm_ruta=r"C:/CAPAS_PARA_SILVILIDAR/Alt95_m_PNOA2.tif"
-hbc_ruta=r"C:/CAPAS_PARA_SILVILIDAR/Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2.tif"
-fcc_ruta=r"C:/CAPAS_PARA_SILVILIDAR/Cob200cm_prt_PNOA2.tif"
-fccmatorral_ruta=r"C:/CAPAS_PARA_SILVILIDAR/CobEstr_0050_0150_tlr_PNOA2.tif"
+hm_ruta="C:/CAPAS_PARA_SILVILIDAR/Alt95_m_PNOA2.tif"
+hbc_ruta="C:/CAPAS_PARA_SILVILIDAR/Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2.tif"
+fcc_ruta="C:/CAPAS_PARA_SILVILIDAR/Cob200cm_prt_PNOA2.tif"
+fccmatorral_ruta="C:/CAPAS_PARA_SILVILIDAR/CobEstrDe0050a0150cm_prt_PNOA2.tif"

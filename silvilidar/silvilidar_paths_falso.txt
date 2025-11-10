@@ -1,0 +1,4 @@
+hm_ruta="C:/CAPAS_PARA_SILVILIDAR/Alt95_m_PNOA2_NO_EXISTE.tif"
+hbc_ruta="C:/CAPAS_PARA_SILVILIDAR/Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2_NO_EXISTE.tif"
+fcc_ruta="C:/CAPAS_PARA_SILVILIDAR/Cob200cm_prt_PNOA2_NO_EXISTE.tif"
+fccmatorral_ruta="C:/CAPAS_PARA_SILVILIDAR/CobEstrDe0050a0150cm_prt_PNOA2_NO_EXISTE.tif"

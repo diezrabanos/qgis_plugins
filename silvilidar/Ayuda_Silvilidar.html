@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Ayuda - Silvilidar</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; line-height: 1.5; margin: 24px; }
+    h1,h2,h3 { color: #2b4f6f }
+    pre { background:#f6f8fa; padding:10px; border:1px solid #ddd; overflow:auto }
+    .box { border-left:4px solid #2b4f6f; padding:10px; background:#fbfdff; margin:10px 0 }
+    table { border-collapse:collapse; width:100%; margin:8px 0 }
+    th,td { padding:8px; border:1px solid #ddd; text-align:left }
+    code { background:#f1f1f1; padding:2px 4px; }
+    ul { margin:8px 0 16px 20px }
+    a { color:#1a73a8 }
+    .modes { background:#f8fafb; border-left:4px solid #1a73a8; padding:8px; margin:6px 0 }
+    .small { font-size:0.95em; color:#333 }
+    figure { margin: 12px 0 }
+  </style>
+</head>
+<body>
+  <h1>Ayuda de Silvilidar</h1>
+  <p>Guía de uso del plugin <strong>Silvilidar</strong> para QGIS: conceptos, flujos, parámetros y salidas. En cada apartado se indica cómo aplicarlo según las tres formas de uso disponibles.</p>
+
+  <h2>Índice</h2>
+  <ol>
+    <li>Visión general y requisitos</li>
+    <li>Descripción de la interfaz</li>
+    <li>Flujo de trabajo: Ejecución de SILVILIDAR</li>
+    <li>Flujo de trabajo: Búsqueda de zonas similares</li>
+    <li>Parámetros y valores por defecto</li>
+    <li>Salidas generadas</li>
+    <li>Consejos y solución de problemas</li>
+    <li>Referencias y archivos relacionados</li>
+  </ol>
+
+  <h2>1. Visión general y requisitos</h2>
+  <p>Silvilidar procesa datos LiDAR (<code>.las</code> / <code>.laz</code>) y/o rásters preelaborados para obtener métricas forestales (HM, HBC, FCC, RC, LC, etc.) y clasificar teselas.</p>
+  <div class="box">
+    <strong>Requisitos mínimos</strong>
+    <ul>
+      <li>QGIS con el complemento <em>Processing</em> activado (GDAL, SAGA disponibles según procesos usados).</li>
+      <li>Opcional: utilidades externas (p. ej. FUSION) para pasos concretos si desea usarlas.</li>
+      <li>Rutas a rásters de referencia: se buscan en <code>silvilidar_paths.txt</code> o en las rutas por defecto del plugin.</li>
+    </ul>
+  </div>
+
+  <div class="modes">
+    <strong>Modalidades de uso (válidas para todo el documento)</strong>
+    <ol class="small">
+      <li><strong>Modo 1 – Dentro de la red JCYL</strong>: el plugin detecta y usa las capas preelaboradas alojadas en el repositorio (HM, HBC, FCC, FCC_MATORRAL). Modo más rápido y homogéneo para la Comunidad.</li>
+      <li><strong>Modo 2 – Fuera de la red pero con capas locales</strong>: si copias las mismas capas a tu equipo y apuntas <code>silvilidar_paths.txt</code> o las colocas donde el plugin las encuentra, el comportamiento es equivalente al Modo 1.</li>
+      <li><strong>Modo 3 – Sin rásters (archivos .las/.laz)</strong>: si no tienes rásters de referencia, ejecuta Silvilidar sobre archivos LiDAR (.las/.laz) en una carpeta; el flujo es distinto en algunos pasos (se generan primeros grids a partir de las hojas) pero el plugin ofrece las mismas salidas finales cuando es posible.</li>
+    </ol>
+  </div>
+
+  <h2>2. Descripción de la interfaz</h2>
+  <p>Resumen de los controles principales y cómo afectan según la modalidad:</p>
+  <ul>
+    <li><strong>Seleccionar carpeta</strong> (pushButton_select_path):
+      <ul>
+        <li>Modo 1: normalmente no necesario (se usan rásters de red).</li>
+        <li>Modo 2: puede usarse para indicar la carpeta con rásters locales o resultados.</li>
+        <li>Modo 3: obligatorio para indicar la carpeta con los archivos <code>.las</code> / <code>.laz</code>.</li>
+      </ul>
+    </li>
+    <li><strong>Parámetros</strong> (pushButton_parametros): abre <code>ConfigDialog</code>. Los umbrales se usan en los tres modos (varían el clasificado y reglas de teselas).</li>
+    <li><strong>Proyectar</strong> (pushButton_proyectar): abre <code>ProjectDialog</code> para fijar <code>crecimiento</code> y <code>crecimientofcc</code> — aplicable en los tres modos (afecta a la proyección de HM y FCC).</li>
+    <li><strong>Salida</strong> (pushButton_salida): controla qué capas/teselas se generan y muestran; en Modo 3 algunas capas se crean a partir de procesamiento con FUSION/processing, si no están disponibles se generan equivalentes mediante GDAL/SAGA cuando es posible.</li>
+    <li><strong>Botón Ayuda</strong>: abre la ayuda incluida (HTML o PDF). Recomendación: usar el HTML por ser más completa y navegable.</li>
+  </ul>
+
+  <!-- PLACEHOLDERS: GUI principal y diálogos (insertados para que el usuario reemplace con sus capturas) -->
+  <figure>
+    <img src="screenshots/placeholder_gui_main.png" alt="Placeholder Ventana principal de Silvilidar" style="max-width:90%;border:1px solid #ccc;"/>
+    <figcaption>Placeholder: Ventana principal de Silvilidar (reemplazar por screenshots/gui_main.png)</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/placeholder_gui_config.png" alt="Placeholder Dialogo Parametros" style="max-width:90%;border:1px solid #ccc;"/>
+    <figcaption>Placeholder: Dialogo Parámetros (reemplazar por screenshots/gui_config.png)</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/placeholder_gui_project.png" alt="Placeholder Dialogo Proyectar" style="max-width:90%;border:1px solid #ccc;"/>
+    <figcaption>Placeholder: Dialogo Proyectar (reemplazar por screenshots/gui_project.png)</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/placeholder_gui_salida.png" alt="Placeholder Dialogo Salida" style="max-width:90%;border:1px solid #ccc;"/>
+    <figcaption>Placeholder: Dialogo Salida (reemplazar por screenshots/gui_salida.png)</figcaption>
+  </figure>
+
+  <h2>3. Flujo de trabajo: Ejecución de SILVILIDAR</h2>
+  <p>Pasos generales y variación por modalidad:</p>
+  <ol>
+    <li>Abrir el plugin desde el menú o la barra de QGIS.</li>
+    <li>Definir datos de entrada:
+      <ul>
+        <li>Modo 1: seleccionar la capa vectorial de zona de trabajo; el plugin recortará los rásters de red y generará las métricas directamente.</li>
+        <li>Modo 2: seleccionar la carpeta/ruta donde tengas los rásters locales (o fijarlos en <code>silvilidar_paths.txt</code>), luego recortar y procesar igual que en Modo 1.</li>
+        <li>Modo 3: seleccionar la carpeta con archivos <code>.las</code>/.<code>laz</code>; el plugin procesará cada hoja (llamadas a FUSION cuando esté disponible o procesos alternativos con Processing) para crear DTM/metricas intermedias.</li>
+      </ul>
+    </li>
+    <li>Configurar parámetros (ConfigDialog) y proyección (ProjectDialog).</li>
+    <li>Elegir salidas (SalidaDialog): marca las capas (HM, FCC, RC, LC, HBC, Matorral, Teselas, Clases claras/regeneración/resalveo).</li>
+    <li>Ejecutar: el plugin genera una carpeta de salida con rasters y shapefiles. Notas por modo:
+      <ul>
+        <li>Modo 1/2: proceso sobre rásters recortados (más rápido y homogéneo).</li>
+        <li>Modo 3: proceso hoja a hoja; puede ser más lento y requerir FUSION o pasos alternativos (processing).</li>
+      </ul>
+    </li>
+    <li>Resultados: se añaden las capas elegidas al proyecto y se crean ficheros en la carpeta <code>Silvilidar_YYYYMMDD_HHMMSS</code>.</li>
+  </ol>
+
+  <h2>4. Flujo de trabajo: Búsqueda de zonas similares</h2>
+  <p>Objetivo: encontrar zonas con histogramas similares a zonas de muestra. Aplicación por modalidad:</p>
+  <ul>
+    <li>Modo 1: se comparan ventanas/histogramas sobre los rásters de red recortados; la comparación es muy rápida al disponer de VRT virtuales y la misma resolución.</li>
+    <li>Modo 2: idéntico al modo 1 si las capas locales coinciden en resolución y CRS; se recomienda usar los mismos QML de estilo para facilitar la comprobación visual.</li>
+    <li>Modo 3: las comparaciones se realizan sobre los rásters generados a partir de las hojas <code>.las/.laz</code>; asegúrate de generar primero los rasters HM, HBC, FCC para que el algoritmo de histogramas funcione correctamente.</li>
+  </ul>
+  <p>Submétodos:</p>
+  <ul>
+    <li><strong>pixel_a_pixel</strong>: compara valores de píxel en las parcelas de muestra y crea filtros por rango (media ± k·desv).</li>
+    <li><strong>por_zonas</strong>: divide el área en ventanas y compara histogramas de cada ventana con la muestra usando distancia/ correlación.</li>
+  </ul>
+
+  <!-- PLACEHOLDERS: Resultados en mapa e histograma -->
+  <figure>
+    <img src="screenshots/placeholder_qgis_map_results.png" alt="Placeholder Resultados en QGIS" style="max-width:90%;border:1px solid #ccc;"/>
+    <figcaption>Placeholder: Resultados en QGIS (reemplazar por screenshots/qgis_map_results.png)</figcaption>
+  </figure>
+  <figure>
+    <img src="screenshots/placeholder_histograma_ejemplo.png" alt="Placeholder Histograma" style="max-width:60%;border:1px solid #ccc;"/>
+    <figcaption>Placeholder: Histograma de la búsqueda similar (reemplazar por screenshots/histograma_ejemplo.png)</figcaption>
+  </figure>
+
+  <h2>5. Parámetros y valores por defecto</h2>
+  <p>Los parámetros tienen efecto en las tres modalidades; la diferencia está en la procedencia de los datos (rásters de red/local o rásters generados a partir de .las/.laz).</p>
+  <div class="small">
+    <p>Principales parámetros (resumen):</p>
+    <ul>
+      <li><code>fccminarbolado</code>, <code>alturadesconocida</code>, <code>hmaxmontebravo</code>, <code>hmaxbajolatizal</code>, etc. — usados para la clasificación de teselas.</li>
+      <li><code>crecimiento</code> y <code>crecimientofcc</code> — ajustan proyección de HM y FCC (aplican en los tres modos).</li>
+      <li>Coeficientes para búsqueda similar: <code>coef_hm*</code>, <code>coef_fcc*</code>, <code>solape</code>, <code>coeficiente_correlacion</code>.</li>
+    </ul>
+  </div>
+
+  <h2>6. Salidas generadas</h2>
+  <p>Salida típica: carpeta con nombre <code>Silvilidar_YYYYMMDD_HHMMSS</code> que contiene rásters, shapefiles y CSV de métricas.</p>
+
+  <!-- PLACEHOLDER: Carpeta de salida -->
+  <figure>
+    <img src="screenshots/placeholder_output_folder.png" alt="Placeholder Carpeta de salida" style="max-width:90%;border:1px solid #ccc;"/>
+    <figcaption>Placeholder: Carpeta de salida con archivos generados (reemplazar por screenshots/output_folder.png)</figcaption>
+  </figure>
+
+  <ul>
+    <li>Rasters (ejemplos): <code>*_hmp.tif</code>, <code>*_hbcp.tif</code>, <code>*_fccp.tif</code>, <code>*_rcp.tif</code>, <code>*_lc.tif</code>, <code>*_V.tif</code>, <code>*_FCC_Matorral.tif</code>.</li>
+    <li>Shapefiles (ejemplos): <code>*_suma.shp</code>, <code>Clara_merged.shp</code>, <code>Regeneracion_merged.shp</code>, <code>Resalveo_merged.shp</code>, <code>Teselas.shp</code>, <code>Zonas_similares_por_histograma.shp</code>.</li>
+    <li>CSV / tablas: <code>metric_all_returns_elevation_stats_*.csv</code> y ficheros <code>_height.txt</code>.</li>
+  </ul>
+  <p class="small">Nota por modalidad: en Modo 1/2 la generación de estos ficheros ocurre a partir de rásters ya disponibles (más rápida); en Modo 3 se generan a partir del procesamiento de hojas LiDAR y puede tardar más.</p>
+
+  <h2>7. Consejos y solución de problemas</h2>
+  <ul>
+    <li>Active <em>Processing</em> en QGIS antes de ejecutar el plugin.</li>
+    <li>CRS y resolución: asegúrate de que las capas/rásters/locales compartan el CRS esperado (ej. EPSG:25830) para evitar reproyecciones imprevistas.</li>
+    <li>Si trabajas en Modo 2, confirma que las rutas en <code>silvilidar_paths.txt</code> apuntan a las copias locales correctas.</li>
+    <li>Si trabajas en Modo 3 y no dispones de FUSION, el plugin intenta usar Processing (GDAL/SAGA) como alternativa; algunas métricas pueden diferir ligeramente.</li>
+    <li>Si el sistema detecta que no está "dentro de la Junta" y no hay rásters locales, recuerda seleccionar la carpeta con <code>.las/.laz</code> y verificar permisos y espacio en disco.</li>
+  </ul>
+
+  <h2>8. Referencias y archivos relacionados</h2>
+  <ul>
+    <li><code>Ayuda_Silvilidar.html</code> (este documento) y <code>Ayuda_Silvilidar.pdf</code> (si está presente).</li>
+    <li><code>silvilidar_paths.txt</code> — fichero para personalizar rutas por defecto (hm_ruta, hbc_ruta, fcc_ruta, fccmatorral_ruta).</li>
+    <li>Carpeta <code>styles/</code> — QML para simbologías (hm.qml, fcc.qml, rc.qml, Teselas.qml...)</li>
+    <li>Scripts / utilidades externas: FUSION (opcional), Processing (GDAL, SAGA).</li>
+  </ul>
+
+  <hr>
+  <p class="small">¿Quieres que genere también una versión imprimible (PDF), un <code>README.md</code> o que añada capturas de la interfaz en esta ayuda? Puedo hacerlo y además integrar la apertura del HTML desde el botón de Ayuda si lo deseas.</p>
+</body>
+</html>

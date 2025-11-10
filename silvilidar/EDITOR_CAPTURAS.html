@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Editor de Capturas - Silvilidar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { color: #2b4f6f; margin-bottom: 20px; }
+    .instruction-box { background: #e3f2fd; border-left: 4px solid #1976d2; padding: 15px; margin: 20px 0; border-radius: 3px; }
+    .screenshot-item { background: white; border: 1px solid #ddd; border-radius: 5px; padding: 20px; margin: 20px 0; }
+    .screenshot-item h3 { color: #1976d2; margin-bottom: 10px; }
+    .placeholder-preview { background: #e8e8e8; border: 2px dashed #999; border-radius: 5px; padding: 40px; text-align: center; color: #666; font-size: 0.9em; min-height: 250px; display: flex; align-items: center; justify-content: center; margin: 15px 0; }
+    .file-info { background: #f9f9f9; border: 1px solid #ddd; padding: 10px; border-radius: 3px; margin: 10px 0; font-size: 0.85em; }
+    .file-info strong { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #2b4f6f; color: white; }
+    code { background: #f5f5f5; padding: 3px 6px; border-radius: 3px; font-family: monospace; }
+    .button { background: #2b4f6f; color: white; padding: 10px 15px; border-radius: 3px; text-decoration: none; display: inline-block; margin: 10px 0; }
+    .button:hover { background: #1a5490; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📸 Editor de Capturas - Guía Silvilidar</h1>
+
+    <div class="instruction-box">
+      <h2>ℹ️ Instrucciones de Uso</h2>
+      <p>Este documento te ayuda a gestionar las capturas de pantalla para la guía del usuario.</p>
+      <ol>
+        <li>Captura las pantallas según lo indicado en SCREENSHOTS_REQUERIDAS.txt</li>
+        <li>Guarda cada captura como PNG en la carpeta <code>screenshots/</code></li>
+        <li>Nómbralas exactamente como se indica (01_ventana_principal.png, etc.)</li>
+        <li>Reemplaza los placeholders en Guia_Usuario_Silvilidar.html</li>
+      </ol>
+    </div>
+
+    <h2>Resumen de Capturas Necesarias</h2>
+    <table>
+      <tr>
+        <th>Archivo</th>
+        <th>Descripción</th>
+        <th>Ubicación en Guía</th>
+      </tr>
+      <tr>
+        <td><code>01_ventana_principal.png</code></td>
+        <td>Ventana principal del plugin</td>
+        <td>Sección 3: Interfaz</td>
+      </tr>
+      <tr>
+        <td><code>02_dialogo_parametros.png</code></td>
+        <td>Diálogo de parámetros</td>
+        <td>Sección 3: Interfaz</td>
+      </tr>
+      <tr>
+        <td><code>02b_dialogo_proyectar.png</code></td>
+        <td>Diálogo de proyección</td>
+        <td>Sección 3: Interfaz</td>
+      </tr>
+      <tr>
+        <td><code>02c_dialogo_salida.png</code></td>
+        <td>Diálogo de salida</td>
+        <td>Sección 3: Interfaz</td>
+      </tr>
+      <tr>
+        <td><code>02d_dialogo_similares.png</code></td>
+        <td>Diálogo de búsqueda similares</td>
+        <td>Sección 3: Interfaz</td>
+      </tr>
+      <tr>
+        <td><code>03_qgis_capa_vectorial.png</code></td>
+        <td>QGIS con capa vectorial</td>
+        <td>Sección 5: Modo 1 - Paso 1</td>
+      </tr>
+      <tr>
+        <td><code>04_procesamiento_en_curso.png</code></td>
+        <td>Ventana de progreso</td>
+        <td>Sección 5: Modo 1 - Paso 5</td>
+      </tr>
+      <tr>
+        <td><code>05_resultado_hm.png</code></td>
+        <td>Raster HM en QGIS</td>
+        <td>Sección 10: Salidas - Resultados</td>
+      </tr>
+      <tr>
+        <td><code>05b_resultado_fcc.png</code></td>
+        <td>Raster FCC en QGIS</td>
+        <td>Sección 10: Salidas - Resultados</td>
+      </tr>
+      <tr>
+        <td><code>05c_resultado_hbc.png</code></td>
+        <td>Raster HBC en QGIS</td>
+        <td>Sección 10: Salidas - Resultados</td>
+      </tr>
+      <tr>
+        <td><code>05d_resultado_rc.png</code></td>
+        <td>Raster RC en QGIS</td>
+        <td>Sección 10: Salidas - Resultados</td>
+      </tr>
+      <tr>
+        <td><code>06_teselas_clasificadas.png</code></td>
+        <td>Teselas clasificadas</td>
+        <td>Sección 10: Salidas - Clasificación</td>
+      </tr>
+      <tr>
+        <td><code>07_zonas_similares.png</code></td>
+        <td>Zonas similares encontradas</td>
+        <td>Sección 10: Salidas - Búsqueda similares</td>
+      </tr>
+      <tr>
+        <td><code>08_histograma_similitud.png</code></td>
+        <td>Gráfico de histogramas</td>
+        <td>Sección 10: Salidas - Histograma</td>
+      </tr>
+      <tr>
+        <td><code>09_carpeta_salida.png</code></td>
+        <td>Estructura de carpeta</td>
+        <td>Sección 10: Salidas - Estructura</td>
+      </tr>
+    </table>
+
+    <h2>Pasos para Reemplazar Placeholders</h2>
+
+    <div class="screenshot-item">
+      <h3>Paso 1: Capturar Pantallas</h3>
+      <p>Para cada elemento de la tabla anterior:</p>
+      <ol>
+        <li>Abre la ventana/diálogo en QGIS o Silvilidar</li>
+        <li>Presiona Print Screen o usa una herramienta de captura (Snipping Tool, etc.)</li>
+        <li>Guarda la imagen como PNG en <code>screenshots/</code></li>
+        <li>Nombra el archivo exactamente como se indica</li>
+      </ol>
+    </div>
+
+    <div class="screenshot-item">
+      <h3>Paso 2: Reemplazar en HTML</h3>
+      <p>Abre <code>Guia_Usuario_Silvilidar.html</code> con un editor de texto</p>
+      <p>Busca el placeholder:</p>
+      <code>&lt;div class="placeholder-img"&gt;...&lt;/div&gt;</code>
+      <p>Reemplázalo con:</p>
+      <code>&lt;img src="screenshots/XX_nombre.png" alt="Descripción"&gt;</code>
+      <p>Ejemplo:</p>
+      <code>&lt;img src="screenshots/01_ventana_principal.png" alt="Ventana principal del plugin"&gt;</code>
+    </div>
+
+    <div class="screenshot-item">
+      <h3>Paso 3: Verificar Visualización</h3>
+      <ol>
+        <li>Guarda los cambios en HTML</li>
+        <li>Abre <code>Guia_Usuario_Silvilidar.html</code> en un navegador</li>
+        <li>Verifica que todas las imágenes se visualizan correctamente</li>
+      </ol>
+    </div>
+
+    <h2>Recomendaciones</h2>
+    <div class="instruction-box">
+      <ul>
+        <li>✓ Usa formato PNG para mejor calidad</li>
+        <li>✓ Dimensiones mínimas: 800x600 px</li>
+        <li>✓ Comprime las imágenes para reducir tamaño (herramientas online o TinyPNG)</li>
+        <li>✓ Incluye menús y paneles relevantes en las capturas</li>
+        <li>✓ Usa datos realistas pero que no comprometan privacidad</li>
+        <li>✓ Asegúrate de que el texto sea legible en las capturas</li>
+      </ul>
+    </div>
+
+    <h2>Herramientas Útiles</h2>
+    <div class="instruction-box">
+      <ul>
+        <li><strong>Captura:</strong> Snipping Tool (Windows), Shift+Print (Linux), Cmd+Shift+4 (Mac)</li>
+        <li><strong>Edición:</strong> Paint.NET, GIMP, Photoshop</li>
+        <li><strong>Compresión:</strong> TinyPNG.com, ImageOptim, JPEGmini</li>
+        <li><strong>Visualización:</strong> Cualquier navegador web moderno</li>
+      </ul>
+    </div>
+
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 0.9em;">
+      <p>Guía de Editor de Capturas - Silvilidar v1.0 | Última actualización: Octubre 2024</p>
+    </footer>
+  </div>
+</body>
+</html>
+

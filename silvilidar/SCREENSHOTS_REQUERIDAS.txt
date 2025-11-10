@@ -1,0 +1,157 @@
+================================================================================
+LISTA DE CAPTURAS DE PANTALLA REQUERIDAS PARA LA GUIA DE USUARIO
+Plugin: Silvilidar v1.0
+================================================================================
+
+CARPETA RECOMENDADA: screenshots/
+(Crear la carpeta en la misma ubicación que Guia_Usuario_Silvilidar.html)
+
+================================================================================
+SECCIÓN 3: INTERFAZ PRINCIPAL
+================================================================================
+
+1. 01_ventana_principal.png
+   - Descripción: Ventana principal del plugin Silvilidar
+   - Dimensiones recomendadas: 800x600 px
+   - Contenido: Mostrar todos los botones (Seleccionar carpeta, Parámetros,
+     Proyectar, Salida, Buscar similares, Ejecutar)
+   - Cómo obtenerla: Captura de pantalla de la ventana principal del plugin
+
+2. 02_dialogo_parametros.png
+   - Descripción: Diálogo de configuración de parámetros
+   - Dimensiones recomendadas: 600x500 px
+   - Contenido: Mostrar los parámetros: fccminarbolado, alturadesconocida,
+     hmaxmontebravo, crecimiento, etc.
+   - Cómo obtenerla: Captura del diálogo al hacer clic en "Parámetros"
+
+3. 02b_dialogo_proyectar.png
+   - Descripción: Diálogo de proyección de métricas
+   - Dimensiones recomendadas: 600x400 px
+   - Contenido: Mostrar campos para crecimiento y crecimientofcc
+   - Cómo obtenerla: Captura del diálogo al hacer clic en "Proyectar"
+
+4. 02c_dialogo_salida.png
+   - Descripción: Diálogo para seleccionar capas de salida
+   - Dimensiones recomendadas: 600x500 px
+   - Contenido: Mostrar checkboxes para HM, HBC, FCC, RC, Teselas, etc.
+   - Cómo obtenerla: Captura del diálogo al hacer clic en "Salida"
+
+5. 02d_dialogo_similares.png
+   - Descripción: Diálogo de búsqueda de zonas similares
+   - Dimensiones recomendadas: 600x500 px
+   - Contenido: Mostrar opciones de método (pixel_a_pixel, por_zonas),
+     parámetros de similitud
+   - Cómo obtenerla: Captura del diálogo al hacer clic en "Buscar similares"
+
+================================================================================
+SECCIÓN 5: FLUJO MODO 1 - PREPARACIÓN
+================================================================================
+
+6. 03_qgis_capa_vectorial.png
+   - Descripción: QGIS con capa vectorial de zona de trabajo cargada
+   - Dimensiones recomendadas: 1000x700 px
+   - Contenido: QGIS mostrando una zona de trabajo (polígono) sobre el mapa base
+   - Cómo obtenerla: Captura de QGIS con una capa vectorial visible
+
+7. 04_procesamiento_en_curso.png
+   - Descripción: Ventana de progreso durante el procesamiento
+   - Dimensiones recomendadas: 600x200 px
+   - Contenido: Barra de progreso o ventana de estado mostrando el avance
+   - Cómo obtenerla: Captura durante la ejecución del procesamiento
+
+================================================================================
+SECCIÓN 10: RESULTADOS Y SALIDAS
+================================================================================
+
+8. 05_resultado_hm.png
+   - Descripción: Raster de Altura Media (HM) visualizado en QGIS
+   - Dimensiones recomendadas: 1000x700 px
+   - Contenido: Mapa con gradiente de colores mostrando alturas
+   - Cómo obtenerla: Captura de QGIS mostrando la capa *_hmp.tif
+
+9. 05b_resultado_fcc.png
+   - Descripción: Raster de Fracción de Cobertura (FCC) visualizado
+   - Dimensiones recomendadas: 1000x700 px
+   - Contenido: Mapa con gradiente de colores mostrando cobertura forestal
+   - Cómo obtenerla: Captura de QGIS mostrando la capa *_fccp.tif
+
+10. 05c_resultado_hbc.png
+    - Descripción: Raster de Altura Base Copa (HBC) visualizado
+    - Dimensiones recomendadas: 1000x700 px
+    - Contenido: Mapa con gradiente de colores mostrando altura de copas
+    - Cómo obtenerla: Captura de QGIS mostrando la capa *_hbcp.tif
+
+11. 05d_resultado_rc.png
+    - Descripción: Raster de Ratio de Retornos (RC) visualizado
+    - Dimensiones recomendadas: 1000x700 px
+    - Contenido: Mapa con gradiente de colores mostrando complejidad de vegetación
+    - Cómo obtenerla: Captura de QGIS mostrando la capa *_rcp.tif
+
+12. 06_teselas_clasificadas.png
+    - Descripción: Mapa de teselas clasificadas
+    - Dimensiones recomendadas: 1000x700 px
+    - Contenido: Polígonos con diferentes colores representando: Clara,
+      Regeneración, Resalveo, Masa forestal
+    - Cómo obtenerla: Captura de QGIS mostrando Teselas.shp con simbología
+
+13. 07_zonas_similares.png
+    - Descripción: Zonas similares encontradas por el algoritmo
+    - Dimensiones recomendadas: 1000x700 px
+    - Contenido: Mapa con zona de referencia (destacada) y zonas similares
+      (en rojo u otro color)
+    - Cómo obtenerla: Captura de QGIS mostrando Zonas_similares_por_histograma.shp
+
+14. 08_histograma_similitud.png
+    - Descripción: Gráfico de histogramas para comparación de similitud
+    - Dimensiones recomendadas: 800x500 px
+    - Contenido: Gráfico mostrando dos histogramas superpuestos o comparados
+    - Cómo obtenerla: Captura de la ventana de histograma del plugin
+
+15. 09_carpeta_salida.png
+    - Descripción: Estructura de carpeta de salida en Explorador Windows
+    - Dimensiones recomendadas: 800x600 px
+    - Contenido: Explorador de archivos mostrando carpeta Silvilidar_YYYYMMDD_HHMMSS
+      con subcarpetas y archivos (.tif, .shp, .csv, etc.)
+    - Cómo obtenerla: Captura de Explorador de Windows con la carpeta de salida
+
+================================================================================
+FORMATO DE ARCHIVOS
+================================================================================
+
+- Formato: PNG (recomendado) o JPG
+- Compresión: Alta (para reducir tamaño de archivo)
+- Calidad: Mínimo 72 DPI
+
+================================================================================
+NOTAS IMPORTANTES
+================================================================================
+
+1. Todas las capturas deben tener buena legibilidad
+2. Incluir paneles de herramientas y menús cuando sea relevante
+3. Usar datos realistas pero que no comprometan privacidad
+4. Para editarlas, puedes usar: Paint.NET, GIMP, Photoshop o similar
+5. Renombrarlas exactamente como se indica (números y nombres específicos)
+6. Colocarlas en la carpeta screenshots/ dentro de la carpeta del plugin
+
+================================================================================
+INSTRUCCIONES PARA REEMPLAZAR EN HTML
+================================================================================
+
+En el archivo Guia_Usuario_Silvilidar.html, busca los placeholders:
+<small>(Reemplazar con: screenshots/XX_nombre_archivo.png)</small>
+
+Y reemplaza todo el div .placeholder-img con:
+<img src="screenshots/XX_nombre_archivo.png" alt="Descripción de la imagen">
+
+Ejemplo:
+De esto:
+  <div class="placeholder-img">
+    🖼️ Captura: Ventana principal...
+    <small>(Reemplazar con: screenshots/01_ventana_principal.png)</small>
+  </div>
+
+A esto:
+  <img src="screenshots/01_ventana_principal.png" alt="Ventana principal del plugin">
+
+================================================================================
+

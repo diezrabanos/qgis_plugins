@@ -1,0 +1,516 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guía de Usuario - Silvilidar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f7fa; }
+    .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    header { border-bottom: 4px solid #2b4f6f; padding-bottom: 20px; margin-bottom: 30px; }
+    h1 { color: #2b4f6f; font-size: 2.5em; margin-bottom: 10px; }
+    .subtitle { color: #666; font-size: 1.1em; font-style: italic; }
+    h2 { color: #1a5490; font-size: 1.8em; margin-top: 40px; margin-bottom: 20px; border-left: 5px solid #1a5490; padding-left: 15px; }
+    h3 { color: #2b7ab0; font-size: 1.3em; margin-top: 25px; margin-bottom: 15px; }
+    p { margin-bottom: 15px; }
+    .toc { background: #f0f4f8; border: 1px solid #d0d8e0; border-radius: 5px; padding: 20px 30px; margin: 30px 0; }
+    .toc h3 { margin-top: 0; border-left: none; padding-left: 0; }
+    .toc ol { margin-left: 20px; }
+    .toc a { color: #1a73a8; text-decoration: none; }
+    ul, ol { margin-bottom: 15px; margin-left: 25px; }
+    li { margin-bottom: 8px; }
+    .step-box { background: #e8f4f8; border-left: 4px solid #1a5490; padding: 15px; margin: 15px 0; border-radius: 3px; }
+    .info-box { background: #fffbf0; border-left: 4px solid #ff9800; padding: 15px; margin: 15px 0; border-radius: 3px; }
+    .warning-box { background: #ffebee; border-left: 4px solid #f44336; padding: 15px; margin: 15px 0; border-radius: 3px; }
+    .success-box { background: #f1f8f4; border-left: 4px solid #4caf50; padding: 15px; margin: 15px 0; border-radius: 3px; }
+    code { background: #f5f5f5; padding: 3px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
+    th { background: #2b4f6f; color: white; padding: 12px; text-align: left; font-weight: bold; }
+    td { padding: 12px; border-bottom: 1px solid #ddd; }
+    tr:hover { background: #f9f9f9; }
+    .screenshot { text-align: center; margin: 30px 0; }
+    .screenshot img { max-width: 100%; height: auto; border: 2px solid #ddd; border-radius: 5px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .screenshot figcaption { font-size: 0.9em; color: #666; margin-top: 10px; font-style: italic; }
+    .screenshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0; }
+    .screenshot-grid .screenshot { margin: 0; }
+    @media (max-width: 768px) { .screenshot-grid { grid-template-columns: 1fr; } }
+    .placeholder-img { background: #e8e8e8; border: 2px dashed #999; border-radius: 5px; padding: 40px; text-align: center; color: #666; font-size: 0.9em; min-height: 250px; display: flex; align-items: center; justify-content: center; }
+    footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📊 Guía de Usuario: Silvilidar</h1>
+      <p class="subtitle">Plugin de QGIS para análisis de datos LiDAR y cálculo de métricas forestales</p>
+    </header>
+
+    <div class="toc">
+      <h3>📑 Tabla de Contenidos</h3>
+      <ol>
+        <li><a href="#intro">Introducción y primeros pasos</a></li>
+        <li><a href="#requisitos">Requisitos y configuración inicial</a></li>
+        <li><a href="#interfaz">Conociendo la interfaz</a></li>
+        <li><a href="#modos">Los tres modos de funcionamiento</a></li>
+        <li><a href="#workflow1">Flujo paso a paso: Modo 1</a></li>
+        <li><a href="#workflow2">Flujo paso a paso: Modo 2</a></li>
+        <li><a href="#workflow3">Flujo paso a paso: Modo 3</a></li>
+        <li><a href="#parametros">Parámetros explicados</a></li>
+        <li><a href="#similares">Búsqueda de zonas similares</a></li>
+        <li><a href="#salidas">Entendiendo las salidas</a></li>
+        <li><a href="#soluciones">Problemas comunes y soluciones</a></li>
+        <li><a href="#faq">Preguntas frecuentes</a></li>
+      </ol>
+    </div>
+
+    <h2 id="intro">1. Introducción y primeros pasos</h2>
+    <p><strong>Silvilidar</strong> es un plugin de QGIS que permite procesar datos LiDAR y generar métricas forestales para análisis territorial. Ya sea que trabajes dentro o fuera de la red, con datos en red o locales, este plugin te ofrece las herramientas necesarias.</p>
+
+    <h3>¿Qué es LiDAR?</h3>
+    <p>LiDAR (Light Detection and Ranging) es una tecnología que captura datos de elevación del terreno mediante pulsos láser. Los datos se entregan típicamente en archivos con extensión <code>.las</code> o <code>.laz</code> (comprimido).</p>
+
+    <h3>¿Qué puedo hacer con Silvilidar?</h3>
+    <ul>
+      <li>Generar capas de alturas (HM, HBC) a partir de datos LiDAR</li>
+      <li>Calcular cobertura forestal (FCC) y porcentaje de retornos (RC)</li>
+      <li>Clasificar teselas según características forestales</li>
+      <li>Buscar zonas con propiedades similares usando análisis de histogramas</li>
+      <li>Exportar resultados en múltiples formatos (rasters, shapefiles, tablas)</li>
+    </ul>
+
+    <h2 id="requisitos">2. Requisitos y configuración inicial</h2>
+
+    <h3>Requisitos del sistema</h3>
+    <div class="info-box">
+      <strong>✓ Obligatorio:</strong>
+      <ul>
+        <li>QGIS 3.10 o superior</li>
+        <li>Plugin Processing activado en QGIS</li>
+        <li>Conexión a internet (si trabajas en Modo 1)</li>
+        <li>Acceso a las capas de referencia (red o local)</li>
+      </ul>
+    </div>
+
+    <h2 id="interfaz">3. Conociendo la interfaz</h2>
+    <p>La ventana principal del plugin tiene botones para controlar el flujo de trabajo:</p>
+    <table>
+      <tr>
+        <th>Botón</th>
+        <th>Función</th>
+      </tr>
+      <tr>
+        <td>Seleccionar carpeta</td>
+        <td>Elige la ubicación de datos o salida</td>
+      </tr>
+      <tr>
+        <td>Parámetros</td>
+        <td>Abre el diálogo de configuración</td>
+      </tr>
+      <tr>
+        <td>Proyectar</td>
+        <td>Define crecimiento proyectado para métricas</td>
+      </tr>
+      <tr>
+        <td>Salida</td>
+        <td>Selecciona qué capas generar</td>
+      </tr>
+      <tr>
+        <td>Buscar similares</td>
+        <td>Busca zonas con propiedades parecidas</td>
+      </tr>
+      <tr>
+        <td>Ejecutar</td>
+        <td>Inicia el procesamiento</td>
+      </tr>
+    </table>
+
+    <h3>📸 Ventana Principal de Silvilidar</h3>
+    <div class="screenshot">
+      <div class="placeholder-img">
+        🖼️ Captura: Ventana principal con todos los botones<br>
+        <small>(Reemplazar con: screenshots/01_ventana_principal.png)</small>
+      </div>
+      <figcaption>Figura 1: Interfaz principal del plugin Silvilidar mostrando todos los botones de control</figcaption>
+    </div>
+
+    <h3>📸 Diálogos de Configuración</h3>
+    <div class="screenshot-grid">
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Diálogo: Parámetros<br>
+          <small>(Reemplazar con: screenshots/02_dialogo_parametros.png)</small>
+        </div>
+        <figcaption>Figura 2a: Diálogo de configuración de parámetros</figcaption>
+      </div>
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Diálogo: Proyectar<br>
+          <small>(Reemplazar con: screenshots/02b_dialogo_proyectar.png)</small>
+        </div>
+        <figcaption>Figura 2b: Diálogo de proyección de métricas</figcaption>
+      </div>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Diálogo: Salida<br>
+          <small>(Reemplazar con: screenshots/02c_dialogo_salida.png)</small>
+        </div>
+        <figcaption>Figura 2c: Diálogo para seleccionar capas de salida</figcaption>
+      </div>
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Diálogo: Búsqueda de similares<br>
+          <small>(Reemplazar con: screenshots/02d_dialogo_similares.png)</small>
+        </div>
+        <figcaption>Figura 2d: Diálogo de búsqueda de zonas similares</figcaption>
+      </div>
+    </div>
+
+    <h2 id="modos">4. Los tres modos de funcionamiento</h2>
+
+    <h3>🔵 Modo 1: Red JCYL</h3>
+    <p><strong>Para ti si:</strong> Trabajas dentro de la red de la Junta de Castilla y León</p>
+    <p><strong>Ventajas:</strong> Acceso automático a rásters actualizados, datos homogéneos, procesamiento muy rápido, sin necesidad de descargar datos.</p>
+
+    <h3>🟢 Modo 2: Capas Locales</h3>
+    <p><strong>Para ti si:</strong> Has descargado las capas a tu equipo local</p>
+    <p><strong>Ventajas:</strong> Funcionan sin conexión de red, procesamiento rápido, compatible con datos de otros organismos.</p>
+
+    <h3>🟡 Modo 3: Archivos LAS/LAZ</h3>
+    <p><strong>Para ti si:</strong> Trabajas directamente con datos LiDAR sin procesar</p>
+    <p><strong>Ventajas:</strong> Máximo control sobre el procesamiento, genera métricas desde cero, flexible con resoluciones.</p>
+
+    <h2 id="workflow1">5. Flujo paso a paso: Modo 1 (Red JCYL)</h2>
+
+    <h3>Paso 1: Preparar datos</h3>
+    <div class="step-box">
+      <p><strong>Qué necesitas:</strong> Una capa vectorial (shapefile, GeoJSON, etc.) que delimite tu zona de trabajo.</p>
+      <ol>
+        <li>Abre QGIS y carga tu capa vectorial</li>
+        <li>Asegúrate de que está en el CRS correcto (típicamente EPSG:25830 para España)</li>
+      </ol>
+    </div>
+
+    <div class="screenshot">
+      <div class="placeholder-img">
+        🖼️ Captura: QGIS con capa vectorial cargada<br>
+        <small>(Reemplazar con: screenshots/03_qgis_capa_vectorial.png)</small>
+      </div>
+      <figcaption>Figura 3: QGIS con una capa vectorial de zona de trabajo cargada</figcaption>
+    </div>
+
+    <h3>Paso 2: Abre Silvilidar</h3>
+    <div class="step-box">
+      <ol>
+        <li>Ve a <strong>Complementos → Silvilidar → Silvilidar</strong></li>
+        <li>Se abrirá la ventana principal del plugin</li>
+      </ol>
+    </div>
+
+    <h3>Paso 3: Configura parámetros</h3>
+    <div class="step-box">
+      <p>Haz clic en <strong>Parámetros</strong> si deseas ajustar los umbrales de clasificación. Si no, usa los valores por defecto (están calibrados para la región).</p>
+    </div>
+
+    <h3>Paso 4: Selecciona las salidas</h3>
+    <div class="step-box">
+      <p>Haz clic en <strong>Salida</strong> y marca:</p>
+      <ul>
+        <li>☑ HM — Altura media de la masa forestal</li>
+        <li>☑ HBC — Altura de base de copa</li>
+        <li>☑ FCC — Fracción de cobertura forestal</li>
+        <li>☑ RC — Ratio de retornos</li>
+        <li>☑ Teselas — Clasificación en unidades de gestión</li>
+      </ul>
+    </div>
+
+    <h3>Paso 5: Ejecuta</h3>
+    <div class="step-box">
+      <p>Haz clic en <strong>Ejecutar</strong>. El plugin:</p>
+      <ol>
+        <li>Recorta los rásters de red a tu zona de trabajo</li>
+        <li>Realiza cálculos (suele tardar 2-10 minutos según el tamaño)</li>
+        <li>Genera una carpeta <code>Silvilidar_YYYYMMDD_HHMMSS</code> con resultados</li>
+        <li>Añade las capas automáticamente al proyecto QGIS</li>
+      </ol>
+    </div>
+
+    <div class="screenshot">
+      <div class="placeholder-img">
+        🖼️ Captura: Procesamiento en curso<br>
+        <small>(Reemplazar con: screenshots/04_procesamiento_en_curso.png)</small>
+      </div>
+      <figcaption>Figura 4: Ventana de progreso durante el procesamiento</figcaption>
+    </div>
+
+    <h2 id="workflow2">6. Flujo paso a paso: Modo 2 (Capas Locales)</h2>
+
+    <h3>Preparación previa (una sola vez)</h3>
+    <div class="warning-box">
+      <strong>⚠ Atención:</strong> Este paso solo se hace una vez. Luego puedes usar las capas locales múltiples veces.
+    </div>
+
+    <div class="step-box">
+      <p><strong>Paso A: Obtén las capas de referencia</strong></p>
+      <ol>
+        <li>Desde la red JCYL, descarga los rásters: HM.tif, HBC.tif, FCC.tif, FCC_MATORRAL.tif</li>
+        <li>Guárdalos en una carpeta local, por ejemplo: <code>C:\Silvilidar_datos\</code></li>
+      </ol>
+    </div>
+
+    <div class="step-box">
+      <p><strong>Paso B: Configura las rutas</strong></p>
+      <ol>
+        <li>Busca el archivo <code>silvilidar_paths.txt</code> en la carpeta del plugin</li>
+        <li>Abre con un editor de texto (Notepad, VS Code, etc.)</li>
+        <li>Modifica las rutas para que apunten a tus carpetas locales</li>
+        <li>Guarda el archivo</li>
+      </ol>
+    </div>
+
+    <h3>Uso: Procesar con capas locales</h3>
+    <p>Una vez configuradas, el flujo es <strong>exactamente igual que Modo 1</strong>. El plugin automáticamente usará tus capas locales.</p>
+
+    <h2 id="workflow3">7. Flujo paso a paso: Modo 3 (Archivos LAS/LAZ)</h2>
+
+    <h3>Paso 1: Prepara los datos LiDAR</h3>
+    <div class="step-box">
+      <p><strong>Necesitas:</strong> Archivos <code>.las</code> o <code>.laz</code> en una carpeta</p>
+      <ul>
+        <li>Ejemplo: <code>C:\Lidar_datos\hoja_001.las</code>, <code>hoja_002.las</code>, etc.</li>
+        <li>Todos deben estar en el mismo CRS (recomendado EPSG:25830)</li>
+      </ul>
+    </div>
+
+    <h3>Paso 2: Selecciona la carpeta</h3>
+    <div class="step-box">
+      <ol>
+        <li>Abre Silvilidar</li>
+        <li>Haz clic en <strong>Seleccionar carpeta</strong></li>
+        <li>Navega a <code>C:\Lidar_datos\</code> (o donde tengas tus archivos)</li>
+        <li>El plugin detectará automáticamente los archivos <code>.las</code> y <code>.laz</code></li>
+      </ol>
+    </div>
+
+    <h3>Paso 3: Ejecuta</h3>
+    <div class="warning-box">
+      <strong>⚠ Atención:</strong> Este modo puede tardar bastante más (15-60 minutos según la cantidad de datos). Es normal, el plugin está procesando cada hoja LiDAR.
+    </div>
+
+    <h2 id="parametros">8. Parámetros explicados</h2>
+    <p>Los parámetros son umbrales que definen cómo se clasifican las teselas según sus características forestales.</p>
+    <table>
+      <tr>
+        <th>Parámetro</th>
+        <th>Significado</th>
+      </tr>
+      <tr>
+        <td><code>fccminarbolado</code></td>
+        <td>FCC mínima para considerar arbolado (típicamente 15-30%)</td>
+      </tr>
+      <tr>
+        <td><code>alturadesconocida</code></td>
+        <td>Altura mínima para distinguir vegetación (típicamente 3-5 m)</td>
+      </tr>
+      <tr>
+        <td><code>hmaxmontebravo</code></td>
+        <td>Altura máxima para monte bravo (típicamente 8-12 m)</td>
+      </tr>
+      <tr>
+        <td><code>crecimiento</code></td>
+        <td>Proyección anual de altura (típicamente 0.5-2 m/año)</td>
+      </tr>
+    </table>
+
+    <div class="info-box">
+      <strong>💡 Consejo:</strong> Los valores por defecto están ajustados para la región. Solo modifícalos si tienes un motivo específico.
+    </div>
+
+    <h2 id="similares">9. Búsqueda de zonas similares</h2>
+
+    <h3>¿Para qué sirve?</h3>
+    <p>Encuentra otras zonas en tu área de estudio que tengan propiedades parecidas (altura, cobertura, etc.) a una parcela de muestra.</p>
+
+    <h3>Cómo usar</h3>
+    <div class="step-box">
+      <ol>
+        <li>Primero ejecuta Silvilidar para generar las capas base (HM, FCC, etc.)</li>
+        <li>Haz clic en <strong>Buscar similares</strong></li>
+        <li>Dibuja o selecciona un polígono de muestra en QGIS</li>
+        <li>Elige el método: <code>pixel_a_pixel</code> o <code>por_zonas</code></li>
+        <li>Configura parámetros de similitud</li>
+        <li>El plugin genera un shapefile <code>Zonas_similares_por_histograma.shp</code></li>
+      </ol>
+    </div>
+
+    <h2 id="salidas">10. Entendiendo las salidas</h2>
+
+    <h3>Resultados en QGIS</h3>
+    <p>Una vez completado el procesamiento, todas las capas generadas se cargan automáticamente en tu proyecto QGIS. Podrás visualizar:</p>
+
+    <div class="screenshot-grid">
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Captura: Raster HM visualizado<br>
+          <small>(Reemplazar con: screenshots/05_resultado_hm.png)</small>
+        </div>
+        <figcaption>Figura 5a: Visualización del raster de Altura Media (HM)</figcaption>
+      </div>
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Captura: Raster FCC visualizado<br>
+          <small>(Reemplazar con: screenshots/05b_resultado_fcc.png)</small>
+        </div>
+        <figcaption>Figura 5b: Visualización del raster de Fracción de Cobertura (FCC)</figcaption>
+      </div>
+    </div>
+
+    <div class="screenshot-grid">
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Captura: Raster HBC visualizado<br>
+          <small>(Reemplazar con: screenshots/05c_resultado_hbc.png)</small>
+        </div>
+        <figcaption>Figura 5c: Visualización del raster de Altura Base Copa (HBC)</figcaption>
+      </div>
+      <div class="screenshot">
+        <div class="placeholder-img">
+          🖼️ Captura: Raster RC visualizado<br>
+          <small>(Reemplazar con: screenshots/05d_resultado_rc.png)</small>
+        </div>
+        <figcaption>Figura 5d: Visualización del raster de Ratio de Retornos (RC)</figcaption>
+      </div>
+    </div>
+
+    <h3>Clasificación de Teselas</h3>
+    <p>El plugin genera una clasificación automática de teselas según características forestales:</p>
+
+    <div class="screenshot">
+      <div class="placeholder-img">
+        🖼️ Captura: Teselas clasificadas<br>
+        <small>(Reemplazar con: screenshots/06_teselas_clasificadas.png)</small>
+      </div>
+      <figcaption>Figura 6: Mapa de teselas clasificadas con diferentes tipos de cobertura forestal</figcaption>
+    </div>
+
+    <h3>Categorías de Teselas</h3>
+    <div class="info-box">
+      <ul>
+        <li><strong>Clara:</strong> Zonas con baja cobertura, potencial de intervención</li>
+        <li><strong>Regeneración:</strong> Áreas en proceso de crecimiento forestal</li>
+        <li><strong>Resalveo:</strong> Zonas que requieren tratamientos de mejora</li>
+        <li><strong>Masa forestal:</strong> Áreas con características forestales óptimas</li>
+        <li><strong>Otras:</strong> Zonas que no cumplen criterios de clasificación</li>
+      </ul>
+    </div>
+
+    <h3>Búsqueda de Zonas Similares</h3>
+    <p>Resultado de la búsqueda de zonas con propiedades similares:</p>
+
+    <div class="screenshot">
+      <div class="placeholder-img">
+        🖼️ Captura: Zonas similares encontradas<br>
+        <small>(Reemplazar con: screenshots/07_zonas_similares.png)</small>
+      </div>
+      <figcaption>Figura 7: Mapa mostrando las zonas similares (en rojo) identificadas por el algoritmo</figcaption>
+    </div>
+
+    <h3>Histograma de Comparación</h3>
+    <div class="screenshot">
+      <div class="placeholder-img">
+        🖼️ Captura: Histograma de similitud<br>
+        <small>(Reemplazar con: screenshots/08_histograma_similitud.png)</small>
+      </div>
+      <figcaption>Figura 8: Gráfico comparativo de histogramas entre zona de muestra y zonas similares</figcaption>
+    </div>
+
+    <h3>Estructura de carpeta generada</h3>
+    <p>El plugin genera una carpeta con nombre <code>Silvilidar_YYYYMMDD_HHMMSS</code> que contiene:</p>
+
+    <div class="screenshot">
+      <div class="placeholder-img">
+        🖼️ Captura: Carpeta de salida en explorador<br>
+        <small>(Reemplazar con: screenshots/09_carpeta_salida.png)</small>
+      </div>
+      <figcaption>Figura 9: Estructura de carpeta con todos los archivos generados</figcaption>
+    </div>
+
+    <ul>
+      <li><strong>Rasters (*.tif):</strong> *_hmp.tif, *_hbcp.tif, *_fccp.tif, *_rcp.tif, *_lc.tif</li>
+      <li><strong>Shapefiles (*.shp):</strong> *_suma.shp, Teselas.shp, Clara_merged.shp, Regeneracion_merged.shp, Zonas_similares_por_histograma.shp</li>
+      <li><strong>Tablas (*.csv, *.txt):</strong> Estadísticas detalladas</li>
+    </ul>
+
+    <div class="success-box">
+      <strong>✓ Todos estos archivos se añaden automáticamente a tu proyecto QGIS</strong> con símbolos predefinidos.
+    </div>
+
+    <h2 id="soluciones">11. Problemas comunes y soluciones</h2>
+
+    <h3>❌ Problema: "No se encuentran los rásters de red"</h3>
+    <div class="step-box">
+      <p><strong>Solución:</strong></p>
+      <ol>
+        <li>Verifica que estés conectado a la red JCYL (Modo 1)</li>
+        <li>O que hayas configurado las rutas locales (Modo 2)</li>
+        <li>O que hayas seleccionado la carpeta con <code>.las/.laz</code> (Modo 3)</li>
+      </ol>
+    </div>
+
+    <h3>❌ Problema: "El procesamiento es muy lento"</h3>
+    <div class="step-box">
+      <p><strong>Solución:</strong></p>
+      <ul>
+        <li>Modo 1/2: debería tardar 2-10 minutos</li>
+        <li>Modo 3: es normal que tarde 15-60 minutos</li>
+        <li>Si está en Modo 3 y FUSION no está instalado, instálalo para acelerar</li>
+        <li>Cierra otras aplicaciones para liberar memoria</li>
+      </ul>
+    </div>
+
+    <h3>❌ Problema: "Error: CRS no coincide"</h3>
+    <div class="step-box">
+      <p><strong>Solución:</strong></p>
+      <ol>
+        <li>Comprueba que tu capa vectorial está en EPSG:25830</li>
+        <li>Si no, reproyéctala: <strong>Capas → Exportar → Guardar como</strong> y elige EPSG:25830</li>
+        <li>En Modo 3, verifica que los archivos LAS/LAZ también están en EPSG:25830</li>
+      </ol>
+    </div>
+
+    <h2 id="faq">12. Preguntas frecuentes</h2>
+
+    <div class="step-box">
+      <p><strong>P: ¿Puedo cambiar la resolución de los rásters generados?</strong></p>
+      <p>R: En Modo 1/2 se heredan los rásters de entrada (típicamente 2x2 metros). En Modo 3 puedes ajustar la resolución en los parámetros de FUSION.</p>
+    </div>
+
+    <div class="step-box">
+      <p><strong>P: ¿Qué CRS debe tener mi capa de trabajo?</strong></p>
+      <p>R: Se recomienda EPSG:25830 (UTM Zona 30N) para España.</p>
+    </div>
+
+    <div class="step-box">
+      <p><strong>P: ¿Puedo usar datos LiDAR de otros años o provincias?</strong></p>
+      <p>R: Sí, en Modo 3 puedes procesar cualquier dato LiDAR compatible (CRS y resolución)</p>
+    </div>
+
+    <div class="step-box">
+      <p><strong>P: ¿Puedo modificar los estilos de visualización?</strong></p>
+      <p>R: Sí, ve a la carpeta <code>styles/</code> del plugin. Contiene archivos QML que puedes editar.</p>
+    </div>
+
+    <footer>
+      <hr>
+      <p>
+        <strong>Guía de Usuario de Silvilidar v1.0</strong> — Última actualización: Octubre 2024<br>
+        Plugin de QGIS para análisis de datos LiDAR y métricas forestales<br>
+        © Junta de Castilla y León
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -28,10 +28,10 @@ from PyQt5 import uic
 from PyQt5 import QtWidgets
 
 # Cargar desde config.txt si existe
-hm_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\1_AlturaDominanteLidar\Alt95_m_PNOA2.tif"
-hbc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\3_EstructuraDeCopas\Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2.tif"
-fcc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\8_OtrasMetricas\Cob200cm_prt_PNOA2.tif"
-fccmatorral_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_202505\6_CoberturaEstratosAbsolutos\CobEstr_0050_0150_tlr_PNOA2.tif"
+hm_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_actual\1_AlturaDominanteLidar\Alt95_cm_PNOA2.tif"
+hbc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_actual\3_EstructuraDeCopas\Alt20_tlr_sobre2m_filtradoAlt95_4m_baseDeCopa_cm_PNOA2.tif"
+fcc_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_actual\8_OtrasMetricas\Cob200cm_prt_PNOA2.tif"
+fccmatorral_ruta=r"\\repoarchivohm.jcyl.red\MADGMNSVPI_SCAYLEVueloLIDAR$\dasoLidar\PNOA2_2017-2021\metricasLidar\version_actual\6_CoberturaEstratosAbsolutos\CobEstr_0050_0150_tlr_PNOA2.tif"
 if os.path.exists(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt")):
     with open(os.path.join(os.path.dirname(__file__),"silvilidar_paths.txt"), "r", encoding="utf-8") as f:
         for linea in f:
